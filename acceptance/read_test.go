@@ -32,7 +32,7 @@ func TestList(t *testing.T) {
 		t.Errorf("the controller: %+v", c)
 	}
 
-	want(t, r.ok("list"), "NAME", "panels", c.Model, c.Firmware, c.Running)
+	want(t, r.ok("list"), "NAME", "CALLS ITSELF", "panels", c.Device, c.Model, c.Firmware, c.Running)
 }
 
 func TestInfo(t *testing.T) {

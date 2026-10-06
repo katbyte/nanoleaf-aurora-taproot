@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"slices"
 )
 
@@ -56,6 +57,36 @@ type Color struct {
 	Brightness float64 `json:"brightness"`
 	// Probability is how often the highlight plugin picks the colour.
 	Probability float64 `json:"probability"`
+}
+
+// RGB is the colour as red, green and blue, each 0 to 255, for showing it on
+// a screen. A value outside its range is taken as the nearest inside it.
+func (c Color) RGB() (r, g, b uint8) {
+	sat := min(max(c.Saturation, 0), 100) / 100
+	val := min(max(c.Brightness, 0), 100) / 100
+	hue := math.Mod(math.Mod(c.Hue, 360)+360, 360) / 60
+
+	chroma := val * sat
+	x := chroma * (1 - math.Abs(math.Mod(hue, 2)-1))
+	var rf, gf, bf float64
+	switch {
+	case hue < 1:
+		rf, gf, bf = chroma, x, 0
+	case hue < 2:
+		rf, gf, bf = x, chroma, 0
+	case hue < 3:
+		rf, gf, bf = 0, chroma, x
+	case hue < 4:
+		rf, gf, bf = 0, x, chroma
+	case hue < 5:
+		rf, gf, bf = x, 0, chroma
+	default:
+		rf, gf, bf = chroma, 0, x
+	}
+	m := val - chroma
+	level := func(f float64) uint8 { return uint8(math.Round((f + m) * 255)) }
+
+	return level(rf), level(gf), level(bf)
 }
 
 // PluginOption is one setting of the plugin an effect runs: transTime, loop,

@@ -47,6 +47,63 @@ type Found struct {
 	Model    string `json:"model,omitempty"`
 	Firmware string `json:"firmware,omitempty"`
 	ID       string `json:"id,omitempty"`
+	// Via is the ways it was found, of ViaAnnouncement, ViaSystem and ViaScan.
+	Via []string `json:"via"`
+}
+
+// The ways a controller is found.
+const (
+	ViaAnnouncement = "announcement" // it answered this program's own question
+	ViaSystem       = "system"       // the system's discovery service knew of it
+	ViaScan         = "scan"         // something at its address answered as a controller does
+)
+
+// Ways says, in words, each way Browse will look on this machine, for a
+// program that wants to tell the person waiting what it is doing.
+func Ways() []string {
+	var ways []string
+	if names := interfaces(); len(names) > 0 {
+		ways = append(ways, "listening for controllers announcing themselves (mDNS, "+strings.TrimSuffix(Service, ".local.")+") on "+strings.Join(names, ", "))
+	} else {
+		ways = append(ways, "asking controllers to announce themselves (mDNS, "+strings.TrimSuffix(Service, ".local.")+"), with no network of its own to listen on")
+	}
+	if way := systemWay(); way != "" {
+		ways = append(ways, way)
+	}
+
+	return ways
+}
+
+// interfaces names the network interfaces Browse listens on: the ones that
+// are up, can multicast, and have an IPv4 address to do it from.
+func interfaces() []string {
+	ifaces := multicastInterfaces()
+	names := make([]string, len(ifaces))
+	for i, ifi := range ifaces {
+		names[i] = ifi.Name
+	}
+
+	return names
+}
+
+func multicastInterfaces() []net.Interface {
+	all, _ := net.Interfaces() // none is the same as an error: there is nothing to join
+
+	var out []net.Interface
+	for _, ifi := range all {
+		if ifi.Flags&net.FlagUp == 0 || ifi.Flags&net.FlagMulticast == 0 || ifi.Flags&net.FlagLoopback != 0 {
+			continue
+		}
+		addrs, _ := ifi.Addrs()
+		if slices.ContainsFunc(addrs, func(a net.Addr) bool {
+			ipn, ok := a.(*net.IPNet)
+			return ok && ipn.IP.To4() != nil
+		}) {
+			out = append(out, ifi)
+		}
+	}
+
+	return out
 }
 
 // Address is where to reach the controller: its first address, or its host
@@ -151,6 +208,11 @@ func merge(a, b []Found) []Found {
 			}
 		}
 		o.Model, o.Firmware, o.ID = cmp.Or(o.Model, f.Model), cmp.Or(o.Firmware, f.Firmware), cmp.Or(o.ID, f.ID)
+		for _, via := range f.Via {
+			if !slices.Contains(o.Via, via) {
+				o.Via = append(slices.Clone(o.Via), via)
+			}
+		}
 	}
 	slices.SortFunc(out, func(x, y Found) int { return strings.Compare(x.Name, y.Name) })
 
@@ -162,13 +224,8 @@ func merge(a, b []Found) []Found {
 func listen() []*net.UDPConn {
 	var conns []*net.UDPConn
 
-	ifaces, _ := net.Interfaces() // none is the same as an error: there is nothing to join
-	for i := range ifaces {
-		ifi := &ifaces[i]
-		if ifi.Flags&net.FlagUp == 0 || ifi.Flags&net.FlagMulticast == 0 || ifi.Flags&net.FlagLoopback != 0 {
-			continue
-		}
-		if c, err := net.ListenMulticastUDP("udp4", ifi, mdnsGroup); err == nil {
+	for _, ifi := range multicastInterfaces() {
+		if c, err := net.ListenMulticastUDP("udp4", &ifi, mdnsGroup); err == nil {
 			conns = append(conns, c)
 		}
 	}
@@ -309,7 +366,7 @@ func (r *records) found() []Found {
 
 	out := make([]Found, 0, len(r.instances))
 	for inst := range r.instances {
-		f := Found{Name: instanceName(inst), Port: DefaultPort}
+		f := Found{Name: instanceName(inst), Port: DefaultPort, Via: []string{ViaAnnouncement}}
 		if t, ok := r.targets[inst]; ok {
 			f.Host = strings.TrimSuffix(t.host, ".")
 			if t.port != 0 {
@@ -413,7 +470,7 @@ func Scan(ctx context.Context, prefix netip.Prefix, port int, timeout time.Durat
 			if isController(ctx, client, addr, port) {
 				mu.Lock()
 				defer mu.Unlock()
-				found = append(found, Found{Addrs: []netip.Addr{addr}, Port: port})
+				found = append(found, Found{Addrs: []netip.Addr{addr}, Port: port, Via: []string{ViaScan}})
 			}
 		})
 	}

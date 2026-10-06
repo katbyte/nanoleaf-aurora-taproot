@@ -1,4 +1,4 @@
-# 🌱 taproot — Nanoleaf Light Panels, without the app
+# 🌱 taproot — Nanoleaf Aurora Light Panels, without the app
 
 [![GitHub release](https://img.shields.io/github/v/release/katbyte/nanoleaf-aurora-taproot?color=blueviolet)](https://github.com/katbyte/nanoleaf-aurora-taproot/releases/latest)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/katbyte/nanoleaf-aurora-taproot?label=go&color=00ADD8)](https://github.com/katbyte/nanoleaf-aurora-taproot/blob/main/go.mod)
@@ -9,11 +9,14 @@
 ![CodeQL](https://github.com/katbyte/nanoleaf-aurora-taproot/actions/workflows/codeql-analysis.yml/badge.svg)
 [![coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/katbyte/nanoleaf-aurora-taproot/badges/coverage.json)](https://github.com/katbyte/nanoleaf-aurora-taproot/actions/workflows/coverage.yaml)
 
-A command-line utility, and a web page, for the original Nanoleaf Light Panels (the Aurora, model NL22). It talks
-straight to the controllers on your own network: no app, no account, no cloud.
+A command-line utility, Go SDK, and a web page, for the original Nanoleaf Aurora Light Panels (model NL22). It
+talks straight to the controllers on your own network: no app, no account, no cloud.
 
-It exists because the official app stopped applying scenes to these controllers. With taproot you can back up every
-scene a controller holds, copy a scene from the controller that still has it to the ones that lost it, and start it.
+It exists because the official app stopped applying scenes to these controllers and their support was unable to
+help after over a year of back and forth. The company seems to have abandoned them.
+
+With taproot you can back up every scene a controller holds, copy a scene from the controller that still has it to
+the ones that lost it, and start it.
 
 Nothing on a controller is replaced unless you say so, a controller is backed up before anything is written to it,
 and `--dry-run` prints exactly what would be sent without sending it.
@@ -44,15 +47,22 @@ taproot backup                        # every controller, each to a dated folder
 taproot restore bedroom ~/.config/taproot/backups/office/20261006-123629
 ```
 
+`find` looks in up to three ways and says which found each controller. It listens for controllers announcing
+themselves (mDNS, the service `_nanoleafapi._tcp`). On a Mac it also asks macOS's own discovery service, because
+the firewall there often drops the answers to the first. And with `--scan` it knocks on port 16021 at every
+address of a subnet, for networks that announcements do not cross.
+
 A controller is named on the command line by the name you gave it, the name it gives itself, its address, or any
 part of those that only one controller has: `office`, `53a63c` and `183` can all be the same one.
 
 | command | what it does |
 |---|---|
-| `find` | searches the network; `--scan 10.0.5.0/24` knocks on every address of a subnet, for networks a search does not cross |
+| `find` | searches the network, saying how as it goes; `--scan 10.0.5.0/24` also knocks on every address of a subnet |
 | `connect [address\|name]` | gets a token and saves it; keeps asking until the button has been held (`--wait`, default 5m) |
-| `list` | the controllers taproot holds a token for: model, firmware, power, what is running |
+| `connect all` | asks every controller not connected yet, all at once: the one whose button you hold connects, and you name it there and then |
+| `list` | the controllers taproot holds a token for: its name for each and the name the controller gives itself, model, firmware, power, what is running |
 | `info <controller>` | one controller in full |
+| `rename <controller> <name>` | changes what taproot calls a controller: `taproot rename 183 office` |
 | `forget <controller>` | has the controller delete the token, and removes it; `--local` leaves the controller alone |
 | `scene list [controller]` | a controller's scenes, or with none named, which controller holds which |
 | `scene dump <controller> [scene]` | a scene as JSON, exactly as the controller holds it; all of them when none is named; `--out file` |
@@ -71,6 +81,10 @@ start it once it is there. Every command takes `--json` for scripts and `--dry-r
 A controller hands out a token only to somebody who can reach it: hold its power button for 5 to 7 seconds, until
 the light flashes, and for about 30 seconds it will give one to whoever asks. `taproot connect` asks every two
 seconds until that happens, so start it first and then go to the button.
+
+When controllers look alike on the network and all you know is which one you are standing at, `taproot connect all`
+asks every one that is not connected yet. Hold the button on the one you want: taproot says which answered and asks
+what to call it, then goes on asking the rest until they are all connected or you type `q` and enter, or press ctrl-c.
 
 A token never expires and gives full control of the controller. taproot keeps them in
 `~/.config/taproot/controllers.json`, which only you can read, and never prints one, not in output, logs, errors

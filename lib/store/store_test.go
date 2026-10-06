@@ -173,6 +173,45 @@ func TestPut(t *testing.T) {
 	}
 }
 
+func TestRename(t *testing.T) {
+	t.Parallel()
+
+	s := three()
+	// kept to what a command line and a directory both take without quoting
+	if name, err := s.Rename("office", " Living Room! "); err != nil || name != "living-room" {
+		t.Fatalf("Rename: %q, %v", name, err)
+	}
+	if c, err := s.Find("living-room"); err != nil || c.Token != "t1" || c.Device != "Light Panels 53:A6:3C" {
+		t.Errorf("the renamed controller: %+v, %v", c, err)
+	}
+	if _, err := s.Find("office"); err == nil {
+		t.Error("the old name still finds it")
+	}
+	// to the name it has: nothing to do, and no error
+	if name, err := s.Rename("living-room", "Living-Room"); err != nil || name != "living-room" {
+		t.Errorf("to its own name: %q, %v", name, err)
+	}
+
+	for _, bad := range []struct{ from, to, msg string }{
+		{"living-room", "bedroom", "bedroom is already what Light Panels 52:56:C3 is called"},
+		{"living-room", "BED", "bed is already what"},
+		{"living-room", " !! ", "at least one letter or digit"},
+		{"kitchen", "pantry", `no controller called "kitchen"`},
+	} {
+		if _, err := s.Rename(bad.from, bad.to); err == nil || !strings.Contains(err.Error(), bad.msg) {
+			t.Errorf("Rename(%q, %q): %v; want an error saying %q", bad.from, bad.to, err, bad.msg)
+		}
+	}
+	if got := s.Names(); !slices.Equal(got, []string{"bed", "bedroom", "living-room"}) {
+		t.Errorf("after it all: %v", got)
+	}
+
+	// a name given when connecting is kept to the same
+	if name, _ := s.Put(Controller{Name: "The Hall", Host: "10.0.5.50", Serial: "S50", Token: "t"}); name != "the-hall" {
+		t.Errorf("a name given to Put: %q", name)
+	}
+}
+
 func TestRemove(t *testing.T) {
 	t.Parallel()
 

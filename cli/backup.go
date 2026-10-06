@@ -57,7 +57,7 @@ func (f *FlagData) Backup(ctx context.Context, args []string) error {
 
 		// a backup only reads the controller, so a dry run stops short of writing the files
 		if f.DryRun {
-			cout.Printf("<yellow>dry run:</> would back up <cyan>%s</> to %s\n", ctl.Name, to)
+			cout.Printf("<yellow>dry run:</> would back up %s to %s\n", Name(ctl.Name), Dim(to))
 			out = append(out, b)
 			continue
 		}
@@ -67,13 +67,13 @@ func (f *FlagData) Backup(ctx context.Context, args []string) error {
 			var m *backup.Manifest
 			if m, err = backup.Take(ctx, c, to); err == nil {
 				b.Scenes, b.Running = len(m.Scenes), m.Running
-				cout.Printf("backed up <cyan>%s</>: %d scenes in %s\n", ctl.Name, b.Scenes, to)
+				cout.Printf("<green>backed up</> %s: %s scenes in %s\n", Name(ctl.Name), Num(b.Scenes), Dim(to))
 			}
 		}
 		if err != nil {
 			b.Error = err.Error()
 			failed = append(failed, fmt.Errorf("%s: %w", ctl.Name, err))
-			cout.Errorf("<red>%s was not backed up:</> %v\n", ctl.Name, err)
+			cout.Errorf("<red>%s was not backed up:</> %s\n", Escape(ctl.Name), Escape(err.Error()))
 		}
 		out = append(out, b)
 	}
@@ -98,7 +98,7 @@ func (f *FlagData) Restore(ctx context.Context, ref, dir string) error {
 		return err
 	}
 	if b.Manifest != nil {
-		cout.Printf("restoring %d scenes taken from %s on %s\n", len(b.Scenes), Escape(b.Manifest.Controller.Name), b.Manifest.Taken)
+		cout.Printf("restoring %s scenes taken from %s on %s\n", Num(len(b.Scenes)), Device(b.Manifest.Controller.Name), Dim(b.Manifest.Taken))
 	}
 
 	report, err := push.Scenes(ctx, c, b.Scenes, push.Options{

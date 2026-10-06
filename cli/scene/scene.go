@@ -58,14 +58,20 @@ func (f *Flags) List(ctx context.Context, ref string) error {
 		return err
 	}
 
-	cout.Printf("<cyan>%s</> holds %d scenes\n", ctl.Name, len(out))
+	cout.Printf("%s holds %s scenes\n", cli.Name(ctl.Name), cli.Num(len(out)))
 	rows := make([][]string, 0, len(out))
-	for _, s := range out {
-		mark := " "
+	for i, s := range out {
+		mark, name := " ", cli.Scene(s.Name)
 		if s.Running {
-			mark = "▶"
+			mark, name = "<green>▶</>", "<magenta;op=bold>"+escape(s.Name)+"</>"
 		}
-		rows = append(rows, []string{mark, s.Name, s.Kind, s.Plugin, fmt.Sprintf("%d colours", s.Colours)})
+		// the ones that move to sound stand out from the ones that move by themselves
+		kind := cli.Dim(s.Kind)
+		if s.Kind == aurora.PluginTypeRhythm {
+			kind = "<fg=177>" + s.Kind + "</>"
+		}
+		// and each scene's own colours, where colours are shown at all
+		rows = append(rows, []string{mark, name, kind, escape(s.Plugin), cli.Num(s.Colours) + " " + cli.Dim("colours"), cli.Swatch(effects[i].Palette())})
 	}
 	cli.Table(rows)
 
@@ -138,32 +144,33 @@ func (f *Flags) Compare(ctx context.Context) error {
 		return err
 	}
 
-	header := []string{"SCENE"}
+	header := []string{cli.Dim("SCENE")}
 	for _, ctl := range s.Controllers {
-		header = append(header, ctl.Name)
+		header = append(header, cli.Name(ctl.Name))
 	}
 	rows := [][]string{header}
 	for _, c := range out {
-		row := []string{c.Name}
+		row := []string{cli.Scene(c.Name)}
 		for i, ctl := range s.Controllers {
 			switch {
 			case errs[i] != nil:
-				row = append(row, "?")
+				row = append(row, "<red>?</>")
 			case c.On[ctl.Name]:
-				row = append(row, "yes")
+				row = append(row, "<green>yes</>")
 			default:
-				row = append(row, "-")
+				// the gap is what this list is for: the scene a controller has lost
+				row = append(row, "<red>-</>")
 			}
 		}
 		if c.Differs {
-			row = append(row, "differs between controllers")
+			row = append(row, cli.Note("differs between controllers"))
 		}
 		rows = append(rows, row)
 	}
 	cli.Table(rows)
 	for i, ctl := range s.Controllers {
 		if errs[i] != nil {
-			cout.Errorf("<red>%s could not be read:</> %v\n", ctl.Name, errs[i])
+			cout.Errorf("<red>%s could not be read:</> %s\n", escape(ctl.Name), escape(errs[i].Error()))
 		}
 	}
 
@@ -210,7 +217,7 @@ func (f *Flags) Dump(ctx context.Context, ref, name string) error {
 	if err := file.Close(); err != nil {
 		return err
 	}
-	cout.Printf("wrote %s\n", f.Cmd.Scene.Out)
+	cout.Printf("wrote %s\n", cli.Dim(f.Cmd.Scene.Out))
 
 	return nil
 }
@@ -370,7 +377,7 @@ func (f *Flags) Copy(ctx context.Context, name string) error {
 	if f.Cmd.Scene.As != "" {
 		e = e.WithName(f.Cmd.Scene.As)
 	}
-	cout.Printf("copying <cyan>%s</> from <cyan>%s</>\n", escape(e.Name()), from.Name)
+	cout.Printf("copying %s from %s\n", cli.Scene(e.Name()), cli.Name(from.Name))
 
 	reports := make([]push.Report, 0, len(targets))
 	var unreachable []error
@@ -384,7 +391,7 @@ func (f *Flags) Copy(ctx context.Context, name string) error {
 			}
 		}
 		// one controller that is off does not stop the scene reaching the others
-		cout.Errorf("<red>%s:</> %v\n", to.Name, err)
+		cout.Errorf("<red>%s:</> %s\n", escape(to.Name), escape(err.Error()))
 		unreachable = append(unreachable, fmt.Errorf("%s: %w", to.Name, err))
 	}
 
@@ -452,7 +459,7 @@ func (f *Flags) Select(ctx context.Context, ref, name string) error {
 		return err
 	}
 	if !f.DryRun {
-		cout.Printf("<cyan>%s</> is now running <cyan>%s</>\n", ctl.Name, escape(name))
+		cout.Printf("%s is now running %s\n", cli.Name(ctl.Name), cli.Scene(name))
 	}
 
 	return nil

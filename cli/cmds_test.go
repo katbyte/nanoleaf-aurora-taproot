@@ -9,11 +9,13 @@ package cli_test
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -37,6 +39,8 @@ const northern = "kt Northern Lights"
 type home struct {
 	t   *testing.T
 	dir string
+	// stdin is what is typed at the command, for the one that asks questions
+	stdin io.Reader
 }
 
 func newHome(t *testing.T) *home {
@@ -89,6 +93,9 @@ func (h *home) run(args ...string) (string, error) {
 	defer func() { cout.Out, cout.Err, cout.Level = oldOut, oldErr, oldLevel }() //nolint:reassign // and put back
 	root.SetOut(&out)
 	root.SetErr(&out)
+	if h.stdin != nil {
+		root.SetIn(h.stdin)
+	}
 	root.SetArgs(append([]string{"--config-dir", h.dir}, args...))
 	err = root.ExecuteContext(h.t.Context())
 
@@ -159,7 +166,8 @@ func want(t *testing.T, got string, parts ...string) {
 func TestVersionAndHelp(t *testing.T) { //nolint:paralleltest // the commands share viper
 	h := newHome(t)
 	want(t, h.ok("version"), "taproot")
-	want(t, h.ok(), `Run "taproot help"`)
+	// with no command it lists them, rather than saying how to ask for the list
+	want(t, h.ok(), "Usage:", "Available Commands:", "connect", "scene", "serve", "--dry-run")
 	want(t, h.ok("scene"), "list", "dump", "push", "copy", "select")
 }
 
@@ -202,6 +210,199 @@ func TestConnectWaitsForTheButton(t *testing.T) { //nolint:paralleltest // the c
 	if again := h.saved(); len(again) != 1 || again[0].Token == saved[0].Token || again[0].Name != "office" {
 		t.Errorf("after connecting again: %+v", again)
 	}
+}
+
+// unconnected is a canned controller on the network that taproot has no
+// token for yet, and how a search would report it.
+func unconnected(t *testing.T, name string) (*auroratest.Controller, cli.FoundController) {
+	t.Helper()
+
+	ctl := auroratest.New(t)
+	ctl.Set("name", "Light Panels "+name)
+	ctl.Set("serialNo", "S-"+name)
+	return ctl, cli.FoundController{Address: ctl.Host(), Name: "Light Panels " + name, Model: "NL22", Firmware: "5.3.2"}
+}
+
+// asks is how many times a controller has been asked for a token.
+func asks(ctl *auroratest.Controller) int {
+	n := 0
+	for _, r := range ctl.Requests() {
+		if r.Path == "/new" {
+			n++
+		}
+	}
+
+	return n
+}
+
+func (h *home) named(name string) bool {
+	return slices.ContainsFunc(h.saved(), func(c store.Controller) bool { return c.Name == name })
+}
+
+func waitFor(t *testing.T, what string, ok func() bool) {
+	t.Helper()
+
+	deadline := time.Now().Add(10 * time.Second)
+	for !ok() {
+		if time.Now().After(deadline) {
+			t.Fatalf("timed out waiting for %s", what)
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
+}
+
+// Somebody with two controllers that look the same on the network, standing
+// at one of them: connect all asks both, the one whose button is held is the
+// one that answers, and it is named there and then.
+func TestConnectAll(t *testing.T) { //nolint:paralleltest // the commands share viper
+	restoreAsk := cli.SetAskEvery(10 * time.Millisecond)
+	defer restoreAsk()
+	h := newHome(t)
+	office := h.controller("office") // connected already: not one to ask
+	a, foundA := unconnected(t, "AA")
+	b, foundB := unconnected(t, "BB")
+	restoreSearch := cli.SetSearch(foundA, foundB, cli.FoundController{Address: office.Host(), Name: "Light Panels office"})
+	defer restoreSearch()
+
+	typed, typing := io.Pipe()
+	defer func() { _ = typing.Close() }()
+	h.stdin = typed
+	type result struct {
+		out string
+		err error
+	}
+	done := make(chan result, 1)
+	go func() {
+		out, err := h.run("connect", "all")
+		done <- result{out, err}
+	}()
+
+	// nobody has touched anything yet: both are being asked, and asked again
+	waitFor(t, "both to be asked", func() bool { return asks(a) >= 2 && asks(b) >= 2 })
+	if len(h.saved()) != 1 {
+		t.Fatal("a controller was saved before any button was held")
+	}
+
+	// the button on the second one: it is saved at once, under the name it gives itself, and then named
+	b.Pair()
+	waitFor(t, "the one whose button was held to be saved", func() bool { return h.named("light-panels-bb") })
+	_, _ = io.WriteString(typing, "Bedroom\n")
+	waitFor(t, "it to take the name typed for it", func() bool { return h.named("bedroom") })
+	if h.named("light-panels-bb") || h.named("light-panels-aa") {
+		t.Errorf("after naming one: %+v", h.saved())
+	}
+
+	// the other goes on being asked meanwhile; a name that is taken is asked for again
+	a.Pair()
+	waitFor(t, "the other to be saved", func() bool { return h.named("light-panels-aa") })
+	_, _ = io.WriteString(typing, "office\n")
+	_, _ = io.WriteString(typing, "\n") // enter alone keeps the name it has
+	// with every one connected and named there is nothing left to wait for
+	var res result
+	select {
+	case res = <-done:
+	case <-time.After(10 * time.Second):
+		t.Fatal("connect all did not finish once every controller was connected")
+	}
+	if res.err != nil {
+		t.Fatalf("connect all: %v\n%s", res.err, res.out)
+	}
+	want(t, res.out, "2 not connected yet", "Light Panels AA", "Light Panels BB", "hold the power button", "asking both every",
+		"type q and enter, or press ctrl-c, to stop", "connected Light Panels BB", "what should Light Panels BB be called?", "(enter keeps light-panels-bb)",
+		"saved as bedroom", "connected Light Panels AA", "office is already what Light Panels office is called", "connected 2: bedroom, light-panels-aa")
+	if strings.Contains(res.out, "still not connected") {
+		t.Errorf("with both connected:\n%s", res.out)
+	}
+	saved := h.saved()
+	if len(saved) != 3 || !h.named("bedroom") || !h.named("light-panels-aa") || !h.named("office") {
+		t.Fatalf("saved: %+v", saved)
+	}
+	for _, c := range saved {
+		if c.Token == "" {
+			t.Errorf("%s was saved with no token", c.Name)
+		}
+	}
+	// the one that was connected already was never asked for another token
+	if asks(office) != 0 {
+		t.Errorf("a controller that was connected already was asked %d times", asks(office))
+	}
+
+	// with nothing left to connect it says so, and asks nobody
+	want(t, h.ok("connect", "all"), "every controller found is connected already (3)")
+}
+
+func TestConnectAllStops(t *testing.T) { //nolint:paralleltest // the commands share viper
+	restoreAsk := cli.SetAskEvery(10 * time.Millisecond)
+	defer restoreAsk()
+	h := newHome(t)
+	a, foundA := unconnected(t, "AA")
+	b, foundB := unconnected(t, "BB")
+	restoreSearch := cli.SetSearch(foundA, foundB)
+	defer restoreSearch()
+
+	// q, then enter, when there is no question on screen
+	typed, typing := io.Pipe()
+	defer func() { _ = typing.Close() }()
+	h.stdin = typed
+	done := make(chan string, 1)
+	go func() { done <- h.ok("connect", "all") }()
+	waitFor(t, "both to be asked", func() bool { return asks(a) >= 1 && asks(b) >= 1 })
+	_, _ = io.WriteString(typing, "not a command\nQ\n")
+	select {
+	case out := <-done:
+		want(t, out, "still not connected: Light Panels AA", "Light Panels BB")
+		if strings.Contains(out, "connected 1") || len(h.saved()) != 0 {
+			t.Errorf("stopped before any button was held:\n%s", out)
+		}
+	case <-time.After(10 * time.Second):
+		t.Fatal("q did not stop connect all")
+	}
+
+	// with nobody at a terminal, and a time to stop at: the one that is ready connects under its own name
+	h.stdin = strings.NewReader("")
+	a.Pair()
+	out := h.ok("connect", "all", "--wait", "400ms")
+	want(t, out, "stops after 400ms", "connected Light Panels AA", "connected 1: light-panels-aa", "still not connected: Light Panels BB")
+	if strings.Contains(out, "what should") {
+		t.Errorf("a question was asked of nobody:\n%s", out)
+	}
+	if !h.named("light-panels-aa") || len(h.saved()) != 1 {
+		t.Fatalf("saved: %+v", h.saved())
+	}
+
+	// and when the time runs out with nothing connected, that is an error
+	want(t, h.fails("connect", "all", "--wait", "100ms"), "no controller handed out a token in 100ms")
+
+	// for a script: what connected, as a list, with no questions
+	b.Pair()
+	var connected []cli.Connected
+	if err := json.Unmarshal([]byte(h.ok("connect", "all", "--wait", "2s", "--json")), &connected); err != nil || len(connected) != 1 || connected[0].Name != "light-panels-bb" {
+		t.Errorf("connect all --json: %+v, %v", connected, err)
+	}
+}
+
+func TestConnectAllRefuses(t *testing.T) { //nolint:paralleltest // the commands share viper
+	h := newHome(t)
+	a, foundA := unconnected(t, "AA")
+	a.Pair()
+
+	restoreNone := cli.SetSearch()
+	want(t, h.fails("connect", "all"), "found no controllers")
+	restoreNone()
+
+	restoreSearch := cli.SetSearch(foundA)
+	defer restoreSearch()
+	want(t, h.fails("connect", "all", "--name", "office"), "--name and --token-file are for connecting one")
+
+	// a dry run says what it would ask and asks nobody
+	want(t, h.ok("connect", "all", "--dry-run"), "1 not connected yet", "Light Panels AA", "dry run:", "POST /api/v1/new")
+	if asks(a) != 0 || len(h.saved()) != 0 {
+		t.Errorf("a dry run asked %d times and saved %d", asks(a), len(h.saved()))
+	}
+
+	// a controller that has gone since it was found is said so, and the rest go on
+	a.Unplug()
+	want(t, h.ok("connect", "all", "--wait", "300ms", "--timeout", "1s"), "cannot reach the controller at "+a.Host(), "still not connected: Light Panels AA")
 }
 
 func TestConnectGivesUp(t *testing.T) { //nolint:paralleltest // the commands share viper
@@ -274,6 +475,23 @@ func TestConnectDryRun(t *testing.T) { //nolint:paralleltest // the commands sha
 	}
 }
 
+// find says how it is looking while it looks, since a few seconds of nothing
+// leaves a person wondering what is being waited for.
+func TestFindSaysWhatItIsDoing(t *testing.T) { //nolint:paralleltest // the commands share viper
+	h := newHome(t)
+
+	// what is on the network is not this test's to say; what find says it is doing is
+	want(t, h.ok("find", "--wait", "200ms"), "searching for controllers for 200ms", "(mDNS, _nanoleafapi._tcp)")
+	want(t, h.ok("search", "--wait", "200ms", "--scan", "127.0.0.1/32"), "knocking on port 16021 at every address of 127.0.0.1/32")
+	want(t, h.fails("find", "--wait", "200ms", "--scan", "everywhere"), "is not a subnet like 10.0.5.0/24")
+
+	// for a script: a list, and nothing else
+	var found []cli.FoundController
+	if err := json.Unmarshal([]byte(h.ok("find", "--wait", "200ms", "--json")), &found); err != nil {
+		t.Errorf("find --json: %v", err)
+	}
+}
+
 func TestListAndInfo(t *testing.T) { //nolint:paralleltest // the commands share viper
 	h := newHome(t)
 	want(t, h.ok("list"), "no controllers yet", "taproot connect")
@@ -282,7 +500,16 @@ func TestListAndInfo(t *testing.T) { //nolint:paralleltest // the commands share
 	gone := h.controller("bedroom")
 	gone.Unplug()
 
-	want(t, h.ok("list", "--timeout", "2s"), "NAME", "office", "on 33%", northern, "bedroom", "unreachable")
+	// each under taproot's name for it, with the name it gives itself beside it; one that is gone still has the name it gave
+	out := h.ok("list", "--timeout", "2s")
+	want(t, out, "NAME", "CALLS ITSELF", "on 33%", northern, "unreachable")
+	for line := range strings.SplitSeq(out, "\n") {
+		for _, name := range []string{"office", "bedroom"} {
+			if strings.HasPrefix(line, name+" ") && !strings.Contains(line, "Light Panels "+name) {
+				t.Errorf("%s is listed without its own name: %q", name, line)
+			}
+		}
+	}
 
 	var listed []cli.Status
 	if err := json.Unmarshal([]byte(h.ok("list", "--json", "--timeout", "2s")), &listed); err != nil {
@@ -308,6 +535,46 @@ func TestListAndInfo(t *testing.T) { //nolint:paralleltest // the commands share
 
 	want(t, h.fails("info", "kitchen"), `no controller matches "kitchen"`)
 	want(t, h.fails("info", "bedroom", "--timeout", "2s"), "GET /")
+}
+
+func TestRename(t *testing.T) { //nolint:paralleltest // the commands share viper
+	h := newHome(t)
+	office := h.controller("light-panels-53-a6-3c")
+	h.controller("bedroom")
+	h.ok("backup", "53a6")
+
+	want(t, h.ok("rename", "53a6", "Office", "--dry-run"), "dry run:", "would rename", "light-panels-53-a6-3c", "office")
+	if h.saved()[1].Name != "light-panels-53-a6-3c" {
+		t.Fatal("a dry run renamed the controller")
+	}
+
+	// by any part of what it is known by, to a name tidied for the command line
+	out := h.ok("rename", "53a6", "Office")
+	want(t, out, "light-panels-53-a6-3c", "is now", "office",
+		"its earlier backups stay in "+filepath.Join(h.dir, "backups", "light-panels-53-a6-3c"), "new ones go in "+filepath.Join(h.dir, "backups", "office"))
+	saved := h.saved()
+	if len(saved) != 2 || saved[1].Name != "office" || saved[1].Token == "" || saved[1].Host != office.Host() {
+		t.Fatalf("saved: %+v", saved)
+	}
+	// it answers to the new name, and nothing was said to the controller about it
+	want(t, h.ok("info", "office"), "name          office", "calls itself  Light Panels light-panels-53-a6-3c")
+	if len(office.Writes()) != 0 {
+		t.Errorf("renaming wrote to the controller: %+v", office.Writes())
+	}
+	// the backup taken before is where it was
+	if list, err := backup.List(filepath.Join(h.dir, "backups")); err != nil || len(list) != 1 || list[0].Controller != "light-panels-53-a6-3c" {
+		t.Errorf("the earlier backup: %+v, %v", list, err)
+	}
+
+	want(t, h.ok("rename", "office", "office"), "is already called that")
+	var renamed cli.Renamed
+	if err := json.Unmarshal([]byte(h.ok("name", "office", "study", "--json")), &renamed); err != nil || renamed.From != "office" || renamed.To != "study" {
+		t.Errorf("rename --json: %+v, %v", renamed, err)
+	}
+
+	want(t, h.fails("rename", "study", "bedroom"), "bedroom is already what Light Panels bedroom is called")
+	want(t, h.fails("rename", "study", "!!"), "at least one letter or digit")
+	want(t, h.fails("rename", "kitchen", "pantry"), `no controller matches "kitchen"`)
 }
 
 func TestForget(t *testing.T) { //nolint:paralleltest // the commands share viper

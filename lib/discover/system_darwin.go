@@ -31,6 +31,14 @@ var (
 	addressOf = regexp.MustCompile(`\sAdd\s.*\s(\d+\.\d+\.\d+\.\d+)\s`)
 )
 
+// systemWay says how systemBrowse looks, or nothing when it cannot.
+func systemWay() string {
+	if _, err := exec.LookPath("dns-sd"); err != nil {
+		return ""
+	}
+	return "asking macOS's own discovery service (dns-sd), since a firewall here often keeps the answers to the first from arriving"
+}
+
 // systemBrowse asks the system's discovery service for controllers until ctx
 // ends. It returns nothing, rather than an error, when dns-sd is not there or
 // says nothing: it is the second of two ways of looking.
@@ -71,7 +79,7 @@ func systemBrowse(ctx context.Context) []Found {
 // resolve asks where a controller is served from, what it says about itself,
 // and what address that is.
 func resolve(ctx context.Context, name string) Found {
-	f := Found{Name: name, Port: DefaultPort}
+	f := Found{Name: name, Port: DefaultPort, Via: []string{ViaSystem}}
 
 	// the lookups get their own time: the search ending must not cut short the one for a controller heard of at its end
 	lctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), lookupFor)

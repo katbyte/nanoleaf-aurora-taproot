@@ -156,6 +156,28 @@ func TestParseEffectRefuses(t *testing.T) {
 	}
 }
 
+func TestColorRGB(t *testing.T) {
+	t.Parallel()
+
+	for c, want := range map[Color][3]uint8{
+		{Hue: 0, Saturation: 100, Brightness: 100}:    {255, 0, 0},
+		{Hue: 120, Saturation: 100, Brightness: 100}:  {0, 255, 0},
+		{Hue: 240, Saturation: 100, Brightness: 100}:  {0, 0, 255},
+		{Hue: 60, Saturation: 100, Brightness: 100}:   {255, 255, 0},
+		{Hue: 180, Saturation: 100, Brightness: 50}:   {0, 128, 128},
+		{Hue: 300, Saturation: 50, Brightness: 100}:   {255, 128, 255},
+		{Hue: 0, Saturation: 0, Brightness: 100}:      {255, 255, 255}, // no saturation is white, whatever the hue
+		{Hue: 77, Saturation: 100, Brightness: 0}:     {0, 0, 0},
+		{Hue: 360, Saturation: 100, Brightness: 100}:  {255, 0, 0}, // all the way round
+		{Hue: -120, Saturation: 100, Brightness: 100}: {0, 0, 255},
+		{Hue: 0, Saturation: 250, Brightness: 250}:    {255, 0, 0}, // out of range is the nearest in it
+	} {
+		if r, g, b := c.RGB(); [3]uint8{r, g, b} != want {
+			t.Errorf("%+v is %d,%d,%d; want %v", c, r, g, b, want)
+		}
+	}
+}
+
 func TestShapeType(t *testing.T) {
 	t.Parallel()
 

@@ -3,8 +3,11 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
-	"text/tabwriter"
+	"unicode/utf8"
+
+	c "github.com/gookit/color"
 
 	"github.com/katbyte/go-kt/cout"
 	"github.com/katbyte/nanoleaf-aurora-taproot/lib/push"
@@ -61,32 +64,124 @@ func (f *FlagData) Emit(v any) (bool, error) {
 	return true, enc.Encode(doc)
 }
 
-// Table prints rows in aligned columns. Colour tags are not rendered inside
-// it: a tag would count towards a column's width and push the rest out.
-func Table(rows [][]string) {
-	w := tabwriter.NewWriter(cout.Writer(), 0, 4, 2, ' ', 0)
-	for _, r := range rows {
-		_, _ = fmt.Fprintln(w, strings.Join(r, "\t"))
+// The colours taproot prints in go by what a thing is, so the same kind of
+// thing is the same colour wherever it turns up:
+//
+//	a controller, by taproot's name for it    cyan
+//	a controller, by the name it gives itself bold
+//	a scene                                   magenta
+//	a number                                  yellow
+//	detail: addresses, paths, versions        dark grey
+//	it worked, it did not, take note          green, red, orange
+//
+// Each of these takes text as it came, from a controller or a person, and
+// makes it safe to print before colouring it.
+
+// Name is taproot's name for a controller.
+func Name(s string) string { return "<cyan>" + Escape(s) + "</>" }
+
+// Device is the name a controller gives itself.
+func Device(s string) string { return "<white;op=bold>" + Escape(s) + "</>" }
+
+// Scene is a scene's name.
+func Scene(s string) string { return "<magenta>" + Escape(s) + "</>" }
+
+// Num is a number that matters.
+func Num(n int) string { return "<yellow>" + strconv.Itoa(n) + "</>" }
+
+// Dim is detail: there to be read when wanted, not to catch the eye.
+func Dim(s string) string { return "<darkGray>" + Escape(s) + "</>" }
+
+// Note is something to take note of that is not an error.
+func Note(s string) string { return "<fg=208>" + Escape(s) + "</>" }
+
+// Swatch is a palette as a row of blocks, each in its own colour: what a
+// scene looks like, in the space of a word. It is nothing at all where
+// colours are not shown, since a row of blocks in one colour says nothing.
+func Swatch(palette []aurora.Color) string {
+	switch {
+	case !c.Enable || !c.Support256Color():
+		return blocks(palette, noColours)
+	case c.SupportTrueColor():
+		return blocks(palette, everyColour)
+	default:
+		return blocks(palette, colours256)
 	}
-	_ = w.Flush() // a console that cannot be written to has nowhere to say so
+}
+
+// How many colours a terminal can show.
+const (
+	noColours   = iota // none, or the sixteen named ones: not enough to show a palette
+	colours256         // the nearest of 256
+	everyColour        // the colour itself
+)
+
+// blocks draws a palette for a terminal that can show that many colours.
+func blocks(palette []aurora.Color, colours int) string {
+	if colours == noColours {
+		return ""
+	}
+
+	var b strings.Builder
+	for _, col := range palette {
+		r, g, bl := col.RGB()
+		if colours == everyColour {
+			fmt.Fprintf(&b, "<fg=%d,%d,%d>█</>", r, g, bl)
+			continue
+		}
+		fmt.Fprintf(&b, "<fg=%d>█</>", c.RgbTo256(r, g, bl))
+	}
+
+	return b.String()
+}
+
+// Table prints rows in aligned columns. A cell may be coloured: a column is
+// as wide as its widest cell looks, not as long as its text with the colour
+// tags in it.
+func Table(rows [][]string) {
+	var widths []int
+	for _, row := range rows {
+		for i, cell := range row {
+			if i == len(widths) {
+				widths = append(widths, 0)
+			}
+			widths[i] = max(widths[i], width(cell))
+		}
+	}
+
+	for _, row := range rows {
+		var line strings.Builder
+		for i, cell := range row {
+			line.WriteString(cell)
+			if i < len(row)-1 {
+				line.WriteString(strings.Repeat(" ", widths[i]-width(cell)+2))
+			}
+		}
+		cout.Printf("%s\n", strings.TrimRight(line.String(), " "))
+	}
+}
+
+// width is how many columns a cell takes on screen.
+func width(cell string) int {
+	return utf8.RuneCountInString(c.ClearTag(cell))
 }
 
 // PrintReport says what a push did to a controller, a line a scene.
 func PrintReport(r push.Report) {
 	switch {
 	case r.Backup != "" && r.DryRun:
-		cout.Printf("<cyan>%s</>: would first back it up to %s\n", r.Controller, r.Backup)
+		cout.Printf("%s: would first back it up to %s\n", Name(r.Controller), Dim(r.Backup))
 	case r.Backup != "":
-		cout.Printf("<cyan>%s</>: backed up to %s\n", r.Controller, r.Backup)
+		cout.Printf("%s: <green>backed up</> to %s\n", Name(r.Controller), Dim(r.Backup))
 	default:
-		cout.Printf("<cyan>%s</>: nothing to write\n", r.Controller)
+		cout.Printf("%s: nothing to write\n", Name(r.Controller))
 	}
 
 	for _, res := range r.Results {
 		colour, word := "green", string(res.Outcome)
 		switch res.Outcome {
 		case push.Unchanged:
-			colour = "gray"
+			colour = "darkGray"
 		case push.Refused, push.Failed:
 			colour = "red"
 		case push.Added, push.Replaced:
@@ -94,12 +189,12 @@ func PrintReport(r push.Report) {
 				word = "would be " + word
 			}
 		}
-		line := fmt.Sprintf("  <%s>%-10s</> %s", colour, word, Escape(res.Scene))
+		line := fmt.Sprintf("  <%s>%-10s</> %s", colour, word, Scene(res.Scene))
 		if res.Reason != "" {
 			line += " — " + Escape(res.Reason)
 		}
 		if len(res.ReadsBack) > 0 {
-			line += " — <yellow>the controller stored it its own way:</> reads back differently in " + strings.Join(res.ReadsBack, ", ")
+			line += " — " + Note("the controller stored it its own way:") + " reads back differently in " + strings.Join(res.ReadsBack, ", ")
 		}
 		cout.Printf("%s\n", line)
 	}

@@ -132,6 +132,9 @@ func (s *Store) Put(c Controller) (name string, replaced bool) {
 		return sameHost(c.Host, o.Host)
 	})
 
+	// a name is typed on the command line and names the directory its backups go in, so it is kept to
+	// what both take without quoting
+	c.Name = Slug(c.Name)
 	// connected again without being named again, it keeps the name it had
 	if c.Name == "" && i >= 0 {
 		c.Name = s.Controllers[i].Name
@@ -157,6 +160,26 @@ func (s *Store) Put(c Controller) (name string, replaced bool) {
 	s.Controllers = append(s.Controllers, c)
 
 	return c.Name, false
+}
+
+// Rename changes what a controller is called and reports the name it now
+// has, which is the one asked for in lower case with everything but letters
+// and digits turned into dashes. A name another controller has is refused.
+func (s *Store) Rename(name, to string) (string, error) {
+	to = Slug(to)
+	if to == "" {
+		return "", errors.New("a name needs at least one letter or digit")
+	}
+	i := slices.IndexFunc(s.Controllers, func(c Controller) bool { return c.Name == name })
+	if i < 0 {
+		return "", fmt.Errorf("no controller called %q", name)
+	}
+	if j := slices.IndexFunc(s.Controllers, func(c Controller) bool { return c.Name == to }); j >= 0 && j != i {
+		return "", fmt.Errorf("%s is already what %s is called", to, s.Controllers[j].Device)
+	}
+	s.Controllers[i].Name = to
+
+	return to, nil
 }
 
 // Remove takes a controller out by its name and reports whether it was there.

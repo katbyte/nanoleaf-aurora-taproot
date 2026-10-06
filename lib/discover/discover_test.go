@@ -94,6 +94,25 @@ func TestRecordsFromOnePacket(t *testing.T) {
 	if f.Address() != "10.0.5.183" {
 		t.Errorf("Address: %q", f.Address())
 	}
+	if !slices.Equal(f.Via, []string{ViaAnnouncement}) {
+		t.Errorf("found by %v", f.Via)
+	}
+}
+
+// Ways is for telling a person what a search is doing, so it always has
+// something to say, and says which service is being looked for.
+func TestWays(t *testing.T) {
+	t.Parallel()
+
+	ways := Ways()
+	if len(ways) == 0 || !strings.Contains(ways[0], "mDNS, _nanoleafapi._tcp") {
+		t.Errorf("Ways: %q", ways)
+	}
+	for _, way := range ways {
+		if way == "" || strings.HasSuffix(way, " on ") {
+			t.Errorf("a way with nothing in it: %q", way)
+		}
+	}
 }
 
 // A responder may answer the first question with a name and nothing else,
@@ -212,13 +231,13 @@ func TestMerge(t *testing.T) {
 	t.Parallel()
 
 	ours := []Found{
-		{Name: "B", Port: 16021},
-		{Name: "A", Host: "a.local", Port: 16021, Addrs: []netip.Addr{netip.MustParseAddr("10.0.5.1")}, Model: "NL22"},
+		{Name: "B", Port: 16021, Via: []string{ViaAnnouncement}},
+		{Name: "A", Host: "a.local", Port: 16021, Addrs: []netip.Addr{netip.MustParseAddr("10.0.5.1")}, Model: "NL22", Via: []string{ViaAnnouncement}},
 	}
 	theirs := []Found{
-		{Name: "B", Host: "b.local", Port: 16021, Addrs: []netip.Addr{netip.MustParseAddr("10.0.5.2")}, Model: "NL22", Firmware: "5.3.2", ID: "id"},
-		{Name: "A", Host: "other.local", Addrs: []netip.Addr{netip.MustParseAddr("10.0.5.1")}, Firmware: "5.2.1"},
-		{Name: "C", Port: 16021},
+		{Name: "B", Host: "b.local", Port: 16021, Addrs: []netip.Addr{netip.MustParseAddr("10.0.5.2")}, Model: "NL22", Firmware: "5.3.2", ID: "id", Via: []string{ViaSystem}},
+		{Name: "A", Host: "other.local", Addrs: []netip.Addr{netip.MustParseAddr("10.0.5.1")}, Firmware: "5.2.1", Via: []string{ViaSystem}},
+		{Name: "C", Port: 16021, Via: []string{ViaSystem}},
 	}
 	got := merge(ours, theirs)
 	if len(got) != 3 || got[0].Name != "A" || got[1].Name != "B" || got[2].Name != "C" {
@@ -231,7 +250,11 @@ func TestMerge(t *testing.T) {
 	if b := got[1]; b.Host != "b.local" || b.Address() != "10.0.5.2" || b.Firmware != "5.3.2" || b.ID != "id" {
 		t.Errorf("B: %+v", b)
 	}
-	if len(ours[0].Addrs) != 0 {
+	// one found both ways says so, and one found one way says which
+	if !slices.Equal(got[0].Via, []string{ViaAnnouncement, ViaSystem}) || !slices.Equal(got[2].Via, []string{ViaSystem}) {
+		t.Errorf("found by: A %v, C %v", got[0].Via, got[2].Via)
+	}
+	if len(ours[0].Addrs) != 0 || len(ours[0].Via) != 1 {
 		t.Error("merge changed its argument")
 	}
 }
@@ -267,7 +290,7 @@ func TestScan(t *testing.T) {
 
 	addr, port := serve(http.StatusUnauthorized)
 	found, err := Scan(t.Context(), netip.PrefixFrom(addr, 32), port, 2*time.Second)
-	if err != nil || len(found) != 1 || found[0].Addrs[0] != addr || found[0].Port != port || found[0].Name != "" {
+	if err != nil || len(found) != 1 || found[0].Addrs[0] != addr || found[0].Port != port || found[0].Name != "" || !slices.Equal(found[0].Via, []string{ViaScan}) {
 		t.Errorf("a controller: %+v, %v", found, err)
 	}
 	if want := net.JoinHostPort(addr.String(), strconv.Itoa(port)); found[0].Address() != want {

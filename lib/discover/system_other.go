@@ -7,3 +7,6 @@ import "context"
 // systemBrowse is the search through the system's own discovery service,
 // which only a Mac needs: see system_darwin.go.
 func systemBrowse(context.Context) []Found { return nil }
+
+// systemWay says how systemBrowse looks, which here it does not.
+func systemWay() string { return "" }

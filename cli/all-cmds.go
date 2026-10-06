@@ -1,5 +1,5 @@
 // The taproot root command and the root-level commands: find, connect, list,
-// info, forget, backup and restore. The command groups (scene, serve) are
+// info, rename, forget, backup and restore. The command groups (scene, serve) are
 // added by cmd/taproot; the flag-free shared helpers live in cli/
 
 package cli
@@ -36,10 +36,8 @@ without sending it.`,
 			GetFlags().Out.Apply()
 			return nil
 		},
-		RunE: func(_ *cobra.Command, _ []string) error {
-			cout.Printf("Run \"taproot help\" for more information about available taproot commands.\n")
-			return nil
-		},
+		// with nothing asked of it, taproot says what it can be asked
+		RunE: func(cmd *cobra.Command, _ []string) error { return cmd.Help() },
 	}
 
 	root.AddCommand(&cobra.Command{
@@ -48,7 +46,7 @@ without sending it.`,
 		Args:          cobra.NoArgs,
 		SilenceErrors: true,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			cout.Printf("🌱 taproot %s\n", version.Version)
+			cout.Printf("🌱 taproot <yellow>%s</>\n", version.Version)
 			return nil
 		},
 	})
@@ -72,12 +70,17 @@ every address of a subnet instead, which finds a controller wherever it can be r
 	root.AddCommand(findCmd)
 
 	connectCmd := &cobra.Command{
-		Use:   "connect [ip|host|name]",
-		Short: "gets a token from a controller and saves it: asks until you have held its power button",
+		Use:   "connect [ip|host|name|all]",
+		Short: "gets a token from a controller and saves it: asks until you have held its power button; all asks every one not connected yet",
 		Long: `Connects to a controller by its address, or by part of the name it announces (taproot find lists them); with nothing
 named it looks for one that is not connected yet. A controller only hands out a token for about 30 seconds after its power
 button has been held for 5 to 7 seconds, until the light flashes, so connect keeps asking until it gets one or --wait runs
 out. The token is saved in the controllers file, which only you can read, and is never printed.
+
+taproot connect all asks every controller that is not connected yet, all at once, so the one whose button you hold is the
+one that connects: the way to connect a particular controller when all you know is which one you are standing at. It says
+which one answered and asks what to call it, then goes on asking the rest until they are all connected, you type q and
+enter, or you press ctrl-c. It has no time limit unless --wait gives it one.
 
 --token-file takes a token you already have, from a file holding it alone or as the controller sent it ({"auth_token": ...}),
 instead of asking for a new one.`,
@@ -90,10 +93,14 @@ instead of asking for a new one.`,
 			if len(args) == 1 {
 				target = args[0]
 			}
+			if target == "all" {
+				return GetFlags().ConnectAll(cmd.Context(), cmd.InOrStdin(), cmd.Flags().Changed("wait"))
+			}
 			return GetFlags().Connect(cmd.Context(), target)
 		},
 	}
-	connectCmd.Flags().Duration("wait", 5*time.Minute, "how long to keep asking for a token")
+	connectCmd.Flags().Duration("wait", 5*time.Minute, "how long to keep asking for a token (connect all keeps asking until stopped unless this is given)")
+	connectCmd.Flags().String("scan", "", "when searching, also knock on every address of this subnet, e.g. 10.0.5.0/24")
 	connectCmd.Flags().String("name", "", "what to call the controller (default: the name it gives itself, in lower case with dashes)")
 	connectCmd.Flags().String("token-file", "", "a file holding a token you already have, to save instead of asking for a new one")
 	root.AddCommand(connectCmd)
@@ -118,6 +125,21 @@ instead of asking for a new one.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
 			return GetFlags().Info(cmd.Context(), args[0])
+		},
+	})
+
+	root.AddCommand(&cobra.Command{
+		Use:   "rename controller name",
+		Short: "changes what taproot calls a controller",
+		Long: `Gives a controller another name to go by on the command line and on the page: taproot rename 183 office. The name is
+kept to lower case letters, digits and dashes, so "Living Room" becomes living-room. Only taproot's own name for it changes;
+the name the controller gives itself stays as it is. Backups already taken stay in the folder named for the old name.`,
+		Aliases:       []string{"name"},
+		Args:          cobra.ExactArgs(2),
+		SilenceErrors: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
+			return GetFlags().Rename(args[0], args[1])
 		},
 	})
 
