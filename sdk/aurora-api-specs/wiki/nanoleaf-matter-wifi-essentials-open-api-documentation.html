@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Nanoleaf Matter WiFi Essentials Open API Documentation</title>
+<style>
+body { font: 15px/1.5 -apple-system, "Segoe UI", sans-serif; max-width: 62rem; margin: 2rem auto; padding: 0 1rem; }
+table { border-collapse: collapse; margin: 1rem 0; }
+td, th { border: 1px solid #bbb; padding: .3rem .6rem; vertical-align: top; text-align: left; }
+pre { background: #f4f4f4; padding: .6rem; overflow-x: auto; }
+img { max-width: 100%; }
+.source { color: #555; border-bottom: 1px solid #bbb; padding-bottom: .6rem; }
+</style>
+</head>
+<body>
+<p class="source">Saved from <a href="https://nanoleaf.atlassian.net/wiki/spaces/nlapid/pages/2296381472">https://nanoleaf.atlassian.net/wiki/spaces/nlapid/pages/2296381472</a>, version 37 of 2026-04-01.</p>
+<h1>Nanoleaf Matter WiFi Essentials Open API Documentation</h1>
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1791315588440 {padding: 0px;}
+div.rbtoc1791315588440 ul {list-style: none;margin-left: 0px;}
+div.rbtoc1791315588440 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='toc-macro rbtoc1791315588440'>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Introduction'>Introduction</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Discovery'>Discovery</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Authorization'>Authorization</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Endpoints'>Endpoints</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-DeviceInformation'>Device Information</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-State'>State</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-ONState'>ON State</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Brightness'>Brightness</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Hue'>Hue</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Saturation'>Saturation</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-ColorTemperature'>Color Temperature</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-ColorMode'>Color Mode</a></li>
+</ul>
+</li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Effects'>Effects</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-TheEffectJSONstructure'>The Effect JSON structure</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-animName'>animName</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-animType'>animType</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-pluginType'>pluginType</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-pluginUuid'>pluginUuid</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-pluginOptions'>pluginOptions</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-hexPalette'>hexPalette</a></li>
+</ul>
+</li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Activatinganeffect'>Activating an effect</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-CommandAPI'>Command API</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-RequestAll'>Request All</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Request'>Request</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Add'>Add</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Display'>Display</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Delete'>Delete</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-RequestPlugins'>Request Plugins</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Length'>Length</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-StreamControl'>Stream Control</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-AddressingLEDs'>Addressing LEDs</a></li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-StreamControlFrameFormat'>Stream Control Frame Format</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href='#NanoleafMatterWiFiEssentialsOpenAPIDocumentation-MotionAppendix'>Motion Appendix</a></li>
+</ul>
+</div><h1 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Introduction">Introduction</h1><p>The Nanoleaf Matter Wifi Essentials devices expose a simple HTTP REST API over WiFI. </p><p>The API is very similar to the <a class="external-link" href="https://forum.nanoleaf.me/docs" rel="nofollow">Light Panels series of products API</a>, however, there are a few differences.</p><p>This API is available on firmware versions above <strong>v3.0.10 </strong>and only on the following devices</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>Full Product Name</strong></p></th><th class="confluenceTh"><p><strong>Model Number</strong></p></th></tr><tr><td class="confluenceTd"><p>Nanoleaf Essentials Holiday String Lights (2023 version)</p></td><td class="confluenceTd"><p>NL71K1</p></td></tr><tr><td class="confluenceTd"><p>Nanoleaf Essentials Holiday String Lights (2024 version)</p></td><td class="confluenceTd"><p>NL71K2</p></td></tr><tr><td class="confluenceTd"><p>Nanoleaf Essentials Indoor HD Lightstrip</p></td><td class="confluenceTd"><p>NL72K1</p></td></tr><tr><td class="confluenceTd"><p>Nanoleaf Essentials Indoor Lightstrip</p></td><td class="confluenceTd"><p>NL72K3</p></td></tr><tr><td class="confluenceTd"><p>Nanoleaf Floor Lamp</p></td><td class="confluenceTd"><p>NL72K4</p></td></tr><tr><td class="confluenceTd"><p>Nanoleaf Rope Lights</p></td><td class="confluenceTd"><p>NL72K6</p></td></tr><tr><td class="confluenceTd"><p>Nanoleaf Essentials Outdoor String Lights</p></td><td class="confluenceTd"><p>NL73K1</p></td></tr><tr><td class="confluenceTd"><p>Nanoleaf Essentials Permanent Outdoor Lights</p></td><td class="confluenceTd"><p>NL73K3</p></td></tr><tr><td class="confluenceTd"><p>Nanoleaf Essentials WiFi A19</p></td><td class="confluenceTd"><p>NL75K1</p></td></tr></tbody></table></div><h1 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Discovery">Discovery</h1><p>The devices will broadcast the API service on mDNS under the service name : <code>_nanoleafapi._tcp</code>. Under this the device will broadcast, the address and port the service is reachable at, the service instance name and the firmware version of the device. </p><h1 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Authorization">Authorization</h1><p>In order to communicate with the device using the API, the user will be required to authenticate with the device. This is done by opening the pairing window on the device. </p><p>This can only be done via the Nanoleaf Smarter Series app, under device settings and clicking the <strong>Connect to API </strong>button</p><p>Once the button is clicked, the device activates a 30s pairing window during which the user should send a <code>POST</code> request to the <code>/api/v1/new</code> endpoint. The controller will then respond back with an <strong>authentication token</strong> which should be saved safely as it will be required for all other requests made over the API</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>VERB</strong></p></th><th class="confluenceTh"><p><strong>ENDPOINT</strong></p></th><th class="confluenceTh"><p><strong>REQUEST BODY</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE BODY</strong></p></th></tr><tr><td class="confluenceTd"><p>POST</p></td><td class="confluenceTd"><p><code>/api/v1/new</code></p></td><td class="confluenceTd"><p /></td><td class="confluenceTd"><p>Success:</p><ul><li><p>204 No Content</p></li></ul><p>Error: </p><ul><li><p>403 Forbidden</p></li></ul></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+    &quot;auth_token&quot;: &quot;ppGL6lMTx6bjC3Lri3VLWyNDEh8olxk5&quot;
+}</pre>
+</div></div></td></tr></tbody></table></div><h1 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Endpoints">Endpoints</h1><p>The following is a list of endpoints that are available on the Nanoleaf Matter Wifi Essentials devices.</p><h2 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-DeviceInformation">Device Information</h2><p>The Device Information endpoint provides information about the device</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>VERB</strong></p></th><th class="confluenceTh"><p><strong>ENDPOINT</strong></p></th><th class="confluenceTh"><p><strong>REQUEST BODY</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE BODY</strong></p></th></tr><tr><td class="confluenceTd"><p>GET</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/</code></p></td><td class="confluenceTd"><p /></td><td class="confluenceTd"><p>Success:</p><ul><li><p>204 No Content</p></li></ul><p>Error: </p><ul><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+    &quot;name&quot;: &quot;Nanoleaf IMLS 2E7&quot;,
+    &quot;serialNo&quot;: &quot;V24250ND0003D&quot;,
+    &quot;manufacturer&quot;: &quot;Nanoleaf&quot;,
+    &quot;firmwareVersion&quot;: &quot;3.0.10&quot;,
+    &quot;hardwareVersion&quot;: &quot;1.1.0&quot;,
+    &quot;model&quot;: &quot;NL72K1&quot;
+    &quot;state&quot;: {
+        &quot;brightness&quot;: {
+            &quot;value&quot;: 55,
+            &quot;max&quot;: 100,
+            &quot;min&quot;: 0
+        },
+        &quot;colorMode&quot;: &quot;ct&quot;,
+        &quot;ct&quot;: {
+            &quot;value&quot;: 6407,
+            &quot;max&quot;: 6500,
+            &quot;min&quot;: 1200
+        },
+        &quot;hue&quot;: {
+            &quot;value&quot;: 38,
+            &quot;max&quot;: 360,
+            &quot;min&quot;: 0
+        },
+        &quot;on&quot;: {
+            &quot;value&quot;: false
+        },
+        &quot;sat&quot;: {
+            &quot;value&quot;: 3,
+            &quot;max&quot;: 100,
+            &quot;min&quot;: 0
+        }
+    }
+}</pre>
+</div></div></td></tr></tbody></table></div><h2 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-State">State</h2><p>The state endpoint allows the user to query or modify the state of the device, including changing on/off state, brightness, and colour</p><h3 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-ONState">ON State</h3><p>The <code>on</code> endpoint allows the user to modify the on state of the device. </p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>VERB</strong></p></th><th class="confluenceTh"><p><strong>ENDPOINT</strong></p></th><th class="confluenceTh"><p><strong>REQUEST BODY</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE BODY</strong></p></th></tr><tr><td class="confluenceTd"><p>GET</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/state/on</code></p></td><td class="confluenceTd"><p /></td><td class="confluenceTd"><p>Success:</p><ul><li><p>200 OK</p></li></ul><p>Error:</p><ul><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+    &quot;on&quot;:{
+        &quot;value&quot;:true
+    }
+}</pre>
+</div></div></td></tr><tr><td class="confluenceTd"><p>PUT</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/state</code></p></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+    &quot;on&quot;:{
+        &quot;value&quot;:&lt;on&gt;
+    }
+}</pre>
+</div></div><p>Valid values:</p><p><code>true</code> / <code>false</code> </p></td><td class="confluenceTd"><p>Success:</p><ul><li><p>204 No Content</p></li></ul><p>Error: </p><ul><li><p>400 Bad Request</p></li><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><p /></td></tr></tbody></table></div><h3 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Brightness">Brightness</h3><p>The <code>brightness</code> endpoint allows the user to modify the global brightness of the device. This will affect the brightness of any display the device is currently showing including colours, scenes and screen mirror.</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>VERB</strong></p></th><th class="confluenceTh"><p><strong>ENDPOINT</strong></p></th><th class="confluenceTh"><p><strong>REQUEST BODY</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE BODY</strong></p></th></tr><tr><td class="confluenceTd"><p>GET</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/state/brightness</code></p></td><td class="confluenceTd"><p /></td><td class="confluenceTd"><p>Success:</p><ul><li><p>200 OK</p></li></ul><p>Error:</p><ul><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+    &quot;brightness&quot;:{
+        &quot;value&quot;:75,
+        &quot;max&quot;: 100,
+        &quot;min&quot;: 1
+    }
+}</pre>
+</div></div></td></tr><tr><td class="confluenceTd"><p>PUT</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/state</code></p></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+    &quot;brightness&quot;:{
+        &quot;value&quot;:&lt;brightness&gt;
+    }
+}</pre>
+</div></div><p>valid values : As indicated by the <code>max</code> and <code>min</code> fields in the GET response</p><p /></td><td class="confluenceTd"><p>Success:</p><ul><li><p>204 No Content</p></li></ul><p>Error: </p><ul><li><p>400 Bad Request</p></li><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><p /></td></tr></tbody></table></div><h3 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Hue">Hue</h3><p>The <code>hue</code> endpoint allows the user to modify the hue value of the colour of the device. Changing this endpoint will place the device into colour mode and will stop screen mirror or any other effect that was running before</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>VERB</strong></p></th><th class="confluenceTh"><p><strong>ENDPOINT</strong></p></th><th class="confluenceTh"><p><strong>REQUEST BODY</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE BODY</strong></p></th></tr><tr><td class="confluenceTd"><p>GET</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/state/hue</code></p></td><td class="confluenceTd"><p /></td><td class="confluenceTd"><p>Success:</p><ul><li><p>200 OK</p></li></ul><p>Error:</p><ul><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+    &quot;hue&quot;:{
+        &quot;value&quot;:180,
+        &quot;max&quot;: 360,
+        &quot;min&quot;: 0
+    }
+}</pre>
+</div></div></td></tr><tr><td class="confluenceTd"><p>PUT</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/state</code></p></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+    &quot;hue&quot;:{
+        &quot;value&quot;:&lt;hue&gt;
+    }
+}</pre>
+</div></div><p>valid values : As indicated by the <code>max</code> and <code>min</code> fields in the GET response</p></td><td class="confluenceTd"><p>Success:</p><ul><li><p>204 No Content</p></li></ul><p>Error: </p><ul><li><p>400 Bad Request</p></li><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><p /></td></tr></tbody></table></div><h3 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Saturation">Saturation</h3><p>The <code>saturation</code> endpoint allows the user to modify the saturation value of the color of the device. Changing this endpoint will place the device into colour mode and will stop screen mirror or any other effect that was running before</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>VERB</strong></p></th><th class="confluenceTh"><p><strong>ENDPOINT</strong></p></th><th class="confluenceTh"><p><strong>REQUEST BODY</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE BODY</strong></p></th></tr><tr><td class="confluenceTd"><p>GET</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/state/sat</code></p></td><td class="confluenceTd"><p /></td><td class="confluenceTd"><p>Success:</p><ul><li><p>200 OK</p></li></ul><p>Error:</p><ul><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+    &quot;sat&quot;:{
+        &quot;value&quot;:100,
+        &quot;max&quot;: 100,
+        &quot;min&quot;: 0
+    }
+}</pre>
+</div></div></td></tr><tr><td class="confluenceTd"><p>PUT</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/state</code></p></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+    &quot;sat&quot;:{
+        &quot;value&quot;:&lt;saturation&gt;
+    }
+}</pre>
+</div></div><p>valid values : As indicated by the <code>max</code> and <code>min</code> fields in the GET response</p></td><td class="confluenceTd"><p>Success:</p><ul><li><p>204 No Content</p></li></ul><p>Error: </p><ul><li><p>400 Bad Request</p></li><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><p /></td></tr></tbody></table></div><h3 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-ColorTemperature">Color Temperature</h3><p>The <code>ct</code> endpoint allows the user to modify the color temperature of the device. Changing this endpoint will place the device into ct mode and will stop screen mirror or any other effect that was running before</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>VERB</strong></p></th><th class="confluenceTh"><p><strong>ENDPOINT</strong></p></th><th class="confluenceTh"><p><strong>REQUEST BODY</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE BODY</strong></p></th></tr><tr><td class="confluenceTd"><p>GET</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/state/ct</code></p></td><td class="confluenceTd"><p /></td><td class="confluenceTd"><p>Success:</p><ul><li><p>200 OK</p></li></ul><p>Error:</p><ul><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+    &quot;ct&quot;:{
+        &quot;value&quot;:true,
+        &quot;max&quot;: 6535,
+        &quot;min&quot;: 2127
+    }
+}</pre>
+</div></div><p /></td></tr><tr><td class="confluenceTd"><p>PUT</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/state/ct</code></p></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+    &quot;on&quot;:{
+        &quot;value&quot;:&lt;color temperature&gt;
+    }
+}</pre>
+</div></div><p>valid values : As indicated by the <code>max</code> and <code>min</code> fields in the GET response</p></td><td class="confluenceTd"><p>Success:</p><ul><li><p>204 No Content</p></li></ul><p>Error: </p><ul><li><p>400 Bad Request</p></li><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><p /></td></tr></tbody></table></div><h3 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-ColorMode">Color Mode</h3><div class="table-wrap"><table class="confluenceTable"><tbody><tr><td class="confluenceTd"><p><code>hs</code></p></td><td class="confluenceTd"><p>The color of the device is set from the Hue / Saturation values</p></td></tr><tr><td class="confluenceTd"><p><code>ct</code></p></td><td class="confluenceTd"><p>The color of the device is set from the Color Temperature</p></td></tr><tr><td class="confluenceTd"><p><code>effect</code></p></td><td class="confluenceTd"><p>The color of the device is being controller by a scene</p></td></tr></tbody></table></div><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>VERB</strong></p></th><th class="confluenceTh"><p><strong>ENDPOINT</strong></p></th><th class="confluenceTh"><p><strong>REQUEST BODY</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE BODY</strong></p></th></tr><tr><td class="confluenceTd"><p>GET</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/state/colorMode</code></p></td><td class="confluenceTd"><p /></td><td class="confluenceTd"><p>Success:</p><ul><li><p>200 OK</p></li></ul><p>Error:</p><ul><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;colorMode&quot;: &quot;effect&quot;
+}</pre>
+</div></div><p /></td></tr></tbody></table></div><h2 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Effects">Effects</h2><p>The <code>/effects/</code> endpoint allows the user to activate, query and modify scenes that are stored on the controller. </p><h3 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-TheEffectJSONstructure">The Effect JSON structure</h3><p>All effects follow the same JSON structure as given below</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+    &quot;animName&quot;: &quot;Northern Lights&quot;,
+    &quot;animType&quot;: &quot;plugin&quot;,
+    &quot;pluginType&quot;: &quot;color&quot;,
+    &quot;pluginUuid&quot;: &quot;6970681a-20b5-4c5e-8813-bdaebc4ee4fa&quot;,
+    &quot;hexPalette&quot;: [
+        &quot;002EFF&quot;,
+        &quot;00EDFF&quot;,
+        &quot;00FF0C&quot;,
+        &quot;EDFF00&quot;,
+        &quot;FF8300&quot;,
+        &quot;FF0000&quot;,
+        &quot;FF00D8&quot;
+    ],
+    &quot;pluginOptions&quot;: [
+        {
+            &quot;name&quot;: &quot;linDirection&quot;,
+            &quot;value&quot;: &quot;right&quot;
+        },
+        {
+            &quot;name&quot;: &quot;loop&quot;,
+            &quot;value&quot;: true
+        },
+        {
+            &quot;name&quot;: &quot;nColorsPerFrame&quot;,
+            &quot;value&quot;: 6
+        },
+        {
+            &quot;name&quot;: &quot;transTime&quot;,
+            &quot;value&quot;: 24
+        }
+    ]
+}</pre>
+</div></div><p /><div class="panel" style="background-color: #EAE6FF;border-color: #998DD9;border-width: 1px;"><div class="panelContent" style="background-color: #EAE6FF;">
+<p>the word <code>plugin</code> and <code>motion</code> in this section are equivalent in meaning. <code>motion</code> is simply the user facing term for <code>plugin</code> with respect to effects</p><p>Similarly the word <code>animation</code>, <code>effects</code> and <code>scenes</code> are also interchangeable in text. <br/>The controller however will use the word <code>animation</code> in all of its API commands and fields</p>
+</div></div><h4 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-animName">animName</h4><p>The <code>animName</code> field indicates the unique name of the effect on the device. Its a unique identifier for the effect and cannot be duplicated or used by any other effect</p><h4 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-animType">animType</h4><p>The <code>animType</code> field indicates the type of effect stored on the controller. </p><p>Currently, there is only one kind of <code>animType</code> that can be stored on the controller : <code>plugin</code>.</p><p><code>plugin</code> effects create an effect by selecting a motion from the list of motions that are stored on the controller. See: <a href="https://nanoleaf.atlassian.net/wiki/spaces/NOAD1/pages/2296381472/Nanoleaf+Matter+WiFi+Essentials+Open+API+Documentation#Motion-Appendix" rel="nofollow">Motion Appendix</a></p><p>There are two kinds of animTypes that are available on the Nanoleaf Matter WiFi Essentials:</p><ol start="1"><li><p><code>plugin</code> create an effect by selecting a motion from the list of motions that are stored on the controller. See: <a href="https://nanoleaf.atlassian.net/wiki/spaces/NOAD1/pages/2296381472/Nanoleaf+Matter+WiFi+Essentials+Open+API+Documentation#Motion-Appendix" rel="nofollow">Motion Appendix</a></p></li><li><p><code>extControl</code> which sets the device into stream control mode for use with the DSK app, 4D or with <a href="https://nanoleaf.atlassian.net/wiki/spaces/NOAD1/pages/2296381472/Nanoleaf+Matter+WiFi+Essentials+Open+API+Documentation#Stream-Control" rel="nofollow">stream control</a></p></li></ol><h4 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-pluginType">pluginType</h4><p>The <code>pluginType</code> indicates the kind of motion that is in use by this effect. There are two possible options:</p><ol start="1"><li><p><code>rhythm</code>: The motion depends on input from the device microphone to render colors on the screen</p></li><li><p><code>color</code>: The motion is a simple dynamic motion that simply uses an algorithm to render colors on the screen.</p></li></ol><h4 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-pluginUuid">pluginUuid</h4><p>This is the <code>uuid</code> of the motion that the effect is currently using. </p><p>A list of the uuids of all the motions available are provided in the <a href="https://nanoleaf.atlassian.net/wiki/spaces/NOAD1/pages/2296381472/Nanoleaf+Matter+WiFi+Essentials+Open+API+Documentation#Motion-Appendix" rel="nofollow">Motion Appendix</a></p><h4 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-pluginOptions">pluginOptions</h4><p>This is a JSON object representing the plugin options that the effect currently sets. A list of plugin options available for each motion is available in the <a href="https://nanoleaf.atlassian.net/wiki/spaces/NOAD1/pages/2296381472/Nanoleaf+Matter+WiFi+Essentials+Open+API+Documentation#Motion-Appendix" rel="nofollow">Motion Appendix</a></p><h4 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-hexPalette">hexPalette</h4><p>This is a JSON array representing the colors that are used by this effect. The colors are encoded as hex triplets with each 2B hexadecimal digit representing a color channel. </p><p>Examples:</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>Hex triplet</strong></p></th><th class="confluenceTh"><p><strong>Color</strong></p></th></tr><tr><td class="confluenceTd"><p>#FF0000</p></td><td class="confluenceTd"><p>R = 255</p><p>G = 0</p><p>B = 0</p></td></tr><tr><td class="confluenceTd"><p>#00FF80</p></td><td class="confluenceTd"><p>R  = 0</p><p>G = 255</p><p>B = 180</p></td></tr><tr><td class="confluenceTd"><p>#4080FF</p></td><td class="confluenceTd"><p>R = 64</p><p>G = 128</p><p>B = 255</p></td></tr></tbody></table></div><h3 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Activatinganeffect">Activating an effect</h3><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>VERB</strong></p></th><th class="confluenceTh"><p><strong>ENDPOINT</strong></p></th><th class="confluenceTh"><p><strong>REQUEST BODY</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE BODY</strong></p></th></tr><tr><td class="confluenceTd"><p>GET</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/effects/select</code></p></td><td class="confluenceTd"><p /></td><td class="confluenceTd"><p>Success:</p><ul><li><p>200 OK</p></li></ul><p>Error:</p><ul><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">&lt;name of effect&gt;</pre>
+</div></div><p /></td></tr><tr><td class="confluenceTd"><p>PUT</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/effects</code></p></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;select&quot;:&lt;name of effect&gt;
+}</pre>
+</div></div><p /></td><td class="confluenceTd"><p>Success:</p><ul><li><p>204 No Content</p></li></ul><p>Error: </p><ul><li><p>400 Bad Request</p></li><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><p /></td></tr></tbody></table></div><h3 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-CommandAPI">Command API</h3><p>The Command API allows the user to perform various actions on the controller related to scenes, such as adding / displaying and deleting effects.</p><div class="panel" style="background-color: #EAE6FF;border-color: #998DD9;border-width: 1px;"><div class="panelContent" style="background-color: #EAE6FF;">
+<p>All command API requests must be wrapped in the <code>write</code> object in JSON. This is shown in the examples as well.</p>
+</div></div><h4 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-RequestAll">Request All</h4><p>Allows the user to get a list of all the effects and their properties from the controller</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>VERB</strong></p></th><th class="confluenceTh"><p><strong>ENDPOINT</strong></p></th><th class="confluenceTh"><p><strong>REQUEST BODY</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE BODY</strong></p></th></tr><tr><td class="confluenceTd"><p>PUT</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/effects</code></p></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;write&quot;:{
+    &quot;command&quot;:&quot;requestAll&quot;
+  }
+}</pre>
+</div></div></td><td class="confluenceTd"><p>Success:</p><ul><li><p>204 No Content</p></li></ul><p>Error: </p><ul><li><p>400 Bad Request</p></li><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+    &quot;animations&quot;: [
+        {
+            &quot;animName&quot;: &quot;Cozy Glow&quot;,
+            &quot;animType&quot;: &quot;plugin&quot;,
+            &quot;pluginType&quot;: &quot;color&quot;,
+            &quot;pluginUuid&quot;: &quot;0794a6b3-f6cc-452d-a900-30081604b7ec&quot;,
+            &quot;hexPalette&quot;: [
+                &quot;FCDEB8&quot;,
+                &quot;F7D299&quot;
+            ],
+            &quot;pluginOptions&quot;: []
+        },
+        {
+            &quot;animName&quot;: &quot;Dark Side&quot;,
+            &quot;animType&quot;: &quot;plugin&quot;,
+            &quot;pluginType&quot;: &quot;color&quot;,
+            &quot;pluginUuid&quot;: &quot;6970681a-20b5-4c5e-8813-bdaebc4ee4fa&quot;,
+            &quot;hexPalette&quot;: [
+                &quot;120901&quot;,
+                &quot;120901&quot;,
+                &quot;120901&quot;,
+                &quot;780000&quot;,
+                &quot;FF0000&quot;
+            ],
+            &quot;pluginOptions&quot;: [
+                {
+                    &quot;name&quot;: &quot;nColorsPerFrame&quot;,
+                    &quot;value&quot;: 40
+                }
+            ]
+        }
+    ]
+}</pre>
+</div></div><p /><p /></td></tr></tbody></table></div><h4 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Request">Request</h4><p>The request API allows the user to query an effect by its name specifically. Note that if the effect does not exist the controller will throw an error.</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>VERB</strong></p></th><th class="confluenceTh"><p><strong>ENDPOINT</strong></p></th><th class="confluenceTh"><p><strong>REQUEST BODY</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE BODY</strong></p></th></tr><tr><td class="confluenceTd"><p>PUT</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/effects</code></p></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;write&quot;:{
+    &quot;command&quot;:&quot;request&quot;,
+    &quot;animName&quot;:&quot;Dark Side&quot;
+  }
+}</pre>
+</div></div></td><td class="confluenceTd"><p>Success:</p><ul><li><p>204 No Content</p></li></ul><p>Error: </p><ul><li><p>400 Bad Request if the effect does not exist</p></li><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+    &quot;animName&quot;: &quot;Dark Side&quot;,
+    &quot;animType&quot;: &quot;plugin&quot;,
+    &quot;pluginType&quot;: &quot;color&quot;,
+    &quot;pluginUuid&quot;: &quot;6970681a-20b5-4c5e-8813-bdaebc4ee4fa&quot;,
+    &quot;hexPalette&quot;: [
+        &quot;120901&quot;,
+        &quot;120901&quot;,
+        &quot;120901&quot;,
+        &quot;780000&quot;,
+        &quot;FF0000&quot;
+    ],
+    &quot;pluginOptions&quot;: [
+        {
+            &quot;name&quot;: &quot;nColorsPerFrame&quot;,
+            &quot;value&quot;: 40
+        }
+    ]
+}</pre>
+</div></div><p /><p /><p /></td></tr></tbody></table></div><h4 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Add">Add</h4><p>The add API enables users to add an effect, which is then saved on the device and appears in the effects list. Note that the fields required in <code>pluginOptions</code> object are dependent on the plugin that is used. For more information about which plugin uses what options see here : <a href="https://nanoleaf.atlassian.net/wiki/spaces/nlapid/pages/2298052616/Motion+Appendix" data-linked-resource-id="2298052616" data-linked-resource-version="27" data-linked-resource-type="page">Motion Appendix</a> </p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>VERB</strong></p></th><th class="confluenceTh"><p><strong>ENDPOINT</strong></p></th><th class="confluenceTh"><p><strong>REQUEST BODY</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE BODY</strong></p></th></tr><tr><td class="confluenceTd"><p>PUT</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/effects</code></p></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;write&quot;: {
+    &quot;command&quot;: &quot;add&quot;,
+    &quot;animType&quot;: &quot;plugin&quot;,
+    &quot;animName&quot;: &quot;Dark Side&quot;,
+    &quot;colorType&quot;: &quot;HSB&quot;,
+    &quot;hexPalette&quot;: [
+        &quot;120901&quot;,
+        &quot;120901&quot;,
+        &quot;120901&quot;,
+        &quot;780000&quot;,
+        &quot;FF0000&quot;
+    ],
+    &quot;pluginType&quot;: &quot;color&quot;,
+    &quot;pluginUuid&quot;: &quot;6970681a-20b5-4c5e-8813-bdaebc4ee4fa&quot;,
+    &quot;pluginOptions&quot;: [
+      {
+        &quot;name&quot;: &quot;linDirection&quot;,
+        &quot;value&quot;: &quot;left&quot;
+      },
+      {
+        &quot;name&quot;: &quot;loop&quot;,
+        &quot;value&quot;: true
+      },
+      {
+        &quot;name&quot;: &quot;nColorsPerFrame&quot;,
+        &quot;value&quot;: 4
+      },
+      {
+        &quot;name&quot;: &quot;transTime&quot;,
+        &quot;value&quot;: 24
+      }
+    ]
+  }
+}</pre>
+</div></div></td><td class="confluenceTd"><p>Success:</p><ul><li><p>204 No Content</p></li></ul><p>Error: </p><ul><li><p>400 Bad Request</p></li><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><p /></td></tr></tbody></table></div><h4 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Display">Display</h4><p>The display API allows users to play a temporary effect on the device, which is not saved. Note that the fields required in <code>pluginOptions</code> object are dependent on the plugin that is used. For more information about which plugin uses what options see here : <a href="https://nanoleaf.atlassian.net/wiki/spaces/nlapid/pages/2298052616/Motion+Appendix" data-linked-resource-id="2298052616" data-linked-resource-version="27" data-linked-resource-type="page">Motion Appendix</a> </p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>VERB</strong></p></th><th class="confluenceTh"><p><strong>ENDPOINT</strong></p></th><th class="confluenceTh"><p><strong>REQUEST BODY</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE BODY</strong></p></th></tr><tr><td class="confluenceTd"><p>PUT</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/effects</code></p></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;write&quot;: {
+    &quot;command&quot;: &quot;display&quot;,
+    &quot;animType&quot;: &quot;plugin&quot;,
+    &quot;animName&quot;: &quot;Dark Side&quot;,
+    &quot;colorType&quot;: &quot;HSB&quot;,
+    &quot;hexPalette&quot;: [
+        &quot;120901&quot;,
+        &quot;120901&quot;,
+        &quot;120901&quot;,
+        &quot;780000&quot;,
+        &quot;FF0000&quot;
+    ],
+    &quot;pluginType&quot;: &quot;color&quot;,
+    &quot;pluginUuid&quot;: &quot;6970681a-20b5-4c5e-8813-bdaebc4ee4fa&quot;,
+    &quot;pluginOptions&quot;: [
+      {
+        &quot;name&quot;: &quot;linDirection&quot;,
+        &quot;value&quot;: &quot;left&quot;
+      },
+      {
+        &quot;name&quot;: &quot;loop&quot;,
+        &quot;value&quot;: true
+      },
+      {
+        &quot;name&quot;: &quot;nColorsPerFrame&quot;,
+        &quot;value&quot;: 4
+      },
+      {
+        &quot;name&quot;: &quot;transTime&quot;,
+        &quot;value&quot;: 24
+      }
+    ]
+  }
+}</pre>
+</div></div></td><td class="confluenceTd"><p>Success:</p><ul><li><p>204 No Content</p></li></ul><p>Error: </p><ul><li><p>400 Bad Request</p></li><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><p /></td></tr></tbody></table></div><h4 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Delete">Delete</h4><p>The delete API enables users to remove an effect from the device. Once deleted, the effect cannot be recovered.</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>VERB</strong></p></th><th class="confluenceTh"><p><strong>ENDPOINT</strong></p></th><th class="confluenceTh"><p><strong>REQUEST BODY</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE BODY</strong></p></th></tr><tr><td class="confluenceTd"><p>PUT</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/effects</code></p></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;write&quot;:{
+    &quot;command&quot;:&quot;delete&quot;,
+    &quot;animName&quot;:&quot;Dark Side&quot;
+  }
+}</pre>
+</div></div><p /></td><td class="confluenceTd"><p>Success:</p><ul><li><p>204 No Content</p></li></ul><p>Error: </p><ul><li><p>400 Bad Request if the effect does not exist</p></li></ul></td><td class="confluenceTd"><p /></td></tr></tbody></table></div><h4 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-RequestPlugins">Request Plugins</h4><p>The request plugins API allows the user to query the list of motions that are available on the device. This list of motions can be different for different devices and can change with a firmware update. If the controller was to change the motion list, it will figure out a migration strategy for effects that are using a motion that will be removed. </p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>VERB</strong></p></th><th class="confluenceTh"><p><strong>ENDPOINT</strong></p></th><th class="confluenceTh"><p><strong>REQUEST BODY</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE BODY</strong></p></th></tr><tr><td class="confluenceTd"><p>PUT</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/effects</code></p></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;write&quot;:{
+    &quot;command&quot;:&quot;requestPlugins&quot;,
+  }
+}</pre>
+</div></div></td><td class="confluenceTd"><p>Success:</p><ul><li><p>204 No Content</p></li></ul><p>Error: </p><ul><li><p>400 Bad Request if the effect does not exist</p></li><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">[
+    &quot;6970681a-20b5-4c5e-8813-bdaebc4ee4fa&quot;,
+    &quot;027842e4-e1d6-4a4c-a731-be74a1ebd4cf&quot;,
+    &quot;b3fd723a-aae8-4c99-bf2b-087159e0ef53&quot;,
+    &quot;1dab05d3-07bf-4648-9d48-db8dd196ed28&quot;,
+    &quot;ba632d3e-9c2b-4413-a965-510c839b3f71&quot;,
+    &quot;70b7c636-6bf8-491f-89c1-f4103508d642&quot;,
+    &quot;fe0d0ba8-741f-4210-940c-454eceed010f&quot;,
+    &quot;e8b69f65-df13-480b-a949-db1bbc9a1cde&quot;,
+    &quot;30a017d4-e6a5-4647-8c41-5a7cd38ff907&quot;,
+    &quot;713518c1-d560-47db-8991-de780af71d1e&quot;,
+    &quot;0794a6b3-f6cc-452d-a900-30081604b7ec&quot;,
+    &quot;e2eb1818-07ac-495f-a10d-7c192d7df705&quot;,
+    &quot;5c4d343f-8eca-47e9-8c01-92662dff4eb6&quot;,
+    &quot;29929fc2-6905-41c0-a7d7-1582a8c11f17&quot;,
+    &quot;db8ce916-88de-484f-bdbb-afd732053105&quot;,
+    &quot;4eb1454c-ab57-40ad-a51c-f248bc9aae40&quot;,
+    &quot;27477952-a5f7-42cc-b38b-bde3bb8c9929&quot;,
+    &quot;0349fc36-7727-4ebc-bc1b-a0021c55038e&quot;,
+    &quot;fe605997-2b21-4990-8d46-cde0610d9deb&quot;,
+    &quot;337784c0-6c98-447a-8a9f-fc6ac44a8024&quot;,
+    &quot;8f32ae5c-1a73-4170-aeba-80735b8e8eda&quot;,
+    &quot;af555dc5-67de-4b63-9674-85fefc663dee&quot;
+]</pre>
+</div></div></td></tr></tbody></table></div><h2 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-Length">Length</h2><p>The length endpoint allows the user to query the number of LEDs on the Lightstrip that is connected to the device. Note that the device will only detect the length once on startup, and if the length of the LS is modified by cutting it, for instance, the controller must be power cycled for it to detect the length of the Lightstrip once again.</p><p> </p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>VERB</strong></p></th><th class="confluenceTh"><p><strong>ENDPOINT</strong></p></th><th class="confluenceTh"><p><strong>REQUEST BODY</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE BODY</strong></p></th></tr><tr><td class="confluenceTd"><p>GET</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/length</code></p></td><td class="confluenceTd"><p /></td><td class="confluenceTd"><p>Success:</p><ul><li><p>200 OK</p></li></ul><p>Error:</p><ul><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+    &quot;numLEDs&quot;: 300
+}</pre>
+</div></div><p /><p /></td></tr></tbody></table></div><h2 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-StreamControl">Stream Control</h2><p>Stream Control allows the user to take control of every single LED in the Light Strip or String Lights thats connected to the controller. </p><p>Stream Control Data Frames are sent to the controller over UDP to the IP address of the controller and Port <code>60222</code></p><p>To activate Stream Control mode the effects API can be used:<br/></p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>VERB</strong></p></th><th class="confluenceTh"><p><strong>ENDPOINT</strong></p></th><th class="confluenceTh"><p><strong>REQUEST BODY</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE</strong></p></th><th class="confluenceTh"><p><strong>RESPONSE BODY</strong></p></th></tr><tr><td class="confluenceTd"><p>PUT</p></td><td class="confluenceTd"><p><code>/api/v1/&lt;auth token&gt;/effects</code></p></td><td class="confluenceTd"><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+    &quot;write&quot;: {
+        &quot;command&quot;: &quot;display&quot;,
+        &quot;animType&quot;: &quot;extControl&quot;,
+        &quot;extControlVersion&quot;: &quot;v2&quot;
+    }
+}</pre>
+</div></div></td><td class="confluenceTd"><p>Success:</p><ul><li><p>204 No Content</p></li></ul><p>Error: </p><ul><li><p>400 Bad Request if the effect does not exist</p></li><li><p>401 Unauthorized</p></li></ul></td><td class="confluenceTd"><p /><p /><p /><p /></td></tr></tbody></table></div><h3 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-AddressingLEDs">Addressing LEDs</h3><p>The LEDs are addressed simply by their index from 0 - N, where N is the total number of LEDs, i.e. the <code>id</code> of each LED is the same as its index. The typical Addressable LS has 300 LEDs and for the Holiday String Lights its 250, but for the Outdoor String Lights you might have to count the number you have.</p><p>In case you are using a WiFi A19, which is a single point source of light, the Number of LEDs for such a device will be simply <code>1</code></p><h3 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-StreamControlFrameFormat">Stream Control Frame Format</h3><p>Each Stream Control Data Frame sent to the controller is formatted as follows: </p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p style="text-align: center;"><strong>Field</strong></p></th><td class="confluenceTd"><p style="text-align: center;">Num Panels</p></td><td data-highlight-colour="#deebff" class="confluenceTd"><p style="text-align: center;">PanelId0</p></td><td data-highlight-colour="#deebff" class="confluenceTd"><p style="text-align: center;">R0 </p></td><td data-highlight-colour="#deebff" class="confluenceTd"><p style="text-align: center;">G0</p></td><td data-highlight-colour="#deebff" class="confluenceTd"><p style="text-align: center;">B0</p></td><td data-highlight-colour="#deebff" class="confluenceTd"><p style="text-align: center;">W0</p></td><td data-highlight-colour="#deebff" class="confluenceTd"><p style="text-align: center;">Transition Time0</p></td><td class="confluenceTd"><p style="text-align: center;">…</p></td><td data-highlight-colour="#ffebe6" class="confluenceTd"><p style="text-align: center;">PanelId N</p></td><td data-highlight-colour="#ffebe6" class="confluenceTd"><p style="text-align: center;">R N</p></td><td data-highlight-colour="#ffebe6" class="confluenceTd"><p style="text-align: center;">G N</p></td><td data-highlight-colour="#ffebe6" class="confluenceTd"><p style="text-align: center;">B N</p></td><td data-highlight-colour="#ffebe6" class="confluenceTd"><p style="text-align: center;">W N</p></td><td data-highlight-colour="#ffebe6" class="confluenceTd"><p style="text-align: center;">Transition Time1</p></td></tr><tr><th class="confluenceTh"><p style="text-align: center;"><strong>Size</strong></p></th><td class="confluenceTd"><p style="text-align: center;">2B</p></td><td data-highlight-colour="#deebff" class="confluenceTd"><p style="text-align: center;">2B</p></td><td data-highlight-colour="#deebff" class="confluenceTd"><p style="text-align: center;">1B</p></td><td data-highlight-colour="#deebff" class="confluenceTd"><p style="text-align: center;">1B</p></td><td data-highlight-colour="#deebff" class="confluenceTd"><p style="text-align: center;">1B</p></td><td data-highlight-colour="#deebff" class="confluenceTd"><p style="text-align: center;">1B</p></td><td data-highlight-colour="#deebff" class="confluenceTd"><p style="text-align: center;">2B</p></td><td class="confluenceTd"><p style="text-align: center;">…</p></td><td data-highlight-colour="#ffebe6" class="confluenceTd"><p style="text-align: center;">2B</p></td><td data-highlight-colour="#ffebe6" class="confluenceTd"><p style="text-align: center;">1B</p></td><td data-highlight-colour="#ffebe6" class="confluenceTd"><p style="text-align: center;">1B</p></td><td data-highlight-colour="#ffebe6" class="confluenceTd"><p style="text-align: center;">1B</p></td><td data-highlight-colour="#ffebe6" class="confluenceTd"><p style="text-align: center;">1B</p></td><td data-highlight-colour="#ffebe6" class="confluenceTd"><p style="text-align: center;">2B</p></td></tr></tbody></table></div><p>where N is the number of LEDs that are being addressed in the above frame. Its not necessary to update all LEDs in the same frame, any number and any subset of LEDs may be addressed</p><div class="panel" style="background-color: #EAE6FF;border-color: #998DD9;border-width: 1px;"><div class="panelContent" style="background-color: #EAE6FF;">
+<p>All multi bytes fields are encoded as big endian</p><p>Transition time is represented as multiples of 100ms. So a value of 5 would mean a transition time of 500ms</p><p>The White LED field (<code>Wn</code>) is always set to 0</p>
+</div></div><p>Example:</p><p>Say the following LEDs with ids are to be set to the following colors, all with transition times of 500ms</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>LED id</strong></p></th><th class="confluenceTh"><p><strong>LED color</strong></p></th></tr><tr><td class="confluenceTd"><p>128</p></td><td class="confluenceTd"><p>Red - #FF0000</p></td></tr><tr><td class="confluenceTd"><p>23</p></td><td class="confluenceTd"><p>Magenta - #FF00FF</p></td></tr><tr><td class="confluenceTd"><p>282</p></td><td class="confluenceTd"><p>Lime - #80FF00</p></td></tr></tbody></table></div><p>The stream control data frame would like as follows, bytes represented as hexdecimal numbers</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><td class="confluenceTd"><p>00</p></td><td class="confluenceTd"><p>04</p></td><td data-highlight-colour="#ffebe6" class="confluenceTd"><p>00</p></td><td data-highlight-colour="#ffebe6" class="confluenceTd"><p>80</p></td><td data-highlight-colour="#ffebe6" class="confluenceTd"><p>00</p></td><td data-highlight-colour="#ffebe6" class="confluenceTd"><p>FF</p></td><td data-highlight-colour="#ffebe6" class="confluenceTd"><p>FF</p></td><td data-highlight-colour="#ffebe6" class="confluenceTd"><p>00</p></td><td data-highlight-colour="#ffebe6" class="confluenceTd"><p>00</p></td><td data-highlight-colour="#ffebe6" class="confluenceTd"><p>05</p></td><td data-highlight-colour="#eae6ff" class="confluenceTd"><p>00</p></td><td data-highlight-colour="#eae6ff" class="confluenceTd"><p>17</p></td><td data-highlight-colour="#eae6ff" class="confluenceTd"><p>FF</p></td><td data-highlight-colour="#eae6ff" class="confluenceTd"><p>00</p></td><td data-highlight-colour="#eae6ff" class="confluenceTd"><p>FF</p></td><td data-highlight-colour="#eae6ff" class="confluenceTd"><p>00</p></td><td data-highlight-colour="#eae6ff" class="confluenceTd"><p>00</p></td><td data-highlight-colour="#eae6ff" class="confluenceTd"><p>05</p></td><td data-highlight-colour="#e3fcef" class="confluenceTd"><p>01</p></td><td data-highlight-colour="#e3fcef" class="confluenceTd"><p>1A</p></td><td data-highlight-colour="#e3fcef" class="confluenceTd"><p>80</p></td><td data-highlight-colour="#e3fcef" class="confluenceTd"><p>FF</p></td><td data-highlight-colour="#e3fcef" class="confluenceTd"><p>00</p></td><td data-highlight-colour="#e3fcef" class="confluenceTd"><p>00</p></td><td data-highlight-colour="#e3fcef" class="confluenceTd"><p>00</p></td><td data-highlight-colour="#e3fcef" class="confluenceTd"><p>05</p></td></tr></tbody></table></div><h1 id="NanoleafMatterWiFiEssentialsOpenAPIDocumentation-MotionAppendix">Motion Appendix</h1><p>This page describes the motions and its properties and parameters that are provided by the Nanoleaf Matter Wifi Essentials devices.</p><p>Note that not all motions will be present on all devices. Devices may only have a subset of motions.</p><p>To get the list of motions stored on a device, see: <a data-card-appearance="inline" href="https://nanoleaf.atlassian.net/wiki/spaces/NOAD1/pages/2296381472/Nanoleaf+Matter+WiFi+Essentials+Open+API+Documentation#Request-motions" rel="nofollow">https://nanoleaf.atlassian.net/wiki/spaces/NOAD1/pages/2296381472/Nanoleaf+Matter+WiFi+Essentials+Open+API+Documentation#Request-motions</a></p><a href="https://nanoleaf.atlassian.net/wiki/spaces/nlapid/pages/2298052616/Motion+Appendix#Motions" data-linked-resource-id="2298052616" data-linked-resource-version="27" data-linked-resource-type="page">Motion Appendix</a><p> </p>
+</body>
+</html>

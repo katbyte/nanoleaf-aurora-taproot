@@ -1,0 +1,246 @@
+{
+  "recorded": "2026-10-06",
+  "writes": false,
+  "exchanges": [
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "response": {
+        "name": "Light Panels 53:A6:3C",
+        "serialNo": "S00000A0000",
+        "manufacturer": "Nanoleaf",
+        "firmwareVersion": "5.2.1",
+        "hardwareVersion": "1.6-2",
+        "model": "NL22",
+        "cloudHash": {},
+        "discovery": {},
+        "effects": {
+          "effectsList": [
+            "Color Burst",
+            "Fireworks",
+            "Flames",
+            "Forest",
+            "Inner Peace",
+            "Meteor Shower",
+            "Nemo",
+            "Northern Lights",
+            "Paint Splatter",
+            "Pulse Pop Beats",
+            "Rhythmic Northern Lights",
+            "Ripple",
+            "Romantic",
+            "Snowfall",
+            "Sound Bar",
+            "Streaking Notes",
+            "kt Northern Lights"
+          ],
+          "select": "kt Northern Lights"
+        },
+        "firmwareUpgrade": {},
+        "panelLayout": {
+          "globalOrientation": {
+            "value": 88,
+            "max": 360,
+            "min": 0
+          },
+          "layout": {
+            "numPanels": 4,
+            "sideLength": 150,
+            "positionData": [
+              {
+                "panelId": 234,
+                "x": 299,
+                "y": 43,
+                "o": 180,
+                "shapeType": 0
+              },
+              {
+                "panelId": 147,
+                "x": 224,
+                "y": 0,
+                "o": 120,
+                "shapeType": 0
+              },
+              {
+                "panelId": 136,
+                "x": 149,
+                "y": 43,
+                "o": 300,
+                "shapeType": 0
+              },
+              {
+                "panelId": 10,
+                "x": 74,
+                "y": 0,
+                "o": 0,
+                "shapeType": 0
+              }
+            ]
+          }
+        },
+        "rhythm": {
+          "auxAvailable": false,
+          "firmwareVersion": "2.4.3",
+          "hardwareVersion": "2.0",
+          "rhythmActive": false,
+          "rhythmConnected": true,
+          "rhythmId": 186,
+          "rhythmMode": 0,
+          "rhythmPos": {
+            "x": 0.0,
+            "y": 43.30127018922193,
+            "o": 180.0
+          }
+        },
+        "schedules": {},
+        "state": {
+          "brightness": {
+            "value": 33,
+            "max": 100,
+            "min": 0
+          },
+          "colorMode": "effect",
+          "ct": {
+            "value": 3000,
+            "max": 6500,
+            "min": 1200
+          },
+          "hue": {
+            "value": 0,
+            "max": 360,
+            "min": 0
+          },
+          "on": {
+            "value": true
+          },
+          "sat": {
+            "value": 0,
+            "max": 100,
+            "min": 0
+          }
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "response": {
+        "name": "Light Panels 53:A6:3C",
+        "serialNo": "S00000A0000",
+        "manufacturer": "Nanoleaf",
+        "firmwareVersion": "5.2.1",
+        "hardwareVersion": "1.6-2",
+        "model": "NL22",
+        "cloudHash": {},
+        "discovery": {},
+        "effects": {
+          "effectsList": [
+            "Color Burst",
+            "Fireworks",
+            "Flames",
+            "Forest",
+            "Inner Peace",
+            "Meteor Shower",
+            "Nemo",
+            "Northern Lights",
+            "Paint Splatter",
+            "Pulse Pop Beats",
+            "Rhythmic Northern Lights",
+            "Ripple",
+            "Romantic",
+            "Snowfall",
+            "Sound Bar",
+            "Streaking Notes",
+            "kt Northern Lights"
+          ],
+          "select": "kt Northern Lights"
+        },
+        "firmwareUpgrade": {},
+        "panelLayout": {
+          "globalOrientation": {
+            "value": 88,
+            "max": 360,
+            "min": 0
+          },
+          "layout": {
+            "numPanels": 4,
+            "sideLength": 150,
+            "positionData": [
+              {
+                "panelId": 234,
+                "x": 299,
+                "y": 43,
+                "o": 180,
+                "shapeType": 0
+              },
+              {
+                "panelId": 147,
+                "x": 224,
+                "y": 0,
+                "o": 120,
+                "shapeType": 0
+              },
+              {
+                "panelId": 136,
+                "x": 149,
+                "y": 43,
+                "o": 300,
+                "shapeType": 0
+              },
+              {
+                "panelId": 10,
+                "x": 74,
+                "y": 0,
+                "o": 0,
+                "shapeType": 0
+              }
+            ]
+          }
+        },
+        "rhythm": {
+          "auxAvailable": false,
+          "firmwareVersion": "2.4.3",
+          "hardwareVersion": "2.0",
+          "rhythmActive": false,
+          "rhythmConnected": true,
+          "rhythmId": 186,
+          "rhythmMode": 0,
+          "rhythmPos": {
+            "x": 0.0,
+            "y": 43.30127018922193,
+            "o": 180.0
+          }
+        },
+        "schedules": {},
+        "state": {
+          "brightness": {
+            "value": 33,
+            "max": 100,
+            "min": 0
+          },
+          "colorMode": "effect",
+          "ct": {
+            "value": 3000,
+            "max": 6500,
+            "min": 1200
+          },
+          "hue": {
+            "value": 0,
+            "max": 360,
+            "min": 0
+          },
+          "on": {
+            "value": true
+          },
+          "sat": {
+            "value": 0,
+            "max": 100,
+            "min": 0
+          }
+        }
+      }
+    }
+  ]
+}

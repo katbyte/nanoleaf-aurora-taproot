@@ -1,0 +1,1675 @@
+{
+  "recorded": "2026-10-06",
+  "writes": false,
+  "exchanges": [
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "response": {
+        "name": "Light Panels 53:A6:3C",
+        "serialNo": "S00000A0000",
+        "manufacturer": "Nanoleaf",
+        "firmwareVersion": "5.2.1",
+        "hardwareVersion": "1.6-2",
+        "model": "NL22",
+        "cloudHash": {},
+        "discovery": {},
+        "effects": {
+          "effectsList": [
+            "Color Burst",
+            "Fireworks",
+            "Flames",
+            "Forest",
+            "Inner Peace",
+            "Meteor Shower",
+            "Nemo",
+            "Northern Lights",
+            "Paint Splatter",
+            "Pulse Pop Beats",
+            "Rhythmic Northern Lights",
+            "Ripple",
+            "Romantic",
+            "Snowfall",
+            "Sound Bar",
+            "Streaking Notes",
+            "kt Northern Lights"
+          ],
+          "select": "kt Northern Lights"
+        },
+        "firmwareUpgrade": {},
+        "panelLayout": {
+          "globalOrientation": {
+            "value": 88,
+            "max": 360,
+            "min": 0
+          },
+          "layout": {
+            "numPanels": 4,
+            "sideLength": 150,
+            "positionData": [
+              {
+                "panelId": 234,
+                "x": 299,
+                "y": 43,
+                "o": 180,
+                "shapeType": 0
+              },
+              {
+                "panelId": 147,
+                "x": 224,
+                "y": 0,
+                "o": 120,
+                "shapeType": 0
+              },
+              {
+                "panelId": 136,
+                "x": 149,
+                "y": 43,
+                "o": 300,
+                "shapeType": 0
+              },
+              {
+                "panelId": 10,
+                "x": 74,
+                "y": 0,
+                "o": 0,
+                "shapeType": 0
+              }
+            ]
+          }
+        },
+        "rhythm": {
+          "auxAvailable": false,
+          "firmwareVersion": "2.4.3",
+          "hardwareVersion": "2.0",
+          "rhythmActive": false,
+          "rhythmConnected": true,
+          "rhythmId": 186,
+          "rhythmMode": 0,
+          "rhythmPos": {
+            "x": 0.0,
+            "y": 43.30127018922193,
+            "o": 180.0
+          }
+        },
+        "schedules": {},
+        "state": {
+          "brightness": {
+            "value": 33,
+            "max": 100,
+            "min": 0
+          },
+          "colorMode": "effect",
+          "ct": {
+            "value": 3000,
+            "max": 6500,
+            "min": 1200
+          },
+          "hue": {
+            "value": 0,
+            "max": 360,
+            "min": 0
+          },
+          "on": {
+            "value": true
+          },
+          "sat": {
+            "value": 0,
+            "max": 100,
+            "min": 0
+          }
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/state",
+      "status": 200,
+      "response": {
+        "brightness": {
+          "value": 33,
+          "max": 100,
+          "min": 0
+        },
+        "colorMode": "effect",
+        "ct": {
+          "value": 3000,
+          "max": 6500,
+          "min": 1200
+        },
+        "hue": {
+          "value": 0,
+          "max": 360,
+          "min": 0
+        },
+        "on": {
+          "value": true
+        },
+        "sat": {
+          "value": 0,
+          "max": 100,
+          "min": 0
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/state/on",
+      "status": 200,
+      "response": {
+        "value": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/state/brightness",
+      "status": 200,
+      "response": {
+        "value": 33,
+        "max": 100,
+        "min": 0
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/state/hue",
+      "status": 200,
+      "response": {
+        "value": 0,
+        "max": 360,
+        "min": 0
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/state/sat",
+      "status": 200,
+      "response": {
+        "value": 0,
+        "max": 100,
+        "min": 0
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/state/ct",
+      "status": 200,
+      "response": {
+        "value": 3000,
+        "max": 6500,
+        "min": 1200
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/panelLayout/globalOrientation",
+      "status": 200,
+      "response": {
+        "value": 88,
+        "max": 360,
+        "min": 0
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/state/colorMode",
+      "status": 200,
+      "response": "effect"
+    },
+    {
+      "method": "GET",
+      "path": "/panelLayout/layout",
+      "status": 200,
+      "response": {
+        "numPanels": 4,
+        "sideLength": 150,
+        "positionData": [
+          {
+            "panelId": 234,
+            "x": 299,
+            "y": 43,
+            "o": 180,
+            "shapeType": 0
+          },
+          {
+            "panelId": 147,
+            "x": 224,
+            "y": 0,
+            "o": 120,
+            "shapeType": 0
+          },
+          {
+            "panelId": 136,
+            "x": 149,
+            "y": 43,
+            "o": 300,
+            "shapeType": 0
+          },
+          {
+            "panelId": 10,
+            "x": 74,
+            "y": 0,
+            "o": 0,
+            "shapeType": 0
+          }
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/effects/effectsList",
+      "status": 200,
+      "response": [
+        "Color Burst",
+        "Fireworks",
+        "Flames",
+        "Forest",
+        "Inner Peace",
+        "Meteor Shower",
+        "Nemo",
+        "Northern Lights",
+        "Paint Splatter",
+        "Pulse Pop Beats",
+        "Rhythmic Northern Lights",
+        "Ripple",
+        "Romantic",
+        "Snowfall",
+        "Sound Bar",
+        "Streaking Notes",
+        "kt Northern Lights"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/effects/select",
+      "status": 200,
+      "response": "kt Northern Lights"
+    },
+    {
+      "method": "PUT",
+      "path": "/effects",
+      "request": {
+        "write": {
+          "command": "requestPlugins",
+          "version": "2.0"
+        }
+      },
+      "status": 200,
+      "response": {
+        "plugins": [
+          {
+            "uuid": "027842e4-e1d6-4a4c-a731-be74a1ebd4cf",
+            "name": "Flow",
+            "description": "Imagine you dump each color onto your panels. Watch the color flow in a direction of your choosing.",
+            "author": "Nanoleaf",
+            "type": "color",
+            "tags": [
+              "zen",
+              " happy"
+            ],
+            "features": [],
+            "pluginConfig": [
+              {
+                "name": "loop",
+                "type": "bool",
+                "defaultValue": true
+              },
+              {
+                "name": "transTime",
+                "type": "int",
+                "defaultValue": 24,
+                "minValue": 1,
+                "maxValue": 600
+              },
+              {
+                "name": "delayTime",
+                "type": "int",
+                "defaultValue": 0,
+                "minValue": 0,
+                "maxValue": 600
+              },
+              {
+                "name": "linDirection",
+                "type": "string",
+                "defaultValue": "right",
+                "strings": [
+                  "left",
+                  "right",
+                  "up",
+                  "down"
+                ]
+              }
+            ]
+          },
+          {
+            "uuid": "23e70ff4-458c-4852-826f-9315d89ee6ed",
+            "name": "Meteor Shower",
+            "description": "Like a meteor shower of music notes, watch as a stardust of colors sprinkle across the panels to the pitch of the music. Colors on the left indicate low notes while the right represents higher notes.",
+            "author": "Nanoleaf",
+            "type": "rhythm",
+            "tags": [
+              "party",
+              " electronic",
+              " vibrant",
+              " pop"
+            ],
+            "features": []
+          },
+          {
+            "uuid": "29e48ce5-fcf1-4943-b73f-fad1c09701f3",
+            "name": "Rhythmic Northern Lights",
+            "description": "Watch as colors from your palette drop onto the panels and slowly diffuse outwards, mixing with other hues based on the music's changing pitch and beat.",
+            "author": "Nanoleaf",
+            "type": "rhythm",
+            "tags": [
+              "vibrant",
+              " jazz",
+              " pop",
+              " chill"
+            ],
+            "features": []
+          },
+          {
+            "uuid": "30018343-7587-4152-8d97-1c349ccc3e68",
+            "name": "Paint Splatter",
+            "description": "Like paint splatters on a wall, random circular clusters of panels will show blots of color alternating to the beat of the music. The colors are taken from your palette, and randomly selected to correspond to the varying pitches in the song.",
+            "author": "Nanoleaf",
+            "type": "rhythm",
+            "tags": [
+              "vibrant",
+              " happy",
+              " classical",
+              " pop",
+              " acoustic"
+            ],
+            "features": []
+          },
+          {
+            "uuid": "337784c0-6c98-447a-8a9f-fc6ac44a8024",
+            "name": "Streaking Notes",
+            "description": "Each color of your palette is assigned from low notes to high notes. When that note plays, you'll see that color shoot across your panels",
+            "author": "Nanoleaf",
+            "type": "rhythm",
+            "tags": [
+              "pop",
+              " party",
+              " electronic"
+            ],
+            "features": []
+          },
+          {
+            "uuid": "5cec763a-6f32-45cf-a691-b81e176b6b4a",
+            "name": "Fireworks",
+            "description": "This could be your very own mini EDM festival. In this musical fireworks display, explosions of color from your palette are set off to the bass of the song. ",
+            "author": "Nanoleaf",
+            "type": "rhythm",
+            "tags": [
+              "happy",
+              " electronic",
+              " party",
+              " vibrant",
+              " pop"
+            ],
+            "features": []
+          },
+          {
+            "uuid": "60333927-cc36-4a5a-a682-9bd114de8bff",
+            "name": "Pulse Pop Beats",
+            "description": "Designed for vocals and slow jams. Increased flux in the song will trigger pops of color on the panels, and a pulse of colors with fluctuation in the tone of the song. ",
+            "author": "Nanoleaf",
+            "type": "rhythm",
+            "tags": [
+              "electronic",
+              " rap",
+              " classical"
+            ],
+            "features": []
+          },
+          {
+            "uuid": "6970681a-20b5-4c5e-8813-bdaebc4ee4fa",
+            "name": "Wheel",
+            "description": "Provides a continuous moving gradient of color created from your palette.",
+            "author": "Nanoleaf",
+            "type": "color",
+            "tags": [
+              "party",
+              " chill",
+              " zen"
+            ],
+            "features": [],
+            "pluginConfig": [
+              {
+                "name": "loop",
+                "type": "bool",
+                "defaultValue": true
+              },
+              {
+                "name": "transTime",
+                "type": "int",
+                "defaultValue": 24,
+                "minValue": 1,
+                "maxValue": 600
+              },
+              {
+                "name": "nColorsPerFrame",
+                "type": "int",
+                "defaultValue": 2,
+                "minValue": 2,
+                "maxValue": 50
+              },
+              {
+                "name": "linDirection",
+                "type": "string",
+                "defaultValue": "right",
+                "strings": [
+                  "left",
+                  "right",
+                  "up",
+                  "down"
+                ]
+              }
+            ]
+          },
+          {
+            "uuid": "70b7c636-6bf8-491f-89c1-f4103508d642",
+            "name": "Highlight",
+            "description": "Just like random, but you will mostly see the first color of your palette. The other colors fade in periodically.",
+            "author": "Nanoleaf",
+            "type": "color",
+            "tags": [
+              "chill",
+              " zen"
+            ],
+            "features": [
+              "touch"
+            ],
+            "pluginConfig": [
+              {
+                "name": "transTime",
+                "type": "int",
+                "defaultValue": 24,
+                "minValue": 1,
+                "maxValue": 600
+              },
+              {
+                "name": "delayTime",
+                "type": "int",
+                "defaultValue": 15,
+                "minValue": 0,
+                "maxValue": 600
+              },
+              {
+                "name": "mainColorProb",
+                "type": "double",
+                "defaultValue": 80.0,
+                "minValue": 0.0,
+                "maxValue": 100.0
+              }
+            ]
+          },
+          {
+            "uuid": "713518c1-d560-47db-8991-de780af71d1e",
+            "name": "Burst",
+            "description": "Your palette colors radiate out from the center of the panels.",
+            "author": "Nanoleaf",
+            "type": "color",
+            "tags": [
+              "chill",
+              " zen"
+            ],
+            "features": [
+              "touch"
+            ],
+            "pluginConfig": [
+              {
+                "name": "loop",
+                "type": "bool",
+                "defaultValue": true
+              },
+              {
+                "name": "transTime",
+                "type": "int",
+                "defaultValue": 24,
+                "minValue": 1,
+                "maxValue": 600
+              },
+              {
+                "name": "delayTime",
+                "type": "int",
+                "defaultValue": 0,
+                "minValue": 0,
+                "maxValue": 600
+              }
+            ]
+          },
+          {
+            "uuid": "b3fd723a-aae8-4c99-bf2b-087159e0ef53",
+            "name": "Fade",
+            "description": "The Light Panels cycle through your palette colors all together.",
+            "author": "Nanoleaf",
+            "type": "color",
+            "tags": [
+              "chill",
+              " zen"
+            ],
+            "features": [],
+            "pluginConfig": [
+              {
+                "name": "loop",
+                "type": "bool",
+                "defaultValue": true
+              },
+              {
+                "name": "transTime",
+                "type": "int",
+                "defaultValue": 24,
+                "minValue": 1,
+                "maxValue": 600
+              },
+              {
+                "name": "delayTime",
+                "type": "int",
+                "defaultValue": 0,
+                "minValue": 0,
+                "maxValue": 600
+              }
+            ]
+          },
+          {
+            "uuid": "ba632d3e-9c2b-4413-a965-510c839b3f71",
+            "name": "Random",
+            "description": "This will take your palette colors and randomly animate them across your panels.",
+            "author": "Nanoleaf",
+            "type": "color",
+            "tags": [
+              "party",
+              " happy"
+            ],
+            "features": [],
+            "pluginConfig": [
+              {
+                "name": "transTime",
+                "type": "int",
+                "defaultValue": 24,
+                "minValue": 1,
+                "maxValue": 600
+              },
+              {
+                "name": "delayTime",
+                "type": "int",
+                "defaultValue": 0,
+                "minValue": 0,
+                "maxValue": 600
+              }
+            ]
+          },
+          {
+            "uuid": "bc6fe7e0-36d4-4f95-aa21-52a386daa9dc",
+            "name": "Ripple",
+            "description": "Wisps of color dance across the display, creating a majestic ripple effect outwards based on the music's intensity. ",
+            "author": "Nanoleaf",
+            "type": "rhythm",
+            "tags": [
+              "chill",
+              " pop",
+              " vibrant",
+              " accoustic"
+            ],
+            "features": []
+          },
+          {
+            "uuid": "fe0d0ba8-741f-4210-940c-454eceed010f",
+            "name": "Sound Bar",
+            "description": "Two of your favorite colors compete in a dance-off to the intensity of music. The length of your setup will determine the direction the soundbar will go. Works best for softer music.",
+            "author": "Nanoleaf",
+            "type": "rhythm",
+            "tags": [
+              "ambient",
+              " acoustic",
+              " classical",
+              " vocal",
+              " chill"
+            ],
+            "features": []
+          }
+        ]
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/effects",
+      "request": {
+        "write": {
+          "command": "requestAll"
+        }
+      },
+      "status": 200,
+      "response": {
+        "animations": [
+          {
+            "version": "2.0",
+            "animName": "Color Burst",
+            "animType": "plugin",
+            "colorType": "HSB",
+            "palette": [
+              {
+                "hue": 227,
+                "saturation": 100,
+                "brightness": 99,
+                "probability": 0.0
+              },
+              {
+                "hue": 104,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 24,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 275,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 54,
+                "saturation": 91,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 311,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 0,
+                "saturation": 0,
+                "brightness": 100,
+                "probability": 0.0
+              }
+            ],
+            "pluginType": "color",
+            "pluginUuid": "713518c1-d560-47db-8991-de780af71d1e",
+            "pluginOptions": [
+              {
+                "name": "delayTime",
+                "value": 5
+              },
+              {
+                "name": "loop",
+                "value": true
+              },
+              {
+                "name": "transTime",
+                "value": 52
+              }
+            ],
+            "hasOverlay": false
+          },
+          {
+            "version": "1.0",
+            "animName": "Fireworks",
+            "animType": "plugin",
+            "colorType": "HSB",
+            "palette": [
+              {
+                "hue": 54,
+                "saturation": 97,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 314,
+                "saturation": 88,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 317,
+                "saturation": 43,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 190,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 0,
+                "saturation": 0,
+                "brightness": 100,
+                "probability": 0.0
+              }
+            ],
+            "pluginType": "rhythm",
+            "pluginUuid": "5cec763a-6f32-45cf-a691-b81e176b6b4a",
+            "hasOverlay": false
+          },
+          {
+            "version": "2.0",
+            "animName": "Flames",
+            "animType": "plugin",
+            "colorType": "HSB",
+            "palette": [
+              {
+                "hue": 32,
+                "saturation": 100,
+                "brightness": 46,
+                "probability": 0.0
+              },
+              {
+                "hue": 39,
+                "saturation": 100,
+                "brightness": 37,
+                "probability": 0.0
+              },
+              {
+                "hue": 39,
+                "saturation": 100,
+                "brightness": 73,
+                "probability": 0.0
+              }
+            ],
+            "pluginType": "color",
+            "pluginUuid": "70b7c636-6bf8-491f-89c1-f4103508d642",
+            "pluginOptions": [
+              {
+                "name": "delayTime",
+                "value": 0
+              },
+              {
+                "name": "loop",
+                "value": true
+              },
+              {
+                "name": "mainColorProb",
+                "value": 80.0
+              },
+              {
+                "name": "transTime",
+                "value": 7
+              }
+            ],
+            "hasOverlay": false
+          },
+          {
+            "version": "2.0",
+            "animName": "Forest",
+            "animType": "plugin",
+            "colorType": "HSB",
+            "palette": [
+              {
+                "hue": 70,
+                "saturation": 25,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 105,
+                "saturation": 36,
+                "brightness": 70,
+                "probability": 0.0
+              },
+              {
+                "hue": 83,
+                "saturation": 66,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 90,
+                "saturation": 100,
+                "brightness": 33,
+                "probability": 0.0
+              }
+            ],
+            "pluginType": "color",
+            "pluginUuid": "ba632d3e-9c2b-4413-a965-510c839b3f71",
+            "pluginOptions": [
+              {
+                "name": "delayTime",
+                "value": 0
+              },
+              {
+                "name": "loop",
+                "value": true
+              },
+              {
+                "name": "transTime",
+                "value": 30
+              }
+            ],
+            "hasOverlay": false
+          },
+          {
+            "version": "2.0",
+            "animName": "Inner Peace",
+            "animType": "plugin",
+            "colorType": "HSB",
+            "palette": [
+              {
+                "hue": 150,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 153,
+                "saturation": 92,
+                "brightness": 25,
+                "probability": 0.0
+              },
+              {
+                "hue": 152,
+                "saturation": 100,
+                "brightness": 34,
+                "probability": 0.0
+              },
+              {
+                "hue": 195,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 265,
+                "saturation": 100,
+                "brightness": 25,
+                "probability": 0.0
+              },
+              {
+                "hue": 265,
+                "saturation": 100,
+                "brightness": 25,
+                "probability": 0.0
+              },
+              {
+                "hue": 59,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 58,
+                "saturation": 100,
+                "brightness": 37,
+                "probability": 0.0
+              },
+              {
+                "hue": 58,
+                "saturation": 100,
+                "brightness": 36,
+                "probability": 0.0
+              }
+            ],
+            "pluginType": "color",
+            "pluginUuid": "b3fd723a-aae8-4c99-bf2b-087159e0ef53",
+            "pluginOptions": [
+              {
+                "name": "delayTime",
+                "value": 5
+              },
+              {
+                "name": "loop",
+                "value": true
+              },
+              {
+                "name": "transTime",
+                "value": 200
+              }
+            ],
+            "hasOverlay": false
+          },
+          {
+            "version": "1.0",
+            "animName": "Meteor Shower",
+            "animType": "plugin",
+            "colorType": "HSB",
+            "palette": [
+              {
+                "hue": 227,
+                "saturation": 100,
+                "brightness": 99,
+                "probability": 0.0
+              },
+              {
+                "hue": 182,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 125,
+                "saturation": 100,
+                "brightness": 93,
+                "probability": 0.0
+              },
+              {
+                "hue": 62,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 31,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 2,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 307,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              }
+            ],
+            "pluginType": "rhythm",
+            "pluginUuid": "23e70ff4-458c-4852-826f-9315d89ee6ed",
+            "hasOverlay": false
+          },
+          {
+            "version": "2.0",
+            "animName": "Nemo",
+            "animType": "plugin",
+            "colorType": "HSB",
+            "palette": [
+              {
+                "hue": 23,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 108,
+                "saturation": 5,
+                "brightness": 100,
+                "probability": 0.0
+              }
+            ],
+            "pluginType": "color",
+            "pluginUuid": "70b7c636-6bf8-491f-89c1-f4103508d642",
+            "pluginOptions": [
+              {
+                "name": "delayTime",
+                "value": 12
+              },
+              {
+                "name": "loop",
+                "value": true
+              },
+              {
+                "name": "mainColorProb",
+                "value": 80.0
+              },
+              {
+                "name": "transTime",
+                "value": 20
+              }
+            ],
+            "hasOverlay": false
+          },
+          {
+            "version": "2.0",
+            "animName": "Northern Lights",
+            "animType": "plugin",
+            "colorType": "HSB",
+            "palette": [
+              {
+                "hue": 227,
+                "saturation": 100,
+                "brightness": 99,
+                "probability": 0.0
+              },
+              {
+                "hue": 182,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 125,
+                "saturation": 100,
+                "brightness": 93,
+                "probability": 0.0
+              },
+              {
+                "hue": 62,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 31,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 2,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 307,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              }
+            ],
+            "pluginType": "color",
+            "pluginUuid": "6970681a-20b5-4c5e-8813-bdaebc4ee4fa",
+            "pluginOptions": [
+              {
+                "name": "delayTime",
+                "value": 12
+              },
+              {
+                "name": "linDirection",
+                "value": "left"
+              },
+              {
+                "name": "loop",
+                "value": true
+              },
+              {
+                "name": "transTime",
+                "value": 20
+              }
+            ],
+            "hasOverlay": false
+          },
+          {
+            "version": "1.0",
+            "animName": "Paint Splatter",
+            "animType": "plugin",
+            "colorType": "HSB",
+            "palette": [
+              {
+                "hue": 0,
+                "saturation": 60,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 40,
+                "saturation": 60,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 60,
+                "saturation": 60,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 79,
+                "saturation": 60,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 120,
+                "saturation": 60,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 160,
+                "saturation": 60,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 180,
+                "saturation": 60,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 199,
+                "saturation": 60,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 240,
+                "saturation": 60,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 280,
+                "saturation": 60,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 300,
+                "saturation": 60,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 320,
+                "saturation": 56,
+                "brightness": 100,
+                "probability": 0.0
+              }
+            ],
+            "pluginType": "rhythm",
+            "pluginUuid": "30018343-7587-4152-8d97-1c349ccc3e68",
+            "hasOverlay": false
+          },
+          {
+            "version": "1.0",
+            "animName": "Pulse Pop Beats",
+            "animType": "plugin",
+            "colorType": "HSB",
+            "palette": [
+              {
+                "hue": 227,
+                "saturation": 100,
+                "brightness": 99,
+                "probability": 0.0
+              },
+              {
+                "hue": 182,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 125,
+                "saturation": 100,
+                "brightness": 93,
+                "probability": 0.0
+              },
+              {
+                "hue": 62,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 31,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 2,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 307,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              }
+            ],
+            "pluginType": "rhythm",
+            "pluginUuid": "60333927-cc36-4a5a-a682-9bd114de8bff",
+            "hasOverlay": false
+          },
+          {
+            "version": "1.0",
+            "animName": "Rhythmic Northern Lights",
+            "animType": "plugin",
+            "colorType": "HSB",
+            "palette": [
+              {
+                "hue": 222,
+                "saturation": 96,
+                "brightness": 99,
+                "probability": 0.0
+              },
+              {
+                "hue": 295,
+                "saturation": 100,
+                "brightness": 99,
+                "probability": 0.0
+              },
+              {
+                "hue": 1,
+                "saturation": 96,
+                "brightness": 98,
+                "probability": 0.0
+              },
+              {
+                "hue": 36,
+                "saturation": 96,
+                "brightness": 99,
+                "probability": 0.0
+              },
+              {
+                "hue": 59,
+                "saturation": 96,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 112,
+                "saturation": 97,
+                "brightness": 100,
+                "probability": 0.0
+              }
+            ],
+            "pluginType": "rhythm",
+            "pluginUuid": "29e48ce5-fcf1-4943-b73f-fad1c09701f3",
+            "hasOverlay": false
+          },
+          {
+            "version": "1.0",
+            "animName": "Ripple",
+            "animType": "plugin",
+            "colorType": "HSB",
+            "palette": [
+              {
+                "hue": 180,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 315,
+                "saturation": 83,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 282,
+                "saturation": 0,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 278,
+                "saturation": 62,
+                "brightness": 100,
+                "probability": 0.0
+              }
+            ],
+            "pluginType": "rhythm",
+            "pluginUuid": "bc6fe7e0-36d4-4f95-aa21-52a386daa9dc",
+            "hasOverlay": false
+          },
+          {
+            "version": "2.0",
+            "animName": "Romantic",
+            "animType": "plugin",
+            "colorType": "HSB",
+            "palette": [
+              {
+                "hue": 344,
+                "saturation": 67,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 307,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 259,
+                "saturation": 56,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 356,
+                "saturation": 98,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 309,
+                "saturation": 50,
+                "brightness": 100,
+                "probability": 0.0
+              }
+            ],
+            "pluginType": "color",
+            "pluginUuid": "70b7c636-6bf8-491f-89c1-f4103508d642",
+            "pluginOptions": [
+              {
+                "name": "delayTime",
+                "value": 0
+              },
+              {
+                "name": "loop",
+                "value": true
+              },
+              {
+                "name": "mainColorProb",
+                "value": 80.0
+              },
+              {
+                "name": "transTime",
+                "value": 45
+              }
+            ],
+            "hasOverlay": false
+          },
+          {
+            "version": "2.0",
+            "animName": "Snowfall",
+            "animType": "plugin",
+            "colorType": "HSB",
+            "palette": [
+              {
+                "hue": 230,
+                "saturation": 75,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 230,
+                "saturation": 20,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 230,
+                "saturation": 10,
+                "brightness": 100,
+                "probability": 0.0
+              }
+            ],
+            "pluginType": "color",
+            "pluginUuid": "6970681a-20b5-4c5e-8813-bdaebc4ee4fa",
+            "pluginOptions": [
+              {
+                "name": "linDirection",
+                "value": "down"
+              },
+              {
+                "name": "loop",
+                "value": true
+              },
+              {
+                "name": "transTime",
+                "value": 40
+              }
+            ],
+            "hasOverlay": false
+          },
+          {
+            "version": "1.0",
+            "animName": "Sound Bar",
+            "animType": "plugin",
+            "colorType": "HSB",
+            "palette": [
+              {
+                "hue": 235,
+                "saturation": 100,
+                "brightness": 51,
+                "probability": 0.0
+              },
+              {
+                "hue": 307,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 182,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 62,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 2,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 0,
+                "saturation": 0,
+                "brightness": 91,
+                "probability": 0.0
+              }
+            ],
+            "pluginType": "rhythm",
+            "pluginUuid": "fe0d0ba8-741f-4210-940c-454eceed010f",
+            "hasOverlay": false
+          },
+          {
+            "version": "1.0",
+            "animName": "Streaking Notes",
+            "animType": "plugin",
+            "colorType": "HSB",
+            "palette": [
+              {
+                "hue": 227,
+                "saturation": 100,
+                "brightness": 99,
+                "probability": 0.0
+              },
+              {
+                "hue": 182,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 125,
+                "saturation": 100,
+                "brightness": 93,
+                "probability": 0.0
+              },
+              {
+                "hue": 62,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 31,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 2,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 307,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              }
+            ],
+            "pluginType": "rhythm",
+            "pluginUuid": "337784c0-6c98-447a-8a9f-fc6ac44a8024",
+            "hasOverlay": false
+          },
+          {
+            "version": "2.0",
+            "animName": "kt Northern Lights",
+            "animType": "plugin",
+            "colorType": "HSB",
+            "palette": [
+              {
+                "hue": 227,
+                "saturation": 100,
+                "brightness": 99,
+                "probability": 0.0
+              },
+              {
+                "hue": 182,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 124,
+                "saturation": 100,
+                "brightness": 93,
+                "probability": 0.0
+              },
+              {
+                "hue": 62,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 31,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 2,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              },
+              {
+                "hue": 307,
+                "saturation": 100,
+                "brightness": 100,
+                "probability": 0.0
+              }
+            ],
+            "pluginType": "color",
+            "pluginUuid": "6970681a-20b5-4c5e-8813-bdaebc4ee4fa",
+            "pluginOptions": [
+              {
+                "name": "linDirection",
+                "value": "up"
+              },
+              {
+                "name": "loop",
+                "value": true
+              },
+              {
+                "name": "nColorsPerFrame",
+                "value": 3
+              },
+              {
+                "name": "transTime",
+                "value": 107
+              }
+            ],
+            "hasOverlay": false
+          }
+        ]
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/effects",
+      "request": {
+        "write": {
+          "command": "request",
+          "animName": "taproot test: no such scene"
+        }
+      },
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/rhythm",
+      "status": 200,
+      "response": {
+        "auxAvailable": false,
+        "firmwareVersion": "2.4.3",
+        "hardwareVersion": "2.0",
+        "rhythmActive": false,
+        "rhythmConnected": true,
+        "rhythmId": 186,
+        "rhythmMode": 0,
+        "rhythmPos": {
+          "x": 0.0,
+          "y": 43.30127018922193,
+          "o": 180.0
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/rhythm/rhythmConnected",
+      "status": 200,
+      "response": true
+    },
+    {
+      "method": "GET",
+      "path": "/rhythm/rhythmActive",
+      "status": 200,
+      "response": false
+    },
+    {
+      "method": "GET",
+      "path": "/rhythm/rhythmId",
+      "status": 200,
+      "response": 186
+    },
+    {
+      "method": "GET",
+      "path": "/rhythm/hardwareVersion",
+      "status": 200,
+      "response": "2.0"
+    },
+    {
+      "method": "GET",
+      "path": "/rhythm/firmwareVersion",
+      "status": 200,
+      "response": "2.4.3"
+    },
+    {
+      "method": "GET",
+      "path": "/rhythm/auxAvailable",
+      "status": 200,
+      "response": false
+    },
+    {
+      "method": "GET",
+      "path": "/rhythm/rhythmMode",
+      "status": 200,
+      "response": 0
+    },
+    {
+      "method": "GET",
+      "path": "/rhythm/rhythmPos",
+      "status": 200,
+      "response": {
+        "x": 0.0,
+        "y": 43.30127018922193,
+        "o": 180.0
+      }
+    }
+  ]
+}

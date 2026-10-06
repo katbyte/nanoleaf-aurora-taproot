@@ -1,0 +1,24 @@
+services:
+  taproot:
+    # published on release; `docker compose pull` picks up a new build of this tag. `make docker`
+    # builds and tags the same name locally, for running from a checkout
+    image: ghcr.io/katbyte/nanoleaf-aurora-taproot:latest
+    container_name: taproot
+    restart: unless-stopped
+    # connecting a controller by its address always works. the page's "search the network" listens for
+    # controllers announcing themselves, which a container on docker's own network cannot hear: on linux,
+    # uncomment this (and drop `ports` below) to put the container on the host's network instead. knocking
+    # on a subnet, the box beside the search button, works either way
+    # network_mode: host
+    ports:
+      - "7668:7668" # the page is open to anyone who can reach this port: put a login in front of it before letting it out of the house
+    environment:
+      # the page answers to this machine's addresses, localhost and anything.local without being told. reached
+      # by another name, through a proxy say, it must be told the name, or it will refuse the request:
+      # add a line here, "TAPROOT_ALLOW_HOSTS=lights.example.com"
+      - "TZ=America/Vancouver"
+    volumes:
+      # controllers.json, which holds every controller's token and must stay private, and the backups.
+      # to bring controllers over from a machine where taproot is already connected, copy its
+      # ~/.config/taproot/controllers.json here before the first start
+      - ./data:/config

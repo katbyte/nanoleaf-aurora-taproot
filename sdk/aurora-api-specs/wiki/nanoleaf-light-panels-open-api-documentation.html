@@ -1,0 +1,1112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Nanoleaf Light Panels Open API Documentation</title>
+<style>
+body { font: 15px/1.5 -apple-system, "Segoe UI", sans-serif; max-width: 62rem; margin: 2rem auto; padding: 0 1rem; }
+table { border-collapse: collapse; margin: 1rem 0; }
+td, th { border: 1px solid #bbb; padding: .3rem .6rem; vertical-align: top; text-align: left; }
+pre { background: #f4f4f4; padding: .6rem; overflow-x: auto; }
+img { max-width: 100%; }
+.source { color: #555; border-bottom: 1px solid #bbb; padding-bottom: .6rem; }
+</style>
+</head>
+<body>
+<p class="source">Saved from <a href="https://nanoleaf.atlassian.net/wiki/spaces/nlapid/pages/2789310530">https://nanoleaf.atlassian.net/wiki/spaces/nlapid/pages/2789310530</a>, version 8 of 2026-07-08.</p>
+<h1>Nanoleaf Light Panels Open API Documentation</h1>
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1791315589210 {padding: 0px;}
+div.rbtoc1791315589210 ul {list-style: none;margin-left: 0px;}
+div.rbtoc1791315589210 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='toc-macro rbtoc1791315589210'>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-1.Introduction'>1. Introduction</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-2.Definitions'>2. Definitions</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.FunctionalPrinciples'>3. Functional Principles</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.1.ColorModes'>3.1. Color Modes</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.2.Effects'>3.2. Effects</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.2.1.Palettes'>3.2.1. Palettes</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.2.2.Plugins'>3.2.2. Plugins</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.2.3.PluginOptions'>3.2.3. Plugin Options</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.2.4.EffectsCommands'>3.2.4. Effects Commands</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.2.4.1.Add/UpdateEffects'>3.2.4.1. Add/Update Effects</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.2.4.2.DeleteEffects'>3.2.4.2. Delete Effects</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.2.4.3.RequestEffects'>3.2.4.3. Request Effects</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.2.4.4.RequestAll'>3.2.4.4. Request All</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.2.4.5.RenameEffects'>3.2.4.5. Rename Effects</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.2.4.6.DisplayEffects'>3.2.4.6. Display Effects</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.2.4.7.DisplayTemporaryEffects'>3.2.4.7. Display Temporary Effects</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.2.4.8.RequestPlugins'>3.2.4.8. Request Plugins</a></li>
+</ul>
+</li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.2.5.ReservedEffectNames'>3.2.5. Reserved Effect Names</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.2.6.EffectTypes'>3.2.6. Effect Types</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.2.6.1.Custom'>3.2.6.1. Custom</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.2.6.2.ExternalControl(extControl)'>3.2.6.2. External Control (extControl)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.3.LayoutData'>3.3. Layout Data</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.3.1.1.LightPanels(TenPanels)'>3.3.1.1. Light Panels ( Ten Panels )</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.3.1.2.LightPanels(SixPanels)'>3.3.1.2. Light Panels ( Six Panels )</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.3.1.3.Canvas(SixPanels)'>3.3.1.3. Canvas ( Six Panels )</a></li>
+</ul>
+</li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.4.Brightness'>3.4. Brightness</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.5.Events'>3.5. Events</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.5.1.RegisteringandReceivingEvents'>3.5.1. Registering and Receiving Events</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.5.2.EventsTypes'>3.5.2. Events Types</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.5.2.1.State'>3.5.2.1. State</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.5.2.2.Layout'>3.5.2.2. Layout</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.5.2.3.Effects'>3.5.2.3. Effects</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.5.2.4.Touch'>3.5.2.4. Touch</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.5.2.4.1.GestureIds'>3.5.2.4.1. Gesture Ids</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.5.2.4.2.TouchStreamData'>3.5.2.4.2. Touch Stream Data</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.5.2.4.3.EnablingTouchStreamData'>3.5.2.4.3. Enabling Touch Stream Data</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.5.2.4.4.TouchDataStreamFormat'>3.5.2.4.4. Touch Data Stream Format</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.5.2.4.5.TouchLifeCycle'>3.5.2.4.5. Touch Life Cycle</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.6.Discovery'>3.6. Discovery</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.6.1.mDNS(Bonjour)'>3.6.1. mDNS ( Bonjour )</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.6.2.SSDP'>3.6.2. SSDP</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.6.2.1.SSDPNOTIFY'>3.6.2.1. SSDP NOTIFY</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.6.2.2.SSDPM-SEARCH'>3.6.2.2. SSDP M-SEARCH</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-3.6.2.3.SSDPBYEBYE'>3.6.2.3. SSDP BYEBYE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-4.APIJSONStructure'>4. API JSON Structure</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-4.1.LightPanels'>4.1. Light Panels</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-4.2.Canvas'>4.2. Canvas</a></li>
+</ul>
+</li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.APIReference'>5. API Reference</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.1.Authorization'>5.1. Authorization</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.1.1.AddUser'>5.1.1. Add User</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.1.2.DeleteUser'>5.1.2. Delete User</a></li>
+</ul>
+</li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.2.GetAllPanelInfo'>5.2. Get All Panel Info</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.3.State'>5.3. State</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.3.1.On/Off'>5.3.1. On/Off</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.3.2.Brightness'>5.3.2. Brightness</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.3.3.Hue'>5.3.3. Hue</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.3.4.Saturation'>5.3.4. Saturation</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.3.5.ColorTemperature'>5.3.5. Color Temperature</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.3.6.ColorMode'>5.3.6. Color Mode</a></li>
+</ul>
+</li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.4.Effects'>5.4. Effects</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.4.1.Select'>5.4.1. Select</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.4.2.List'>5.4.2. List</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.4.3.Write'>5.4.3. Write</a></li>
+</ul>
+</li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.5.PanelLayout'>5.5. Panel Layout</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.5.1.GlobalOrientation'>5.5.1. Global Orientation</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.5.2.Layout'>5.5.2. Layout</a></li>
+</ul>
+</li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.6.Identify'>5.6. Identify</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.7.ExternalControl(Streaming)'>5.7. External Control ( Streaming )</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.8.Rhythm(LightPanelsOnly)'>5.8. Rhythm ( Light Panels Only )</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.8.1.RhythmConnected'>5.8.1. Rhythm Connected</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.8.2.RhythmActive'>5.8.2. Rhythm Active</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.8.3.RhythmId'>5.8.3. Rhythm Id</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.8.4.RhythmHardwareVersion'>5.8.4. Rhythm Hardware Version</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.8.5.RhythmFirmwareVersion'>5.8.5. Rhythm Firmware Version</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.8.6.RhythmAuxAvailable'>5.8.6. Rhythm Aux Available</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.8.7.RhythmMode'>5.8.7. Rhythm Mode</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.8.8.RhythmPosition'>5.8.8. Rhythm Position</a></li>
+</ul>
+</li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.9ScreenMirror'>5.9 Screen Mirror</a>
+<ul class='toc-indentation'>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.9.1ActivateScreenMirror'>5.9.1 Activate Screen Mirror</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.9.2ActivateMusicSync'>5.9.2 Activate Music Sync</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.9.3GetScreenMirror'>5.9.3 Get Screen Mirror</a></li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-5.9.4GetMusicSync'>5.9.4 Get Music Sync</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href='#NanoleafLightPanelsOpenAPIDocumentation-6.KnownIssues'>6. Known Issues</a></li>
+</ul>
+</div><hr/><h1 id="NanoleafLightPanelsOpenAPIDocumentation-1.Introduction">1. Introduction</h1><p>This documentation provides the detailed interfaces and structure of the Nanoleaf Devices OpenAPI, an interface developed for third-party developers to authenticate, control, and obtain information of the Panels, via a simple RESTful API over HTTP.</p><hr/><h1 id="NanoleafLightPanelsOpenAPIDocumentation-2.Definitions">2. Definitions</h1><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p>Term</p></th><th class="confluenceTh"><p>Definition</p></th></tr><tr><td class="confluenceTd"><p>User</p></td><td class="confluenceTd"><p>Any application intended to control or obtain data from panels. Examples: a third-party mobile app, web-based interface for testing, Postman</p></td></tr><tr><td class="confluenceTd"><p>Panels/Device</p></td><td class="confluenceTd"><p>Refers to Nanoleaf Light panels and Canvas Light Squares</p></td></tr><tr><td class="confluenceTd"><p>Effect/Animation</p></td><td class="confluenceTd"><p>A collection of user presets that define panels operating mode that can be activated through the Nanoleaf App, Siri, HomeKit, Amazon Alexa, IFTTT, or any 3rd party implementing the Open API. Nanoleaf uses &quot;Effect&quot; or &quot;Scene&quot; for all user-facing references, although &quot;animation&quot; is used in certain parts of the API.<br/> </p></td></tr><tr><td class="confluenceTd"><p>Palette</p></td><td class="confluenceTd"><p>A collection of colors used to define an Effect</p></td></tr><tr><td class="confluenceTd"><p>Plugin/Motion</p></td><td class="confluenceTd"><p>An Effect type. Also referred to as &quot;Scene Types&quot;, they instruct Panels how to render light. Nanoleaf uses &quot;Motions&quot; for all user-facing references. &quot;Plugin&quot; is mostly used in the API.</p></td></tr><tr><td class="confluenceTd"><p>Options</p></td><td class="confluenceTd"><p>Plugin options that modify how the effect should be rendered</p></td></tr><tr><td class="confluenceTd"><p>Scene</p></td><td class="confluenceTd"><p>Often used synonymously with Effect. A Scene is a more general purpose container that can control multiple smart home devices, especially in the context of HomeKit. For the purposes of the panels API, a Scene and Effect are synonymous.</p></td></tr><tr><td class="confluenceTd"><p>Controller/ Control Square/Processor</p></td><td class="confluenceTd"><p>This is the hardware responsible for controlling Panels and relaying messages to and from the local wifi network.</p></td></tr></tbody></table></div><hr/><h1 id="NanoleafLightPanelsOpenAPIDocumentation-3.FunctionalPrinciples">3. Functional Principles</h1><h2 id="NanoleafLightPanelsOpenAPIDocumentation-3.1.ColorModes">3.1. Color Modes</h2><p>Panels have 3 primary color modes:<br/><strong>Effect mode (effect):</strong>this is the main operating mode. It includes static and dynamic Effects<br/><strong>Hue/Saturation mode (hs):</strong>this is a simple color mode where Panels act as a normal color light bulb with hue/saturation defining color<br/><strong>Color temperature mode (ct):</strong>this is a simple color mode where Panels act as a normal color light bulb with CCT (in Kelvin) defining color. The acceptable range is 1200-6500 for Nanoleaf Lines, Nanoleaf Shapes, Nanoleaf Canvas and Nanoleaf Light Panels. The acceptable range for Nanoleaf Elements is 1500-4000</p><h2 id="NanoleafLightPanelsOpenAPIDocumentation-3.2.Effects">3.2. Effects</h2><p>Effects describe instances of user-saved presets. These are made of 3 main components:</p><p style="margin-left: 30.0px;">1. Palette</p><p style="margin-left: 30.0px;">2. Plugins</p><p style="margin-left: 30.0px;">3. Options</p><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-3.2.1.Palettes">3.2.1. Palettes</h3><p style="margin-left: 30.0px;">A palette defines the colors that are to be used in a given effect. This can be used for static type Effects, where a user would use a select-and-tap methodology to create a static effect of their liking. For dynamic effects the palette will define the colors used to generate the effect. Palette size should be limited to 20 colors.</p><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-3.2.2.Plugins">3.2.2. Plugins</h3><p style="margin-left: 30.0px;">Motions are essentially a set of instructions which instruct the panels on how to output light based on inputs from Touch (Canvas only), Sound and the passage of time. A motion may use any combination of the aforementioned inputs and render the light on the panels.</p><p style="margin-left: 30.0px;">Motions can be designed, built and submitted to Nanoleaf using the Nanoleaf SDK (Nanoleaf Light Panels only for now) and are implemented in C++. Once approved by Nanoleaf, these plugins are then available to be downloaded by Nanoleaf users.</p><p style="margin-left: 30.0px;">Since motions act like plugins in software, they are also called plugins and the terminology in the context of this document and application is interchangeable.</p><p style="margin-left: 30.0px;">Every Motion has a uuid which is its unique identifier. An effect must indicate which plugin it uses through its uuid.</p><p style="margin-left: 30.0px;">When using plugins, the animType in the effect json is set to 'plugin'.</p><p style="margin-left: 30.0px;">Default legacy colour effects such as flow, wheel etc have also been converted to Motions and have a fixed uuid. When activating effects that use these default animTypes, the controller automatically maps the effect to the corresponding Motion's uuid. Below is a list of default plugins available on the controller out-of-the box. The mapping for the uuid of the motion and the default legacy effect type is provided in the following table.</p><p style="margin-left: 30.0px;"><strong>Default Plugins</strong></p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>Plugin</strong></p></th><th class="confluenceTh"><p><strong>Description</strong></p></th><th class="confluenceTh"><p><strong>Options</strong></p></th></tr><tr><td class="confluenceTd"><p>Random</p></td><td class="confluenceTd"><p>Panels randomly transition between colors and brightnesses</p></td><td class="confluenceTd"><p>Transition time, delay time</p></td></tr><tr><td class="confluenceTd"><p>Flow*</p></td><td class="confluenceTd"><p>2+ chosen colors gradually mix into each other as if flowing paint is mixing</p></td><td class="confluenceTd"><p>transTime, delay time, loop, LinDirection</p></td></tr><tr><td class="confluenceTd"><p>Wheel*</p></td><td class="confluenceTd"><p>Color gradient cycles across panels in a user specified direction</p></td><td class="confluenceTd"><p>transTime, loop, LinDirection</p></td></tr><tr><td class="confluenceTd"><p>Highlight</p></td><td class="confluenceTd"><p>Subset of random effect where a primary color dominates the transitions and 1 or more secondary colors occasionally transition in and out</p></td><td class="confluenceTd"><p>transTime, delay time, MainColorProb</p></td></tr><tr><td class="confluenceTd"><p>Fade</p></td><td class="confluenceTd"><p>Colors cycle across panels in sync</p></td><td class="confluenceTd"><p>transTime, delay time, loop</p></td></tr><tr><td class="confluenceTd"><p>Explode</p></td><td class="confluenceTd"><p>Similar to flow, but the colors move out from the centre of the panel system, rather than the edge</p></td><td class="confluenceTd"><p>transTime, delay time, loop</p></td></tr></tbody></table></div><p style="margin-left: 30.0px;">*<em> The difference between flow and wheel is subtle. Flow provides full transition between discrete colors with a gradient-type transition; the end of the transition will be when panels are a single color. Wheel provides a constant transition between a set of colors, meaning that there is always a gradient of colors displayed.</em></p><p style="margin-left: 30.0px;"><strong>Legacy Plugin UUID Mapping</strong></p><div class="table-wrap"><table class="confluenceTable"><colgroup><col style="width: 314.0px;"/><col style="width: 391.0px;"/></colgroup><tbody><tr><td class="confluenceTd"><p>Wheel</p></td><td class="confluenceTd"><p>6970681a-20b5-4c5e-8813-bdaebc4ee4fa</p></td></tr><tr><td class="confluenceTd"><p>Flow</p></td><td class="confluenceTd"><p>027842e4-e1d6-4a4c-a731-be74a1ebd4cf</p></td></tr><tr><td class="confluenceTd"><p>Explode</p></td><td class="confluenceTd"><p>713518c1-d560-47db-8991-de780af71d1e</p></td></tr><tr><td class="confluenceTd"><p>Fade</p></td><td class="confluenceTd"><p>b3fd723a-aae8-4c99-bf2b-087159e0ef53</p></td></tr><tr><td class="confluenceTd"><p>Random</p></td><td class="confluenceTd"><p>ba632d3e-9c2b-4413-a965-510c839b3f71</p></td></tr><tr><td class="confluenceTd"><p>Highlight</p></td><td class="confluenceTd"><p>70b7c636-6bf8-491f-89c1-f4103508d642</p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-3.2.3.PluginOptions">3.2.3. Plugin Options</h3><p style="margin-left: 30.0px;">Plugins can use any of the Nanoleaf-approved option types to further control how panels render light.</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>Name</strong></p></th><th class="confluenceTh"><p><strong>Type</strong></p></th><th class="confluenceTh"><p><strong>Global Limits</strong></p></th><th class="confluenceTh"><p><strong>Comment</strong></p></th></tr><tr><td class="confluenceTd"><p>transTime</p></td><td class="confluenceTd"><p>int</p></td><td class="confluenceTd"><p>1-600</p></td><td class="confluenceTd"><p>Generally, the time it takes to go from one palette colour to another, in tenths of a second.</p></td></tr><tr><td class="confluenceTd"><p>loop</p></td><td class="confluenceTd"><p>bool</p></td><td class="confluenceTd"><p>true/false</p></td><td class="confluenceTd"><p>Indicates whether an animation should loop or not</p></td></tr><tr><td class="confluenceTd"><p>linDirection</p></td><td class="confluenceTd"><p>string</p></td><td class="confluenceTd"><p>left, right, up, down</p></td><td class="confluenceTd"><p>Linear direction, based on user‚Äôs global orientation</p></td></tr><tr><td class="confluenceTd"><p>radDirection</p></td><td class="confluenceTd"><p>string</p></td><td class="confluenceTd"><p>in, out</p></td><td class="confluenceTd"><p>Radial direction, based on layout center</p></td></tr><tr><td class="confluenceTd"><p>rotDirection</p></td><td class="confluenceTd"><p>string</p></td><td class="confluenceTd"><p>cw, ccw</p></td><td class="confluenceTd"><p>Circular Direction, around the layout center. cw = clockwise; ccw = counter-clockwise</p></td></tr><tr><td class="confluenceTd"><p>delayTime</p></td><td class="confluenceTd"><p>int</p></td><td class="confluenceTd"><p>0-600</p></td><td class="confluenceTd"><p>Indicates how long the plugin will dwell on a palette colour, in tenths of a second.</p></td></tr><tr><td class="confluenceTd"><p>nColorsPerFrame</p></td><td class="confluenceTd"><p>int</p></td><td class="confluenceTd"><p>1-50</p></td><td class="confluenceTd"><p>Modifier that indicates how much of a palette is shown on the layout. 50 is a global limit, but generally the max will be dynamically set by the App to the size of the user‚Äôs palette.</p></td></tr><tr><td class="confluenceTd"><p>mainColorProb</p></td><td class="confluenceTd"><p>double</p></td><td class="confluenceTd"><p>0.0-100.0</p></td><td class="confluenceTd"><p>Probability of background colour being used</p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-3.2.4.EffectsCommands">3.2.4. Effects Commands</h3><p style="margin-left: 30.0px;">Commands are sent to Panels Write endpoint using a structure outlined in the next sections. If a command response is warranted, the controller will include it in the response.</p><p style="margin-left: 30.0px;">Command Type is a mandatory field and is always present as the first parameter of the command data string. There are 7 different types of Command Types:</p><p style="margin-left: 60.0px;">• Add</p><p style="margin-left: 60.0px;">• Delete</p><p style="margin-left: 60.0px;">• Request</p><p style="margin-left: 60.0px;">• Request All</p><p style="margin-left: 60.0px;">• Request Plugins</p><p style="margin-left: 60.0px;">• Display</p><p style="margin-left: 60.0px;">• Display Temp</p><p style="margin-left: 30.0px;"><strong>Effects Commands Structure</strong><br/>The following key-value pairs are included.</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>Key</strong></p></th><th class="confluenceTh"><p><strong>Value Type</strong></p></th><th class="confluenceTh"><p><strong>Required</strong></p></th><th class="confluenceTh"><p><strong>Description</strong></p></th></tr><tr><td class="confluenceTd"><p>command</p></td><td class="confluenceTd"><p>string</p></td><td class="confluenceTd"><p>Yes</p></td><td class="confluenceTd"><p>Command type: add, request, delete, display, rename, requestAll</p></td></tr><tr><td class="confluenceTd"><p>version</p></td><td class="confluenceTd"><p>string</p></td><td class="confluenceTd"><p>Yes</p></td><td class="confluenceTd"><p>Command version: 1.0</p></td></tr><tr><td class="confluenceTd"><p>duration</p></td><td class="confluenceTd"><p>number</p></td><td class="confluenceTd"><p>no</p></td><td class="confluenceTd"><p>Sets duration of temporary Effect in seconds</p></td></tr><tr><td class="confluenceTd"><p>animName</p></td><td class="confluenceTd"><p>string</p></td><td class="confluenceTd"><p>no</p></td><td class="confluenceTd"><p>effect Name. Not required for Display commands</p></td></tr><tr><td class="confluenceTd"><p>newName</p></td><td class="confluenceTd"><p>string</p></td><td class="confluenceTd"><p>no</p></td><td class="confluenceTd"><p>Used for renaming an effect</p></td></tr><tr><td class="confluenceTd"><p>animType</p></td><td class="confluenceTd"><p>string</p></td><td class="confluenceTd"><p>Yes</p></td><td class="confluenceTd"><p>effect type: random, flow, wheel, fade, highlight, custom, static</p></td></tr><tr><td class="confluenceTd"><p>animData</p></td><td class="confluenceTd"><p>string</p></td><td class="confluenceTd"><p>No</p></td><td class="confluenceTd"><p>Rendered effect data: only needed for custom and static types</p></td></tr><tr><td class="confluenceTd"><p>colorType</p></td><td class="confluenceTd"><p>string</p></td><td class="confluenceTd"><p>no</p></td><td class="confluenceTd"><p>Defines colour type for palette (should be HSB). Required for Add and Display commands.</p></td></tr><tr><td class="confluenceTd"><p>palette</p></td><td class="confluenceTd"><p>array</p></td><td class="confluenceTd"><p>no</p></td><td class="confluenceTd"><p>User defined colours for creating all effects except custom types</p></td></tr><tr><td class="confluenceTd"><p>palette::hue</p></td><td class="confluenceTd"><p>number</p></td><td class="confluenceTd"><p>no</p></td><td class="confluenceTd"><p>Hue (0-359), integer</p></td></tr><tr><td class="confluenceTd"><p>palette::saturation</p></td><td class="confluenceTd"><p>number</p></td><td class="confluenceTd"><p>no</p></td><td class="confluenceTd"><p>Saturation (0-100)</p></td></tr><tr><td class="confluenceTd"><p>palette::brightness</p></td><td class="confluenceTd"><p>number</p></td><td class="confluenceTd"><p>no</p></td><td class="confluenceTd"><p>Brightness (0-100)</p></td></tr><tr><td class="confluenceTd"><p>palette::probability</p></td><td class="confluenceTd"><p>number</p></td><td class="confluenceTd"><p>no</p></td><td class="confluenceTd"><p>Probability of colour appearance in highlight effect type</p></td></tr><tr><td class="confluenceTd"><p>brightnessRange</p></td><td class="confluenceTd"><p>object</p></td><td class="confluenceTd"><p>No</p></td><td class="confluenceTd"><p>Brightness range for random type effects</p></td></tr><tr><td class="confluenceTd"><p>brightnessRange:: minValue</p></td><td class="confluenceTd"><p>number</p></td><td class="confluenceTd"><p>No</p></td><td class="confluenceTd"><p> </p></td></tr><tr><td class="confluenceTd"><p>brightnessRange:: maxValue</p></td><td class="confluenceTd"><p>number</p></td><td class="confluenceTd"><p>No</p></td><td class="confluenceTd"><p> </p></td></tr><tr><td class="confluenceTd"><p>transTime</p></td><td class="confluenceTd"><p>Object or value</p></td><td class="confluenceTd"><p>no</p></td><td class="confluenceTd"><p>Transition time between colours. This will be a single value for flow and wheel, and a range for random, fade, and highlight</p></td></tr><tr><td class="confluenceTd"><p>transTime:: minValue</p></td><td class="confluenceTd"><p>Number</p></td><td class="confluenceTd"><p>no</p></td><td class="confluenceTd"><p> </p></td></tr><tr><td class="confluenceTd"><p>transTime::maxValue</p></td><td class="confluenceTd"><p>Number</p></td><td class="confluenceTd"><p>no</p></td><td class="confluenceTd"><p> </p></td></tr><tr><td class="confluenceTd"><p>delayTime</p></td><td class="confluenceTd"><p>Object or value</p></td><td class="confluenceTd"><p>No</p></td><td class="confluenceTd"><p>Dwell time between colours. This will be a single value for flow and wheel, and a range for random, fade, and highlight</p></td></tr><tr><td class="confluenceTd"><p>delayTime:: minValue</p></td><td class="confluenceTd"><p>Number</p></td><td class="confluenceTd"><p>No</p></td><td class="confluenceTd"><p> </p></td></tr><tr><td class="confluenceTd"><p>delayTime:: maxValue</p></td><td class="confluenceTd"><p>Number</p></td><td class="confluenceTd"><p>No</p></td><td class="confluenceTd"><p> </p></td></tr><tr><td class="confluenceTd"><p>flowFactor</p></td><td class="confluenceTd"><p>Number</p></td><td class="confluenceTd"><p>No</p></td><td class="confluenceTd"><p>Degree of flow for flow type effects. flowFactor can range from 0 to infinite.</p></td></tr><tr><td class="confluenceTd"><p>explodeFactor</p></td><td class="confluenceTd"><p>Number</p></td><td class="confluenceTd"><p>No</p></td><td class="confluenceTd"><p>Math factor for explode. Can range from 0.0 to 1.0. 0.5 recommended.</p></td></tr><tr><td class="confluenceTd"><p>windowSize</p></td><td class="confluenceTd"><p>number</p></td><td class="confluenceTd"><p>No</p></td><td class="confluenceTd"><p>Window size that determines the number of colours shown in a wheel effect</p></td></tr><tr><td class="confluenceTd"><p>direction</p></td><td class="confluenceTd"><p>string</p></td><td class="confluenceTd"><p>no</p></td><td class="confluenceTd"><p>effect directionality</p></td></tr><tr><td class="confluenceTd"><p>loop</p></td><td class="confluenceTd"><p>boolean</p></td><td class="confluenceTd"><p>yes</p></td><td class="confluenceTd"><p> </p></td></tr></tbody></table></div><h4 id="NanoleafLightPanelsOpenAPIDocumentation-3.2.4.1.Add/UpdateEffects">3.2.4.1. Add/Update Effects</h4><p>“Add” will add (or update) an effect to the Panels and update the Effect list. If the Effect already exists, issuing this command will overwrite the previous Effect. Examples shown below:</p><p><strong>Adding animation that uses the &quot;flow&quot; plugin</strong><br/> </p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;command&quot;: &quot;add&quot;,
+  &quot;version&quot;: &quot;2.0&quot;,
+  &quot;animType&quot;: &quot;plugin&quot;,
+  &quot;animName&quot;: &quot;My Animation&quot;,
+  &quot;colorType&quot;: &quot;HSB&quot;,
+  &quot;pluginUuid&quot;: &quot;027842e4-e1d6-4a4c-a731-be74a1ebd4cf&quot;,
+  &quot;pluginType&quot;: &quot;color&quot;,
+  &quot;pluginOptions&quot;: [
+    {
+      &quot;name&quot;: &quot;transTime&quot;,
+      &quot;value&quot;: 2
+    },
+    {
+      &quot;name&quot;: &quot;direction&quot;,
+      &quot;value&quot;: &quot;left&quot;
+    },
+    {
+      &quot;name&quot;: &quot;loop&quot;,
+      &quot;value&quot;: true
+    }
+  ],
+  &quot;Palette&quot;: [
+    {
+      &quot;hue&quot;: 0,
+      &quot;saturation&quot;: 100,
+      &quot;brightness&quot;: 100
+    },
+    {
+      &quot;hue&quot;: 120,
+      &quot;saturation&quot;: 100,
+      &quot;brightness&quot;: 100
+    },
+    {
+      &quot;hue&quot;: 240,
+      &quot;saturation&quot;: 100,
+      &quot;brightness&quot;: 100
+    }
+  ]
+}</pre>
+</div></div><h4 id="NanoleafLightPanelsOpenAPIDocumentation-3.2.4.2.DeleteEffects">3.2.4.2. Delete Effects</h4><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;command&quot;: &quot;delete&quot;,
+  &quot;animName&quot;: &quot;My Flow Animation&quot;
+}</pre>
+</div></div><h4 id="NanoleafLightPanelsOpenAPIDocumentation-3.2.4.3.RequestEffects">3.2.4.3. Request Effects</h4><p>Request command is used to request effect data from the controller for a particular effect.</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;command&quot;: &quot;request&quot;,
+  &quot;animName&quot;: &quot;My Animation&quot;
+}
+
+Sample Response:
+
+{
+  &quot;version&quot;: &quot;1.0&quot;,
+  &quot;animName&quot;: &quot;My Animation&quot;,
+  &quot;animType&quot;: &quot;plugin&quot;,
+  &quot;colorType&quot;: &quot;HSB&quot;,
+  &quot;palette&quot;: [
+    {
+      &quot;hue&quot;: 235,
+      &quot;saturation&quot;: 100,
+      &quot;brightness&quot;: 51,
+      &quot;probability&quot;: 0
+    },
+    {
+      &quot;hue&quot;: 307,
+      &quot;saturation&quot;: 100,
+      &quot;brightness&quot;: 100,
+      &quot;probability&quot;: 0
+    },
+    {
+      &quot;hue&quot;: 182,
+      &quot;saturation&quot;: 100,
+      &quot;brightness&quot;: 100,
+      &quot;probability&quot;: 0
+    },
+    {
+      &quot;hue&quot;: 62,
+      &quot;saturation&quot;: 100,
+      &quot;brightness&quot;: 100,
+      &quot;probability&quot;: 0
+    },
+    {
+      &quot;hue&quot;: 2,
+      &quot;saturation&quot;: 100,
+      &quot;brightness&quot;: 100,
+      &quot;probability&quot;: 0
+    },
+    {
+      &quot;hue&quot;: 0,
+      &quot;saturation&quot;: 0,
+      &quot;brightness&quot;: 91,
+      &quot;probability&quot;: 0
+    }
+  ],
+  &quot;pluginType&quot;: &quot;rhythm&quot;,
+  &quot;pluginUuid&quot;: &quot;fe0d0ba8-741f-4210-940c-454eceed010f&quot;
+}</pre>
+</div></div><h4 id="NanoleafLightPanelsOpenAPIDocumentation-3.2.4.4.RequestAll">3.2.4.4. Request All</h4><p>Request All is used to request all the effect data from the controller for all effects stored on it.</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;command&quot;: &quot;requestAll&quot;,
+}
+
+Sample Response:
+
+{
+  &quot;animations&quot;: [
+    {
+      &quot;loop&quot;: true,
+      &quot;version&quot;: &quot;1.0&quot;,
+      &quot;animName&quot;: &quot;Slow&quot;,
+      &quot;animType&quot;: &quot;custom&quot;,
+      &quot;animData&quot;: &quot;7 224 7 0 0 0 0 0 0 0 0 255 5 0 0 0 0 5 0 0 0 255 5 0 0 
+        0 0 5 0 0 0 255 5 0 0 0 0 5 89 2 0 0 0 0 0 255 0 0 0 10 210 2 0 0 0 
+        0 0 255 255 0 0 15 116 2 0 0 0 0 0 0 255 0 0 20 173 2 0 0 0 0 0 0 255 
+        255 0 25 126 2 0 0 0 0 0 0 0 255 0 30 81 2 0 0 0 0 0 255 0 255 0 35&quot;
+    },
+    {
+      &quot;loop&quot;: true,
+      &quot;version&quot;: &quot;1.0&quot;,
+      &quot;animName&quot;: &quot;Flames&quot;,
+      &quot;animType&quot;: &quot;highlight&quot;,
+      &quot;colorType&quot;: &quot;HSB&quot;,
+      &quot;animData&quot;: null,
+      &quot;palette&quot;: [
+        {
+          &quot;hue&quot;: 30,
+          &quot;saturation&quot;: 100,
+          &quot;brightness&quot;: 100,
+          &quot;probability&quot;: 58
+        },
+        {
+          &quot;hue&quot;: 45,
+          &quot;saturation&quot;: 100,
+          &quot;brightness&quot;: 100,
+          &quot;probability&quot;: 8
+        },
+        {
+          &quot;hue&quot;: 25,
+          &quot;saturation&quot;: 100,
+          &quot;brightness&quot;: 100,
+          &quot;probability&quot;: 25
+        },
+        {
+          &quot;hue&quot;: 40,
+          &quot;saturation&quot;: 100,
+          &quot;brightness&quot;: 100,
+          &quot;probability&quot;: 8
+        }
+      ],
+      &quot;brightnessRange&quot;: {
+        &quot;minValue&quot;: 40,
+        &quot;maxValue&quot;: 100
+      },
+      &quot;transTime&quot;: {
+        &quot;minValue&quot;: 2,
+        &quot;maxValue&quot;: 10
+      },
+      &quot;delayTime&quot;: {
+        &quot;minValue&quot;: 0,
+        &quot;maxValue&quot;: 0
+      }
+    },
+    {
+      &quot;delayTime&quot;: {
+        &quot;minValue&quot;: 0,
+        &quot;maxValue&quot;: 0
+      },
+      &quot;version&quot;: &quot;1.0&quot;,
+      &quot;animName&quot;: &quot;Lightning&quot;,
+      &quot;animType&quot;: &quot;random&quot;,
+      &quot;colorType&quot;: &quot;HSB&quot;,
+      &quot;animData&quot;: null,
+      &quot;palette&quot;: [
+        {
+          &quot;hue&quot;: 0,
+          &quot;saturation&quot;: 0,
+          &quot;brightness&quot;: 100
+        },
+        {
+          &quot;hue&quot;: 0,
+          &quot;saturation&quot;: 0,
+          &quot;brightness&quot;: 0
+        }
+      ],
+      &quot;brightnessRange&quot;: {
+        &quot;minValue&quot;: 25,
+        &quot;maxValue&quot;: 100
+      },
+      &quot;transTime&quot;: {
+        &quot;minValue&quot;: 0,
+        &quot;maxValue&quot;: 0
+      }
+    }
+  ]
+}</pre>
+</div></div><h4 id="NanoleafLightPanelsOpenAPIDocumentation-3.2.4.5.RenameEffects">3.2.4.5. Rename Effects</h4><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;command&quot;: &quot;rename&quot;,
+  &quot;animName&quot;: &quot;My Flow Animation&quot;,
+  &quot;newName&quot;: &quot;My New Flow Animation&quot;
+}</pre>
+</div></div><h4 id="NanoleafLightPanelsOpenAPIDocumentation-3.2.4.6.DisplayEffects">3.2.4.6. Display Effects</h4><p>Display is used to see a preview on Panels. This functions as a temporary display on Panels without saving as an Effect. The command structure is identical to add, but without a required animName field:</p><p><em>Temporary dynamic effect</em></p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;command&quot;: &quot;display&quot;,
+  &quot;version&quot;: &quot;2.0&quot;,
+  &quot;animType&quot;: &quot;plugin&quot;,
+  &quot;colorType&quot;: &quot;HSB&quot;,
+  &quot;pluginUuid&quot;: &quot;027842e4-e1d6-4a4c-a731-be74a1ebd4cf&quot;,
+  &quot;pluginType&quot;: &quot;color&quot;,
+  &quot;pluginOptions&quot;: [
+    {
+      &quot;name&quot;: &quot;transTime&quot;,
+      &quot;value&quot;: 2
+    },
+    {
+      &quot;name&quot;: &quot;direction&quot;,
+      &quot;value&quot;: &quot;left&quot;
+    },
+    {
+      &quot;name&quot;: &quot;loop&quot;,
+      &quot;value&quot;: true
+    }
+  ],
+  &quot;Palette&quot;: [
+    {
+      &quot;hue&quot;: 0,
+      &quot;saturation&quot;: 100,
+      &quot;brightness&quot;: 100
+    },
+    {
+      &quot;hue&quot;: 120,
+      &quot;saturation&quot;: 100,
+      &quot;brightness&quot;: 100
+    },
+    {
+      &quot;hue&quot;: 240,
+      &quot;saturation&quot;: 100,
+      &quot;brightness&quot;: 100
+    }
+  ]
+}</pre>
+</div></div><h4 id="NanoleafLightPanelsOpenAPIDocumentation-3.2.4.7.DisplayTemporaryEffects">3.2.4.7. Display Temporary Effects</h4><p>Display temporary is used to temporarily set a color mode on Panels. This is typically used for temporary notifications or visual indicators. There are two fundamental types with a third derivative type.</p><p>Set saved effect:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;command&quot;: &quot;displayTemp&quot;,
+  &quot;duration&quot;: ,
+  &quot;animName&quot;: 
+}</pre>
+</div></div><p>Set arbitrary effect:</p><p>You should include the exact animationOptionJson, but the command must be displayTemp and there must be a duration field.</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;command&quot;: &quot;displayTemp&quot;,
+  &quot;duration&quot;: ,
+  ‚Ä¶‚Ä¶
+}</pre>
+</div></div><p>Set specific color:<br/>This is a derivative of an arbitrary effect. As a tip, you can flash the colour by adding a black colour to the palette and using the fade plugin with some defined transition time.</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;command&quot;: &quot;displayTemp&quot;,
+  &quot;duration&quot;: ,
+  &quot;animType&quot;: &quot;solid&quot;,
+  &quot;palette&quot;: [
+    {
+      &quot;hue&quot;: &lt; user &gt;,
+      &quot;saturation&quot;: &lt; user &gt;,
+      &quot;brightness&quot;: &lt; user &gt;
+    }
+  ],
+  &quot;colorType&quot;: &quot;HSB&quot;
+}</pre>
+</div></div><h4 id="NanoleafLightPanelsOpenAPIDocumentation-3.2.4.8.RequestPlugins">3.2.4.8. Request Plugins</h4><p>Request command is used to request plugins data from the Panels.</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;command&quot;: &quot;requestPlugins&quot;,
+  &quot;version&quot;: &quot;2.0&quot;
+}</pre>
+</div></div><p>The response contains all the plugins that are present on the controller. The UUID, name, description,author, type, tags, features and pluginConfig data are returned as shown below.<br/>Sample Response for Nanoleaf Canvas Panels</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;plugins&quot;: [
+    {
+      &quot;uuid&quot;: &quot;027842e4-e1d6-4a4c-a731-be74a1ebd4cf&quot;,
+      &quot;name&quot;: &quot;Flow&quot;,
+      &quot;description&quot;: &quot;Imagine you dump each color onto your panels. 
+        Watch the color flow in a direction of your choosing.&quot;,
+      &quot;author&quot;: &quot;Nanoleaf&quot;,
+      &quot;type&quot;: &quot;color&quot;,
+      &quot;tags&quot;: [
+        &quot;zen&quot;,
+        &quot; happy&quot;
+      ],
+      &quot;features&quot;: [
+        &quot;touch&quot;
+      ],
+      &quot;pluginConfig&quot;: [
+        {
+          &quot;name&quot;: &quot;loop&quot;,
+          &quot;type&quot;: &quot;bool&quot;,
+          &quot;defaultValue&quot;: true
+        },
+        {
+          &quot;name&quot;: &quot;transTime&quot;,
+          &quot;type&quot;: &quot;int&quot;,
+          &quot;defaultValue&quot;: 24,
+          &quot;minValue&quot;: 1,
+          &quot;maxValue&quot;: 600
+        },
+        {
+          &quot;name&quot;: &quot;delayTime&quot;,
+          &quot;type&quot;: &quot;int&quot;,
+          &quot;defaultValue&quot;: 0,
+          &quot;minValue&quot;: 0,
+          &quot;maxValue&quot;: 600
+        },
+        {
+          &quot;name&quot;: &quot;linDirection&quot;,
+          &quot;type&quot;: &quot;string&quot;,
+          &quot;defaultValue&quot;: &quot;right&quot;,
+          &quot;strings&quot;: [
+            &quot;left&quot;,
+            &quot;right&quot;,
+            &quot;up&quot;,
+            &quot;down&quot;
+          ]
+        }
+      ]
+    },
+    {
+      &quot;uuid&quot;: &quot;23e70ff4-458c-4852-826f-9315d89ee6ed&quot;,
+      &quot;name&quot;: &quot;Meteor Shower&quot;,
+      &quot;description&quot;: &quot;Like a meteor shower of music notes, 
+        watch as a stardust of colors sprinkle across the panels to the pitch of the music. 
+        Colors on the left indicate low notes while the right represents higher notes.&quot;,
+      &quot;author&quot;: &quot;Nanoleaf&quot;,
+      &quot;type&quot;: &quot;rhythm&quot;,
+      &quot;tags&quot;: [
+        &quot;party&quot;,
+        &quot; electronic&quot;,
+        &quot; vibrant&quot;,
+        &quot; pop&quot;
+      ],
+      &quot;features&quot;: []
+    }
+  ]
+}</pre>
+</div></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-3.2.5.ReservedEffectNames">3.2.5. Reserved Effect Names</h3><p style="margin-left: 30.0px;">The Effect name is used to give the user a snapshot of what is currently displayed. As such, we reserve the following names for indicating certain Panels modes:</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>Reserved Name</strong></p></th><th class="confluenceTh"><p><strong>Description</strong></p></th></tr><tr><td class="confluenceTd"><p>*Static*</p></td><td class="confluenceTd"><p>Panels hold static colors defined by the user</p></td></tr><tr><td class="confluenceTd"><p>*Dynamic*</p></td><td class="confluenceTd"><p>Temporary Dynamic Effect defined by user</p></td></tr><tr><td class="confluenceTd"><p>*Solid*</p></td><td class="confluenceTd"><p>User-defined through Universal Color</p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-3.2.6.EffectTypes">3.2.6. Effect Types</h3><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>Effect Types</strong></p></th><th class="confluenceTh"><p><strong>Description</strong></p></th></tr><tr><td class="confluenceTd"><p>*Custom*</p></td><td class="confluenceTd"><p>Creates any arbitrary effect using a condensed panel-resolved timeline message format</p></td></tr><tr><td class="confluenceTd"><p>extControl</p></td><td class="confluenceTd"><p>External Control (Streaming) opens a UDP socket connection over the local network to stream control data frames to controller/control square.</p></td></tr></tbody></table></div><h4 id="NanoleafLightPanelsOpenAPIDocumentation-3.2.6.1.Custom">3.2.6.1. Custom</h4><p>Custom effect types are used for Static or arbitrary effects and use the &quot;animData&quot; property. The format is as follows. This allows developers to define ‚&quot;frame-by-frame&quot; Effects.</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">      numPanels; panelId0; numFrames0; RGBWT01; RGBWT02; ... RGBWT0n(0);
+      panelId1; numFrames1; RGBWT11; RGBWT12; ... RGBWT1n(1); ... ... panelIdN;
+      numFramesN; RGBWTN1; RGBWTN2; ... RGBWTNn(N);
+</pre>
+</div></div><p>Note that there are no newline characters in the string, and that essentially this is linearization of a 2D Matrix, with N panels, and a certain number of frames per panel. Each panel need not have the same number of frames. Each RGBWTij; collection is a RGBWT vector and is represented as follows:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">R; G; B; W; T;</pre>
+</div></div><p>Note that the W; element is currently ignored. The white LED is used automatically during white balancing by Panels based on its internal calibrations. To avoid lengthy initial transitions that may not look visually pleasing, we introduce the concept of a start frame. If T is set to -1, it is considered a start frame which is initialized instantaneously. For logical consistency, a start frame can ONLY occur for the first frame of every panel. Start frames are not included if the effect is set to loop, which is why T=-1 is used instead of T=0. An RGBWT collection directs a panel to move to the specified RGBW color in a transition time of T*100ms (1T = 100ms). This approach, coupled with a single frame per panel, is how one creates Static Effects.</p><p>Examples<br/>Temporary static display</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;command&quot;: &quot;display/add&quot;,
+  &quot;animType&quot;: &quot;static&quot;,
+  &quot;animData&quot;: &quot;3 82 1 255 0 255 0 20 60 1 0 255 255 0 20 118 1 0 0 0 0 20&quot;,
+  &quot;loop&quot;: false,
+  &quot;palette&quot;: [{
+      &quot;hue&quot;: 0,
+      &quot;saturation&quot;: 100,
+      &quot;brightness&quot;: 0
+  }, {
+      &quot;hue&quot;: 30,
+      &quot;saturation&quot;: 100,
+      &quot;brightness&quot;: 10
+  }],
+  &quot;colorType&quot;: &quot;HSB&quot;
+}</pre>
+</div></div><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre"> = 3
+ = 1
+Panel 1:
+PanelId: 82, R:255, G:0, B:255, W:0, TransitionTime:20*0.1s
+Panel 2:
+PanelId: 60, R:0, G:255, B:255, W:0, TransitionTime:20*0.1s
+Panel 3:
+PanelId:118, R:0, G:0, B:0, W:0, TransitionTime:20*0.1s
+</pre>
+</div></div><p>Note the use of the static effect type to display a static effect.</p><h4 id="NanoleafLightPanelsOpenAPIDocumentation-3.2.6.2.ExternalControl(extControl)">3.2.6.2. External Control (extControl)</h4><p>Allows control over a UDP socket connection to stream control data to stream control data to the Panels. A request is sent to the controller to activate stream control to the Panels. The External Control mode can only be activated in display mode. The write command containing animType as extControl (see Section 5.7) will result in a 200 OK response with the body containing the IP address, the port number, and the protocol type for streaming control (Response only for Light Panels only).<br/>Example response (Light Panels only):</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;streamControlIpAddr&quot;: &quot;192.168.2.231&quot;,
+  &quot;streamControlPort&quot;: 60222,
+  &quot;streamControlProtocol&quot;: &quot;udp&quot;
+}</pre>
+</div></div><p>The frame format is very similar to the custom animation type with the exception that it is sent as an array of bytes, instead of a human readable string. The conversion is done by considering each element as a separate byte as demonstrated by the examples below. Note that each frame need not include all panels if there is no transition for that panel at that time.</p><p>We recommend a stream rate of no faster than 10Hz. You do not need to update every panel every frame. If you specify a transition time larger than 1 (equivalent to 100ms), the panel will transition over that period. If you update the panel again before it completes, it will start a new transition to the target color from its current intermediate state from the previous transition.</p><p>Note that the White LED element is currently ignored. The white LED is used automatically during white balancing by Panels based on its internal calibrations.</p><p>The External Controller must not stream data at a rate higher than 10Hz. (100ms transitions are handled at a panel level and as such, will be smooth even at a 10Hz update frame rate)</p><p>Light Panels and Canvas use a different external control streaming protocols. Light Panels uses stream control v1, while Canvas uses stream control v2.</p><p>An example for both is given below:</p><p>To set the following colors on Light Panels:</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>PanelId</strong></p></th><th class="confluenceTh"><p><strong>Color</strong></p></th><th class="confluenceTh"><p><strong>Transition Time</strong></p></th></tr><tr><td class="confluenceTd"><p>123</p></td><td class="confluenceTd"><p>{255, 0, 0}</p></td><td class="confluenceTd"><p>9</p></td></tr><tr><td class="confluenceTd"><p>223</p></td><td class="confluenceTd"><p>{0, 255, 0}</p></td><td class="confluenceTd"><p>24</p></td></tr><tr><td class="confluenceTd"><p>67</p></td><td class="confluenceTd"><p>{0, 0, 255}</p></td><td class="confluenceTd"><p>32</p></td></tr></tbody></table></div><p>The stream control (v1) message would look like</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">3  --&gt; nPanels
+123 1 255 0 0 0 9  --&gt; set panel color
+223 1 0 255 0 0 24  --&gt; set panel color
+67 1 0 0 255 0 32 --&gt; set panel color
+</pre>
+</div></div><p>Breakdown of Set Panel Color :</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><td class="confluenceTd"><p>123</p></td><td class="confluenceTd"><p>255 0 255 0</p></td><td class="confluenceTd"><p>9</p></td></tr><tr><td class="confluenceTd"><p>Panel Id</p></td><td class="confluenceTd"><p>{R G B W} Color</p></td><td class="confluenceTd"><p>Transition time</p></td></tr></tbody></table></div><p>In order to support the much larger number of panels on Canvas, the size of the nPanels, panelId and tranitionTime fields have been increased from 1B to 2B. The nFrames field has been dropped as it was set to 1 in v1 anyway</p><p>To set the following colors on Canvas</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>PanelId</strong></p></th><th class="confluenceTh"><p><strong>Color</strong></p></th><th class="confluenceTh"><p><strong>Transition Time</strong></p></th></tr><tr><td class="confluenceTd"><p>374</p></td><td class="confluenceTd"><p>{255, 0, 255, 0}</p></td><td class="confluenceTd"><p>12</p></td></tr><tr><td class="confluenceTd"><p>651</p></td><td class="confluenceTd"><p>{255, 255, 0, 0}</p></td><td class="confluenceTd"><p>128</p></td></tr><tr><td class="confluenceTd"><p>235</p></td><td class="confluenceTd"><p>{0, 255, 255, 0}</p></td><td class="confluenceTd"><p>451</p></td></tr></tbody></table></div><p>The stream control (v2) message would look like</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">0 3  ‚---&gt; nPanels
+1 118 255 0 255 0 0 12  ‚---&gt; Set panel color
+2 139 255 255 0 0 0 128  ‚---&gt; Set panel color
+0 235 0 255 255 0 1 195 ‚---&gt; Set panel color
+</pre>
+</div></div><p>Breakdown of Set Panel Color :</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><td class="confluenceTd"><p>1 118</p></td><td class="confluenceTd"><p>255 0 255 0</p></td><td class="confluenceTd"><p>0 12</p></td></tr><tr><td class="confluenceTd"><p>Panel Id (Big Endian)</p></td><td class="confluenceTd"><p>{R G B W} Color</p></td><td class="confluenceTd"><p>Transition time (Big Endian)</p></td></tr></tbody></table></div><p>*Note that all the multi-byte fields are represented in Big Endian format</p><p>Since this is transmitted as a byte stream, the message would look like, with each byte represented by hexadecimal digits:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">0x00 0x03 0x01 0x76 0xFF 0x00 0xFF 0x00 0x00 0xC 0x02 0x8B 0xFF 0xFF
+0x00 0x00 0x00 0x80 0x00 0xEB 0x00 0xFF 0xFF 0x00 0x01 0xC3</pre>
+</div></div><hr/><h2 id="NanoleafLightPanelsOpenAPIDocumentation-3.3.LayoutData">3.3. Layout Data</h2><p>The following describes the data format used to communicate the user‚Äôs detected Panels layout:</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>Item</strong></p></th><th colspan="3" class="confluenceTh"><p><strong>Description</strong></p></th></tr><tr><td class="confluenceTd"><p>numPanels</p></td><td colspan="3" class="confluenceTd"><p>the number of panels. For Light Panels this is EXCLUSIVE of the controller For Canvas this in INCLUSIVE of the control square</p></td></tr><tr><td class="confluenceTd"><p>sideLength</p></td><td colspan="3" class="confluenceTd"><p>The length of a panel side, in pixels, that is used in calculation of the centroid location.</p></td></tr><tr><td class="confluenceTd"><p>panelId</p></td><td colspan="3" class="confluenceTd"><p>Panel identifying number for the nth panel.</p></td></tr><tr><td class="confluenceTd"><p>x</p></td><td colspan="3" class="confluenceTd"><p>X coordinate of the centroid of the nth panel</p></td></tr><tr><td class="confluenceTd"><p>y</p></td><td colspan="3" class="confluenceTd"><p>Y coordinate of the centroid of the nth panel</p></td></tr><tr><td class="confluenceTd"><p>o</p></td><td colspan="3" class="confluenceTd"><p>Orientation of the nth panel.</p></td></tr><tr><td rowspan="21" class="confluenceTd"><p /><p /><p /><p /><p /><p /><p /><p /><p /><p /><p /><p>ShapeType</p></td><th class="confluenceTh"><p>Name</p></th><th class="confluenceTh"><p>Value</p></th><th class="confluenceTh"><p>Side Length</p></th></tr><tr><td class="confluenceTd"><p>Triangle</p></td><td class="confluenceTd"><p>0</p></td><td class="confluenceTd"><p>150</p></td></tr><tr><td class="confluenceTd"><p>Rhythm</p></td><td class="confluenceTd"><p>1</p></td><td class="confluenceTd"><p>N/A</p></td></tr><tr><td class="confluenceTd"><p>Square</p></td><td class="confluenceTd"><p>2</p></td><td class="confluenceTd"><p>100</p></td></tr><tr><td class="confluenceTd"><p>Control Square Master</p></td><td class="confluenceTd"><p>3</p></td><td class="confluenceTd"><p>100</p></td></tr><tr><td class="confluenceTd"><p>Control Square Passive</p></td><td class="confluenceTd"><p>4</p></td><td class="confluenceTd"><p>100</p></td></tr><tr><td class="confluenceTd"><p>Hexagon (Shapes)</p></td><td class="confluenceTd"><p>7</p></td><td class="confluenceTd"><p>67</p></td></tr><tr><td class="confluenceTd"><p>Triangle (Shapes)</p></td><td class="confluenceTd"><p>8</p></td><td class="confluenceTd"><p>134</p></td></tr><tr><td class="confluenceTd"><p>Mini Triangle (Shapes)</p></td><td class="confluenceTd"><p>9</p></td><td class="confluenceTd"><p>67</p></td></tr><tr><td class="confluenceTd"><p>Shapes Controller</p></td><td class="confluenceTd"><p>12</p></td><td class="confluenceTd"><p>N/A</p></td></tr><tr><td class="confluenceTd"><p>Elements Hexagons</p></td><td class="confluenceTd"><p>14</p></td><td class="confluenceTd"><p>134</p></td></tr><tr><td class="confluenceTd"><p>Elements Hexagons - Corner</p></td><td class="confluenceTd"><p>15</p></td><td class="confluenceTd"><p>33.5 / 58</p></td></tr><tr><td class="confluenceTd"><p>Lines Connector</p></td><td class="confluenceTd"><p>16</p></td><td class="confluenceTd"><p>11</p></td></tr><tr><td class="confluenceTd"><p>Light Lines</p></td><td class="confluenceTd"><p>17</p></td><td class="confluenceTd"><p>154</p></td></tr><tr><td class="confluenceTd"><p>Light Lines - Single Zone</p></td><td class="confluenceTd"><p>18</p></td><td class="confluenceTd"><p>77</p></td></tr><tr><td class="confluenceTd"><p>Controller Cap</p></td><td class="confluenceTd"><p>19</p></td><td class="confluenceTd"><p>11</p></td></tr><tr><td class="confluenceTd"><p>Power Connector</p></td><td class="confluenceTd"><p>20</p></td><td class="confluenceTd"><p>11</p></td></tr><tr><td class="confluenceTd"><p>Nanoleaf 4D Lightstrip</p></td><td class="confluenceTd"><p>29</p></td><td class="confluenceTd"><p>50</p></td></tr><tr><td class="confluenceTd"><p>Skylight Panel</p></td><td class="confluenceTd"><p>30</p></td><td class="confluenceTd"><p>180</p></td></tr><tr><td class="confluenceTd"><p>Skylight Controller Primary</p></td><td class="confluenceTd"><p>31</p></td><td class="confluenceTd"><p>180</p></td></tr><tr><td class="confluenceTd"><p>Skylight Controller Passive Mode</p></td><td class="confluenceTd"><p>32</p></td><td class="confluenceTd"><p>180</p></td></tr></tbody></table></div><p><em>Note: As of 5.0.0 the side length field is now deprecated since it cannot represent the side lengths of multiple shapes in order to support the connect+ feature. It will still exist in the JSON, but its value will be set to 0.</em><br/><br/><em>The side length must now be inferred from the shapeType. It will not change for a given Shape and can be treated as a constant.</em></p><p>In the case of Light Panels where controller has no lighting function, it is not included in the data provided by the API. In the case of Canvas/Skylight where controller square acts as regular panel, it is included in the data provided by the API.</p><p>Each element in the LayoutData json array corresponds to a panel with the specified panelId and its location and orientation specified in 2D cartesian space. The (X, Y) pair corresponds to the position of the panel’s centroid and o corresponds to its orientation, which is measured counter clockwise. Along with the sideLength, the orientation and the coordinates, the panel vertices position in cartesian space can be calculated and the panel can be drawn in 2D space on a screen.</p><p>Note that the Global Orientation of the system is typically provided by the user through the Nanoleaf App. This defines the canvas rotation, and normally represents the user‚Äôs preference for viewing the panel layout. The panel layout data will always be the same, regardless of the Global Orientation, so it is the responsibility of the developer to account for this if they wish to draw the layout on a screen.</p><h4 id="NanoleafLightPanelsOpenAPIDocumentation-3.3.1.1.LightPanels(TenPanels)">3.3.1.1. Light Panels ( Ten Panels )</h4><span class="confluence-embedded-file-wrapper image-center-wrapper confluence-embedded-manual-size"><img class="confluence-embedded-image image-center" alt="image-20260203-171929.png" width="571" src="attachments/2789310530-image-20260203-171929.png"></span><p /><p>Sample layout from the Central Controller:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;numPanels&quot;: 10,
+  &quot;sideLength&quot;: 150,
+  &quot;positionLayout&quot;: [
+    {
+      &quot;panelId&quot;: 1,
+      &quot;x&quot;: 100,
+      &quot;y&quot;: 100,
+      &quot;o&quot;: 60,
+      &quot;shapeType&quot;: 0
+    },
+    {
+      &quot;panelId&quot;: 2,
+      &quot;x&quot;: 324,
+      &quot;y&quot;: 56,
+      &quot;o&quot;: 0,
+      &quot;shapeType&quot;: 0
+    },
+    {
+      &quot;panelId&quot;: 3,
+      &quot;x&quot;: 249,
+      &quot;y&quot;: -159,
+      &quot;o&quot;: 60,
+      &quot;shapeType&quot;: 0
+    },
+    {
+      &quot;panelId&quot;: 4,
+      &quot;x&quot;: 174,
+      &quot;y&quot;: 56,
+      &quot;o&quot;: 240,
+      &quot;shapeType&quot;: 0
+    },
+    {
+      &quot;panelId&quot;: 5,
+      &quot;x&quot;: 324,
+      &quot;y&quot;: -29,
+      &quot;o&quot;: 60,
+      &quot;shapeType&quot;: 0
+    },
+    {
+      &quot;panelId&quot;: 6,
+      &quot;x&quot;: -49,
+      &quot;y&quot;: 100,
+      &quot;o&quot;: 60,
+      &quot;shapeType&quot;: 0
+    },
+    {
+      &quot;panelId&quot;: 7,
+      &quot;x&quot;: 399,
+      &quot;y&quot;: 99,
+      &quot;o&quot;: 300,
+      &quot;shapeType&quot;: 0
+    },
+    {
+      &quot;panelId&quot;: 8,
+      &quot;x&quot;: 174,
+      &quot;y&quot;: -29,
+      &quot;o&quot;: 60,
+      &quot;shapeType&quot;: 0
+    },
+    {
+      &quot;panelId&quot;: 9,
+      &quot;x&quot;: 25,
+      &quot;y&quot;: 56,
+      &quot;o&quot;: 120,
+      &quot;shapeType&quot;: 0
+    },
+    {
+      &quot;panelId&quot;: 10,
+      &quot;x&quot;: 249,
+      &quot;y&quot;: -73,
+      &quot;o&quot;: 240,
+      &quot;shapeType&quot;: 0
+    }
+  ]
+}</pre>
+</div></div><h4 id="NanoleafLightPanelsOpenAPIDocumentation-3.3.1.2.LightPanels(SixPanels)">3.3.1.2. Light Panels ( Six Panels )</h4><span class="confluence-embedded-file-wrapper image-center-wrapper confluence-embedded-manual-size"><img class="confluence-embedded-image image-center" alt="image-20260203-171907.png" width="350" src="attachments/2789310530-image-20260203-171907.png"></span><p /><p>Sample layout from the Central Controller:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;numPanels&quot;: 10,
+  &quot;sideLength&quot;: 150,
+  &quot;positionLayout&quot;: [
+    {
+      &quot;panelId&quot;: 1,
+      &quot;x&quot;: 100,
+      &quot;y&quot;: 100,
+      &quot;o&quot;: 0,
+      &quot;shapeType&quot;: 0
+    },
+    {
+      &quot;panelId&quot;: 2,
+      &quot;x&quot;: 25,
+      &quot;y&quot;: -29,
+      &quot;o&quot;: 240,
+      &quot;shapeType&quot;: 0
+    },
+    {
+      &quot;panelId&quot;: 3,
+      &quot;x&quot;: 174,
+      &quot;y&quot;: -29,
+      &quot;o&quot;: 120,
+      &quot;shapeType&quot;: 0
+    },
+    {
+      &quot;panelId&quot;: 4,
+      &quot;x&quot;: 99,
+      &quot;y&quot;: 13,
+      &quot;o&quot;: 180,
+      &quot;shapeType&quot;: 0
+    },
+    {
+      &quot;panelId&quot;: 5,
+      &quot;x&quot;: 99,
+      &quot;y&quot;: -159,
+      &quot;o&quot;: 0,
+      &quot;shapeType&quot;: 0
+    },
+    {
+      &quot;panelId&quot;: 6,
+      &quot;x&quot;: 25,
+      &quot;y&quot;: -116,
+      &quot;o&quot;: 60,
+      &quot;shapeType&quot;: 0
+    }
+  ]
+}</pre>
+</div></div><h4 id="NanoleafLightPanelsOpenAPIDocumentation-3.3.1.3.Canvas(SixPanels)">3.3.1.3. Canvas ( Six Panels )</h4><span class="confluence-embedded-file-wrapper image-center-wrapper confluence-embedded-manual-size"><img class="confluence-embedded-image image-center" alt="image-20260203-171846.png" width="388" src="attachments/2789310530-image-20260203-171846.png"></span><p>Sample layout from the Control Square:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;numPanels&quot;: 6,
+  &quot;sideLength&quot;: 100,
+  &quot;positionData&quot;: [
+    {
+      &quot;panelId&quot;: 46095,
+      &quot;x&quot;: 250,
+      &quot;y&quot;: 100,
+      &quot;o&quot;: 0,
+      &quot;shapeType&quot;: 2
+    },
+    {
+      &quot;panelId&quot;: 9489,
+      &quot;x&quot;: 150,
+      &quot;y&quot;: 100,
+      &quot;o&quot;: 0,
+      &quot;shapeType&quot;: 2
+    },
+    {
+      &quot;panelId&quot;: 22817,
+      &quot;x&quot;: 50,
+      &quot;y&quot;: 100,
+      &quot;o&quot;: 0,
+      &quot;shapeType&quot;: 2
+    },
+    {
+      &quot;panelId&quot;: 31391,
+      &quot;x&quot;: 0,
+      &quot;y&quot;: 0,
+      &quot;o&quot;: 180,
+      &quot;shapeType&quot;: 2
+    },
+    {
+      &quot;panelId&quot;: 26038,
+      &quot;x&quot;: 50,
+      &quot;y&quot;: 200,
+      &quot;o&quot;: 0,
+      &quot;shapeType&quot;: 2
+    },
+    {
+      &quot;panelId&quot;: 19479,
+      &quot;x&quot;: 150,
+      &quot;y&quot;: 250,
+      &quot;o&quot;: 180,
+      &quot;shapeType&quot;: 2
+    }
+  ]
+}</pre>
+</div></div><hr/><h2 id="NanoleafLightPanelsOpenAPIDocumentation-3.4.Brightness">3.4. Brightness</h2><p>Brightness is a central component of any smart lighting system, and Nanoleaf Panels are no exception. It‚Äôs worth differentiating two concepts:</p><ul><li><p>Universal Brightness</p></li><li><p>Palette Color Brightness</p></li></ul><p>The Universal Brightness is what a user normally controls. This works the same way any smart light works. If things are too bright, dim the (universal) brightness and vice versa.</p><p>You will notice that each Palette color also has a &quot;brightness&quot;. This is because Palette colors are specified in HSB, which is analogous to HSV. Note that there is a good deal of subtlety around this difference because screen colours fade to black (V=0), whereas Panels colours fade to white (or whatever ambient lighting is around, B=0).</p><p>Panels' Universal Brightness fades Panels regardless of mode (Static, Dynamic, Solid). You can consider it like a universal multiplier. If you have palette colors with varying brightnesses, their relative ratios will be maintained by Panels regardless of universal brightness.</p><hr/><h2 id="NanoleafLightPanelsOpenAPIDocumentation-3.5.Events">3.5. Events</h2><p>Developers can register and listen to events from Nanoleaf Devices using Server-Sent Events (SSE).</p><ul><li><p>Light Panels requires version &gt; 3.1.0</p></li><li><p>Canvas requires version &gt; 1.10</p></li></ul><p>Please note, only Canvas supports Touch events at this time.</p><h3 id="NanoleafLightPanelsOpenAPIDocumentation-3.5.1.RegisteringandReceivingEvents">3.5.1. Registering and Receiving Events</h3><p>To register for events, a client should send a GET request to the /events endpoint with a query string containing a comma separated list of the event types it wishes to register for.</p><p>For example if a client wished to register for the state (id=1), layout (id=2) and touch (id=3) events, it would sent the following request:</p><p>Example request:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">GET /api/v1//events?id=1,2,4 HTTP/1.1</pre>
+</div></div><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">Host: 192.168.0.2:16021</pre>
+</div></div><p>The Panels will respond and keep the connection open and keep transmitting events as they take place on the controller</p><p>Sample response:</p><p>When an event occurs, the eventId is sent with the id field followed by a newline character, with the actual event json being sent as part of the data field.</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">HTTP/1.1 200 OK
+Content-Type: text/event-stream
+.
+.
+id: 
+
+data: 
+
+
+
+.
+.
+id: 
+
+data: 
+
+
+</pre>
+</div></div><h3 id="NanoleafLightPanelsOpenAPIDocumentation-3.5.2.EventsTypes">3.5.2. Events Types</h3><p>There are currently 4 different event types available (with more types to be added in the future)</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>Event Type</strong></p></th><th class="confluenceTh"><p><strong>Event Type Id</strong></p></th></tr><tr><td class="confluenceTd"><p><strong>State:</strong></p></td><td class="confluenceTd"><p>1</p></td></tr><tr><td class="confluenceTd"><p><strong>Layout</strong></p></td><td class="confluenceTd"><p>2</p></td></tr><tr><td class="confluenceTd"><p><strong>Effects</strong></p></td><td class="confluenceTd"><p>3</p></td></tr><tr><td class="confluenceTd"><p><strong>Touch:</strong></p></td><td class="confluenceTd"><p>4</p></td></tr></tbody></table></div><h4 id="NanoleafLightPanelsOpenAPIDocumentation-3.5.2.1.State">3.5.2.1. State</h4><p>The state event (id : 1) is sent out whenever the state of the Canvas changes. It covers changes on attributes from the /state endpoint. Examples include power, brightness, e.t.c</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><td class="confluenceTd"><p><strong>Attribute</strong></p></td><td class="confluenceTd"><p><strong>Attribute ID</strong></p></td></tr><tr><td class="confluenceTd"><p>on</p></td><td class="confluenceTd"><p>1</p></td></tr><tr><td class="confluenceTd"><p>brightness</p></td><td class="confluenceTd"><p>2</p></td></tr><tr><td class="confluenceTd"><p>hue</p></td><td class="confluenceTd"><p>3</p></td></tr><tr><td class="confluenceTd"><p>saturation</p></td><td class="confluenceTd"><p>4</p></td></tr><tr><td class="confluenceTd"><p>cct</p></td><td class="confluenceTd"><p>5</p></td></tr><tr><td class="confluenceTd"><p>colorMode</p></td><td class="confluenceTd"><p>6</p></td></tr></tbody></table></div><p>Example event json:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;events&quot;: [
+    {
+      &quot;attr&quot;: 1,
+      &quot;value&quot;: true
+    },
+    {
+      &quot;attr&quot;: 2,
+      &quot;value&quot;: 40
+    },
+    {
+      &quot;attr&quot;: 3,
+      &quot;value&quot;: 72
+    },
+    {
+      &quot;attr&quot;: 4,
+      &quot;value&quot;: 2700
+    }
+  ]
+}</pre>
+</div></div><h4 id="NanoleafLightPanelsOpenAPIDocumentation-3.5.2.2.Layout">3.5.2.2. Layout</h4><p>The layout event (id : 2) is sent out whenever there are changes to attributes covered by the /layout endpoint.</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>Attribute</strong></p></th><th class="confluenceTh"><p><strong>Attribute ID</strong></p></th></tr><tr><td class="confluenceTd"><p>layout</p></td><td class="confluenceTd"><p>1</p></td></tr><tr><td class="confluenceTd"><p>globalOrientation</p></td><td class="confluenceTd"><p>2</p></td></tr></tbody></table></div><p>Example event json:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;events&quot;: [
+    {
+      &quot;attr&quot;: 1,
+      &quot;value&quot;: {
+        &quot;numPanels&quot;: 3,
+        &quot;sideLength&quot;: 100,
+        &quot;positionData&quot;: [
+          {
+            &quot;panelId&quot;: 37317,
+            &quot;x&quot;: 200,
+            &quot;y&quot;: 200,
+            &quot;o&quot;: 0,
+            &quot;shapeType&quot;: 2
+          },
+          {
+            &quot;panelId&quot;: 1038,
+            &quot;x&quot;: 200,
+            &quot;y&quot;: 100,
+            &quot;o&quot;: 90,
+            &quot;shapeType&quot;: 2
+          },
+          {
+            &quot;panelId&quot;: 7930,
+            &quot;x&quot;: 200,
+            &quot;y&quot;: 0,
+            &quot;o&quot;: 90,
+            &quot;shapeType&quot;: 2
+          }
+        ]
+      }
+    },
+    {
+      &quot;attr&quot;: 2,
+      &quot;value&quot;: 90
+    }
+  ]
+}</pre>
+</div></div><h4 id="NanoleafLightPanelsOpenAPIDocumentation-3.5.2.3.Effects">3.5.2.3. Effects</h4><p>The effects (id: 3) event is sent out whenever the attributes covered under the /effects endpoint changes Example Event Json:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;events&quot;: [
+    {
+      &quot;attr&quot;: 1,
+      &quot;value&quot;: &quot;Flames&quot;
+    }
+  ]
+}</pre>
+</div></div><h4 id="NanoleafLightPanelsOpenAPIDocumentation-3.5.2.4.Touch">3.5.2.4. Touch</h4><p>Touch (id: 4) events are fired whenever the control square detects touch interaction with the layout.</p><p>The event json, carries an array of objects, each indicating the last detected gesture, and the panelId that the gesture was detected on (if applicable). The panelId field carries a meaningful value only if the gesture can be associated with a specific panel such as for double tap and single tap gestures. For swipe gestures, the panelId is set to -1.</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><td class="confluenceTd"><p><strong>Gesture</strong></p></td><td class="confluenceTd"><p><strong>Gesture ID</strong></p></td><td class="confluenceTd"><p><strong>Can be associated to a panel</strong></p></td></tr><tr><td class="confluenceTd"><p>Single Tap</p></td><td class="confluenceTd"><p>0</p></td><td class="confluenceTd"><p>Yes</p></td></tr><tr><td class="confluenceTd"><p>Double Tap</p></td><td class="confluenceTd"><p>1</p></td><td class="confluenceTd"><p>Yes</p></td></tr><tr><td class="confluenceTd"><p>Swipe Up</p></td><td class="confluenceTd"><p>2</p></td><td class="confluenceTd"><p>No</p></td></tr><tr><td class="confluenceTd"><p>Swipe Down</p></td><td class="confluenceTd"><p>3</p></td><td class="confluenceTd"><p>No</p></td></tr><tr><td class="confluenceTd"><p>Swipe Left</p></td><td class="confluenceTd"><p>4</p></td><td class="confluenceTd"><p>No</p></td></tr><tr><td class="confluenceTd"><p>Swipe Right</p></td><td class="confluenceTd"><p>5</p></td><td class="confluenceTd"><p>No</p></td></tr></tbody></table></div><p>Example Event Json:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;events&quot;: [
+    {
+      &quot;gesture&quot;: 0,
+      &quot;panelId&quot;: 7
+    },
+    {
+      &quot;gesture&quot;: 1,
+      &quot;panelId&quot;: 7
+    },
+    {
+      &quot;gesture&quot;: 3,
+      &quot;panelId&quot;: -1
+    }
+  ]
+}</pre>
+</div></div><h5 id="NanoleafLightPanelsOpenAPIDocumentation-3.5.2.4.1.GestureIds">3.5.2.4.1. Gesture Ids</h5><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>Gesture</strong></p></th><th class="confluenceTh"><p><strong>Gesture ID</strong></p></th><th class="confluenceTh"><p><strong>Can be associated to a panel</strong></p></th></tr><tr><td class="confluenceTd"><p>Single Tap</p></td><td class="confluenceTd"><p>0</p></td><td class="confluenceTd"><p>Yes</p></td></tr><tr><td class="confluenceTd"><p>Double Tap</p></td><td class="confluenceTd"><p>1</p></td><td class="confluenceTd"><p>Yes</p></td></tr><tr><td class="confluenceTd"><p>Swipe Up</p></td><td class="confluenceTd"><p>2</p></td><td class="confluenceTd"><p>No</p></td></tr><tr><td class="confluenceTd"><p>Swipe Down</p></td><td class="confluenceTd"><p>3</p></td><td class="confluenceTd"><p>No</p></td></tr><tr><td class="confluenceTd"><p>Swipe Left</p></td><td class="confluenceTd"><p>4</p></td><td class="confluenceTd"><p>No</p></td></tr><tr><td class="confluenceTd"><p>Swipe Right</p></td><td class="confluenceTd"><p>5</p></td><td class="confluenceTd"><p>No</p></td></tr></tbody></table></div><h5 id="NanoleafLightPanelsOpenAPIDocumentation-3.5.2.4.2.TouchStreamData">3.5.2.4.2. Touch Stream Data</h5><p>As of firmware version 1.4.0+, clients will be able to optionally register for fine resolution, low latency, touch data stream from the canvas controller over a UDP socket, if the client has also registered for Touch Events.</p><p>The Touch Data Stream is active for as long as the SSE session is active. Once the client closes the SSE session, the Touch Data Stream will be disabled as well.</p><h5 id="NanoleafLightPanelsOpenAPIDocumentation-3.5.2.4.3.EnablingTouchStreamData">3.5.2.4.3. Enabling Touch Stream Data</h5><p>In order to ensure low latency, just like in StreamControl, the Touch Data is streamed as binary data over a UDP socket.</p><p>The controller will stream the data to the ip address of the client from whom the event request was received and a port as specified by the client.</p><p>The port can be specified through a custom HTTP header in the HTTP GET request for touch events. The custom header is as shown below:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">TouchEventsPort: </pre>
+</div></div><h5 id="NanoleafLightPanelsOpenAPIDocumentation-3.5.2.4.4.TouchDataStreamFormat">3.5.2.4.4. Touch Data Stream Format</h5><p>Once the GET request is received by the controller, it will also start streaming Touch Data to the UDP Socket on the specified port. The format is as follows:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">  &lt;(touchType = 3bits |
+touchStrength = 4bits)1 = 1B&gt; 
+
+ &lt;(touchType = 3bits | touchStrength = 4bits)2 =
+1B&gt; 
+
+ &lt;(touchType = 3bits | touchStrength = 4bits)3 =
+1B&gt; 
+
+ &lt;(touchType = 3bits | touchStrength = 4bits)4 =
+1B&gt; 
+.
+.
+.
+ &lt;(touchType = 3bits | touchStrength = 4bits)_n
+= 1B&gt; </pre>
+</div></div><p>All multi byte fields are Big Endian. The first 2 Bytes represents the number of panels that are currently undergoing a touch event. After that follows nPanels number of 5B packets, each packet representing touch data for that panel.</p><p>The first 2B of the packet represents the panelId of the panel that is currently undergoing a touch event. The next 1 byte is a combination of the Touch Type and Touch Strength:</p><p><strong>Touch Type and Touch Strength Byte</strong></p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><td class="confluenceTd"><p style="text-align: center;">Reserved</p></td><td colspan="4" class="confluenceTd"><p style="text-align: center;">Touch Type</p></td><td colspan="3" class="confluenceTd"><p style="text-align: center;">Touch Strength</p></td></tr><tr><td class="confluenceTd"><p>Bit 7</p></td><td class="confluenceTd"><p>Bit 6</p></td><td class="confluenceTd"><p>Bit 5</p></td><td class="confluenceTd"><p>Bit 4</p></td><td class="confluenceTd"><p>Bit 3</p></td><td class="confluenceTd"><p>Bit 2</p></td><td class="confluenceTd"><p>Bit 1</p></td><td class="confluenceTd"><p>Bit 0</p></td></tr><tr><td class="confluenceTd"><p> </p></td><td class="confluenceTd"><p> </p></td><td class="confluenceTd"><p> </p></td><td class="confluenceTd"><p> </p></td><td class="confluenceTd"><p> </p></td><td class="confluenceTd"><p> </p></td><td class="confluenceTd"><p> </p></td><td class="confluenceTd"><p> </p></td></tr></tbody></table></div><p>The last 2 bytes represent the panelId of the panel swiped from only in case of a swipe event. This value is otherwise set to 0xFF</p><p>Touch Types are defined as follows:</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><td class="confluenceTd"><p><strong>Value</strong></p></td><td class="confluenceTd"><p><strong>Description</strong></p></td></tr><tr><td class="confluenceTd"><p>0</p></td><td class="confluenceTd"><p>Hover: The user is hovering their hand over a panel</p></td></tr><tr><td class="confluenceTd"><p>1</p></td><td class="confluenceTd"><p>Down: The user has placed their hand down on a panel</p></td></tr><tr><td class="confluenceTd"><p>2</p></td><td class="confluenceTd"><p>Hold: The user has held their hand down on a panel</p></td></tr><tr><td class="confluenceTd"><p>3</p></td><td class="confluenceTd"><p>Up: the user has removed their hand from a panel</p></td></tr><tr><td class="confluenceTd"><p>4</p></td><td class="confluenceTd"><p>Swipe: The user has swiped from one panel to another. The panelId of the panel swiped from is sent along as well</p></td></tr></tbody></table></div><h5 id="NanoleafLightPanelsOpenAPIDocumentation-3.5.2.4.5.TouchLifeCycle">3.5.2.4.5. Touch Life Cycle</h5><p>Touch life cycle describes the typical sequence of touch events that occur when a user would touch a panel. This is a guide only, and not all touch events are necessarily visited.</p><p>A typical touch life cycle will look something like this:</p><span class="confluence-embedded-file-wrapper image-center-wrapper confluence-embedded-manual-size"><img class="confluence-embedded-image image-center" alt="image-20260203-171540.png" width="677" src="attachments/2789310530-image-20260203-171540.png"></span><p style="text-align: center;"></p><h2 id="NanoleafLightPanelsOpenAPIDocumentation-3.6.Discovery">3.6. Discovery</h2><p>*<em>Numbered as 3.7 on dev forum</em></p><p>The Panels use standard technologies for local network discovery.</p><h3 id="NanoleafLightPanelsOpenAPIDocumentation-3.6.1.mDNS(Bonjour)">3.6.1. mDNS ( Bonjour )</h3><p>Panels can be discovered on the local network using mDNS under the service type:<em>_nanoleafapi._tcp</em></p><p>The service includes the IP and port (IPv4 and IPv6). Note that the port defaults to 16021, although we do not recommend hard-coding this information in your code.</p><p>The TXT record format is as follows:</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>Key</strong></p></th><th class="confluenceTh"><p><strong>Description</strong></p></th></tr><tr><td class="confluenceTd"><p>&quot;md&quot;</p></td><td class="confluenceTd"><p>Model name of the product (i.e. NL22 / NL29/ NL42/ NL52/NL59/ NL64/ NL69)</p></td></tr><tr><td class="confluenceTd"><p>&quot;srcvers&quot;</p></td><td class="confluenceTd"><p>Firmware version of the product (i.e. 1.5)</p></td></tr><tr><td class="confluenceTd"><p>&quot;id&quot;</p></td><td class="confluenceTd"><p>Device ID. A randomly generated device ID that will change if a user resets the device (resets will remove API authorizations).</p></td></tr></tbody></table></div><h3 id="NanoleafLightPanelsOpenAPIDocumentation-3.6.2.SSDP">3.6.2. SSDP</h3><p>Panels can be discovered on the local network using SSDP (Simple Service Discovery Protocol/1.0).</p><p>The multicast address for SSDP multicast messages is (per spec):</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre"> 239.255.255.250:1900</pre>
+</div></div><p>The UUID of each device is randomly generated based on RFC 4122 (A Universally Unique IDentifier (UUID) URN Namespace) Variant 4 (Section 4.4).</p><h4 id="NanoleafLightPanelsOpenAPIDocumentation-3.6.2.1.SSDPNOTIFY">3.6.2.1. SSDP NOTIFY</h4><p>Panels will multicast SSDP notify messages on the multicast address at a regular interval (default: 1 minute). A notify message contains the HTTP header: NOTIFY * HTTP/1.1. Contents of the remaining headers in a notify message are:</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>Header</strong></p></th><th class="confluenceTh"><p><strong>Header body</strong></p></th></tr><tr><td class="confluenceTd"><p>&quot;Host&quot;</p></td><td class="confluenceTd"><p>Multicast IP address: 239.255.255.250:1900</p></td></tr><tr><td class="confluenceTd"><p>&quot;NT&quot;</p></td><td class="confluenceTd"><p>Service type: Nanoleaf_aurora:light / nanoleaf:nl29</p></td></tr><tr><td class="confluenceTd"><p>&quot;NTS&quot;</p></td><td class="confluenceTd"><p>ssdp:alive</p></td></tr><tr><td class="confluenceTd"><p>&quot;USN&quot;</p></td><td class="confluenceTd"><p>UUID of the Panels. For example: uuid:123456-1234-1234-123456789abc</p></td></tr><tr><td class="confluenceTd"><p>&quot;Location&quot;</p></td><td class="confluenceTd"><p>Local IP address used by OpenAPI. For example: <a class="external-link" href="http://192.168.1.140:16021" rel="nofollow">http://192.168.1.140:16021</a></p></td></tr><tr><td class="confluenceTd"><p>&quot;Cache-Control&quot;</p></td><td class="confluenceTd"><p>Notify interval. For example: max-age = 60</p></td></tr><tr><td class="confluenceTd"><p>&quot;nl-deviceid&quot;</p></td><td class="confluenceTd"><p>Device ID. Updates after a Panels are reset. For example: 46:EC:1B:0D:67:32</p></td></tr><tr><td class="confluenceTd"><p>&quot;nl-devicename&quot;</p></td><td class="confluenceTd"><p>Device Name. Includes a device identifier based on MAC address. Could be updated by an iOS user using WAC.</p></td></tr></tbody></table></div><p>OpenAPI can be accessed by using the IP address given by Location. Note that the port number is 16021 by default although we recommend getting this information dynamically from SSDP.</p><p>No notify message will be multicast if the Panels are unavailable.</p><h4 id="NanoleafLightPanelsOpenAPIDocumentation-3.6.2.2.SSDPM-SEARCH">3.6.2.2. SSDP M-SEARCH</h4><p>Panels also listens to the multicast address for SSDP m-search messages. An m-search message intended for discovery using Panels OpenAPI must contain in its ST header the service type ssdp:all or nanoleaf_aurora:light.</p><p>Panels will respond by unicast to an m-search message containing one of the above service types with a response, containing the HTTP header: HTTP/1.1 200 OK. The remaining headers in a response are:</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><strong>Header</strong></p></th><th class="confluenceTh"><p><strong>Header body</strong></p></th></tr><tr><td class="confluenceTd"><p>&quot;S&quot;</p></td><td class="confluenceTd"><p>UUID of the Device. For example: uuid:123456-1234-1234-123456789abc</p></td></tr><tr><td class="confluenceTd"><p>&quot;Ext&quot;</p></td><td class="confluenceTd"><p>(empty)</p></td></tr><tr><td class="confluenceTd"><p>&quot;Cache-Control&quot;</p></td><td class="confluenceTd"><p>Notify interval. For example: no-cache=&quot;Ext&quot;, max-age = 60</p></td></tr><tr><td class="confluenceTd"><p>&quot;ST&quot;</p></td><td class="confluenceTd"><p>Service type: Nanoleaf_aurora:light / nanoleaf:nl29</p></td></tr><tr><td class="confluenceTd"><p>&quot;USN&quot;</p></td><td class="confluenceTd"><p>UUID of the Device. For example: uuid:123456-1234-1234-123456789abc</p></td></tr><tr><td class="confluenceTd"><p>&quot;Location&quot;</p></td><td class="confluenceTd"><p>Local IP address used by OpenAPI. For example: <a class="external-link" href="http://192.168.1.140:16021" rel="nofollow">http://192.168.1.140:16021</a></p></td></tr><tr><td class="confluenceTd"><p>&quot;nl-deviceid&quot;</p></td><td class="confluenceTd"><p>Device ID. Updates after Panels are reset. For example:</p></td></tr></tbody></table></div><p>OpenAPI can be accessed by using the IP address given by Location. Note that the port number is 16021 by default although we recommend getting this information dynamically from SSDP.</p><p>If the m-search message provides a non-zero value in its MX or MAX_COUNT header (denoted by M), Panels will send a response after a delay of d seconds, where d is chosen uniformly at random from the set of integers {0, 1, ..., M}.</p><p>No response will be sent if the Panels are unavailable.</p><h4 id="NanoleafLightPanelsOpenAPIDocumentation-3.6.2.3.SSDPBYEBYE">3.6.2.3. SSDP BYEBYE</h4><p>If the Panels become unavailable, an SSDP byebye message is multicast on the multicast address with the HTTP header: NOTIFY * HTTP/1.1. Contents of the remaining headers in a byebye message are:</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><td class="confluenceTd"><p>Header</p></td><td class="confluenceTd"><p>Header body</p></td></tr><tr><td class="confluenceTd"><p>&quot;Host&quot;</p></td><td class="confluenceTd"><p>Multicast IP address: 239.255.255.250:1900</p></td></tr><tr><td class="confluenceTd"><p>&quot;NT&quot;</p></td><td class="confluenceTd"><p>Service type: Nanoleaf_aurora:light / nanoleaf:nl29</p></td></tr><tr><td class="confluenceTd"><p>&quot;NTS&quot;</p></td><td class="confluenceTd"><p>ssdp:byebye</p></td></tr><tr><td class="confluenceTd"><p>&quot;USN&quot;</p></td><td class="confluenceTd"><p>UUID of the Device. For example: uuid:123456-1234-1234-123456789abc</p></td></tr></tbody></table></div><hr/><h1 id="NanoleafLightPanelsOpenAPIDocumentation-4.APIJSONStructure">4. API JSON Structure</h1><p>The following is an example of the internal JSON structure used to organize Panels' device data used by the Open API. It is only accessed by Open API calls, although its relevant contents may be modified by any user-accessible control method, whether it be the Nanoleaf App, HomeKit, Alexa, IFTTT, or other future control path.</p><h2 id="NanoleafLightPanelsOpenAPIDocumentation-4.1.LightPanels">4.1. Light Panels</h2><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;name&quot;: &quot;Light Panels Name&quot;,
+  &quot;serialNo&quot;: &quot;S16331A0217&quot;,
+  &quot;manufacturer&quot;: &quot;Nanoleaf&quot;,
+  &quot;firmwareVersion&quot;: &quot;1.5.0&quot;,
+  &quot;model&quot;: &quot;NL22&quot;,
+  &quot;state&quot;: {
+    &quot;on&quot;: {
+      &quot;value&quot;: false
+    },
+    &quot;brightness&quot;: {
+      &quot;value&quot;: 100,
+      &quot;max&quot;: 100,
+      &quot;min&quot;: 0
+    },
+    &quot;hue&quot;: {
+      &quot;value&quot;: 0,
+      &quot;max&quot;: 360,
+      &quot;min&quot;: 0
+    },
+    &quot;sat&quot;: {
+      &quot;value&quot;: 0,
+      &quot;max&quot;: 100,
+      &quot;min&quot;: 0
+    },
+    &quot;ct&quot;: {
+      &quot;value&quot;: 4000,
+      &quot;max&quot;: 100,
+      &quot;min&quot;: 0
+    },
+    &quot;colorMode&quot;: &quot;effect&quot;
+  },
+  &quot;effects&quot;: {
+    &quot;select&quot;: &quot;Flames&quot;,
+    &quot;effectsList&quot;: [
+      &quot;Color Burst&quot;,
+      &quot;Flames&quot;,
+      &quot;Forest&quot;,
+      &quot;Inner Peace&quot;,
+      &quot;Nemo&quot;,
+      &quot;Northern Lights&quot;,
+      &quot;Romantic&quot;,
+      &quot;Snowfall&quot;
+    ]
+  },
+  &quot;panelLayout&quot;: {
+    &quot;layout&quot;: {
+      &quot;numPanels&quot;: 2,
+      &quot;sideLength&quot;: 150,
+      &quot;positionData&quot;: [
+        {
+          &quot;panelId&quot;: 107,
+          &quot;x&quot;: -74,
+          &quot;y&quot;: 43,
+          &quot;o&quot;: 180,
+          &quot;shapeType&quot;: 0
+        },
+        {
+          &quot;panelId&quot;: 114,
+          &quot;x&quot;: -149,
+          &quot;y&quot;: 0,
+          &quot;o&quot;: 360,
+          &quot;shapeType&quot;: 0
+        }
+      ]
+    },
+    &quot;globalOrientation&quot;: {
+      &quot;value&quot;: 120,
+      &quot;max&quot;: 360,
+      &quot;min&quot;: 0
+    }
+  },
+  &quot;rhythm&quot;: {
+    &quot;rhythmConnected&quot;: true,
+    &quot;rhythmActive&quot;: true,
+    &quot;rhythmId&quot;: 309,
+    &quot;hardwareVersion&quot;: &quot;1.4&quot;,
+    &quot;firmwareVersion&quot;: &quot;1.7-R&quot;,
+    &quot;auxAvailable&quot;: true,
+    &quot;rhythmMode&quot;: 1,
+    &quot;rhythmPos&quot;: {
+      &quot;x&quot;: 299,
+      &quot;y&quot;: -86,
+      &quot;o&quot;: 300
+    }
+  }
+}</pre>
+</div></div><h2 id="NanoleafLightPanelsOpenAPIDocumentation-4.2.Canvas">4.2. Canvas</h2><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">{
+  &quot;name&quot;: &quot;Canvas Name&quot;,
+  &quot;serialNo&quot;: &quot;S18374A0015&quot;,
+  &quot;manufacturer&quot;: &quot;Nanoleaf&quot;,
+  &quot;firmwareVersion&quot;: &quot;1.1.0&quot;,
+  &quot;model&quot;: &quot;NL29&quot;,
+  &quot;discovery&quot;: {},
+  &quot;effects&quot;: {
+    &quot;effectsList&quot;: [
+      &quot;Color Burst&quot;,
+      &quot;Falling Whites&quot;,
+      &quot;Fireworks&quot;,
+      &quot;Flames&quot;,
+      &quot;Forest&quot;,
+      &quot;Inner Peace&quot;,
+      &quot;Meteor Shower&quot;,
+      &quot;Nemo&quot;,
+      &quot;Northern Lights&quot;,
+      &quot;Paint Splatter&quot;,
+      &quot;Pulse Pop Beats&quot;,
+      &quot;Radial Sound Bar&quot;,
+      &quot;Rhythmic Northern Lights&quot;,
+      &quot;Romantic&quot;,
+      &quot;Sound Bar&quot;,
+      &quot;Streaking Notes&quot;
+    ],
+    &quot;select&quot;: &quot;Northern Lights&quot;
+  },
+  &quot;panelLayout&quot;: {
+    &quot;globalOrientation&quot;: {
+      &quot;value&quot;: 0,
+      &quot;max&quot;: 360,
+      &quot;min&quot;: 0
+    },
+    &quot;layout&quot;: {
+      &quot;numPanels&quot;: 12,
+      &quot;sideLength&quot;: 100,
+      &quot;positionData&quot;: [
+        {
+          &quot;panelId&quot;: 46095,
+          &quot;x&quot;: 400,
+          &quot;y&quot;: 100,
+          &quot;o&quot;: 0,
+          &quot;shapeType&quot;: 2
+        },
+        {
+          &quot;panelId&quot;: 31391,
+          &quot;x&quot;: 300,
+          &quot;y&quot;: 100,
+          &quot;o&quot;: 270,
+          &quot;shapeType&quot;: 2
+        },
+        {
+          &quot;panelId&quot;: 39497,
+          &quot;x&quot;: 300,
+          &quot;y&quot;: 200,
+          &quot;o&quot;: 270,
+          &quot;shapeType&quot;: 2
+        },
+        {
+          &quot;panelId&quot;: 42722,
+          &quot;x&quot;: 200,
+          &quot;y&quot;: 200,
+          &quot;o&quot;: 270,
+          &quot;shapeType&quot;: 2
+        },
+        {
+          &quot;panelId&quot;: 26430,
+          &quot;x&quot;: 200,
+          &quot;y&quot;: 100,
+          &quot;o&quot;: 270,
+          &quot;shapeType&quot;: 2
+        },
+        {
+          &quot;panelId&quot;: 18778,
+          &quot;x&quot;: 100,
+          &quot;y&quot;: 250,
+          &quot;o&quot;: 90,
+          &quot;shapeType&quot;: 2
+        },
+        {
+          &quot;panelId&quot;: 35118,
+          &quot;x&quot;: 100,
+          &quot;y&quot;: 150,
+          &quot;o&quot;: 0,
+          &quot;shapeType&quot;: 2
+        },
+        {
+          &quot;panelId&quot;: 63476,
+          &quot;x&quot;: 0,
+          &quot;y&quot;: 200,
+          &quot;o&quot;: 270,
+          &quot;shapeType&quot;: 2
+        },
+        {
+          &quot;panelId&quot;: 13987,
+          &quot;x&quot;: 0,
+          &quot;y&quot;: 100,
+          &quot;o&quot;: 270,
+          &quot;shapeType&quot;: 2
+        },
+        {
+          &quot;panelId&quot;: 24430,
+          &quot;x&quot;: 400,
+          &quot;y&quot;: 200,
+          &quot;o&quot;: 0,
+          &quot;shapeType&quot;: 2
+        },
+        {
+          &quot;panelId&quot;: 24564,
+          &quot;x&quot;: 350,
+          &quot;y&quot;: 300,
+          &quot;o&quot;: 180,
+          &quot;shapeType&quot;: 2
+        },
+        {
+          &quot;panelId&quot;: 8223,
+          &quot;x&quot;: 250,
+          &quot;y&quot;: 300,
+          &quot;o&quot;: 90,
+          &quot;shapeType&quot;: 2
+        }
+      ]
+    }
+  },
+  &quot;state&quot;: {
+    &quot;brightness&quot;: {
+      &quot;value&quot;: 100,
+      &quot;max&quot;: 100,
+      &quot;min&quot;: 0
+    },
+    &quot;colorMode&quot;: &quot;effect&quot;,
+    &quot;ct&quot;: {
+      &quot;value&quot;: 3000,
+      &quot;max&quot;: 6500,
+      &quot;min&quot;: 1200
+    },
+    &quot;hue&quot;: {
+      &quot;value&quot;: 0,
+      &quot;max&quot;: 360,
+      &quot;min&quot;: 0
+    },
+    &quot;on&quot;: {
+      &quot;value&quot;: true
+    },
+    &quot;sat&quot;: {
+      &quot;value&quot;: 0,
+      &quot;max&quot;: 100,
+      &quot;min&quot;: 0
+    }
+  }
+}</pre>
+</div></div><hr/><h1 id="NanoleafLightPanelsOpenAPIDocumentation-5.APIReference">5. API Reference</h1><p>API endpoint follows the hierarchical structure of the internal JSON.</p><h2 id="NanoleafLightPanelsOpenAPIDocumentation-5.1.Authorization">5.1. Authorization</h2><p>A user is authorized to access the OpenAPI if they can demonstrate physical access of Panels. This is achieved by: Holding the on-off button down for 5-7 seconds until the LED starts flashing in a pattern.</p><p>Please note that Nanoleaf Skylight does not have physical on-off button, so the OpneAPI authorization window has to open through the Nanoleaf app. On the Nanoleaf mobile app, you can open that window by going to the device settings of your paired Nanoleaf Skylight and clicking on &quot;Connect to API&quot;.</p><p>Sending a POST request to the authorization endpoint /api/v1/new within 30 seconds of activating pairing. The POST response will contain a randomly generated authorization token:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre">  {&quot;auth_token&quot; : &quot;xxxxxxxxxxxxxxxxxxxxx ... xxx&quot;}
+</pre>
+</div></div><p>In the following, the authorization token string is denoted by</p><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.1.1.AddUser">5.1.1. Add User</h3><div class="table-wrap"><table class="confluenceTable"><tbody><tr><td class="confluenceTd"><p>Endpoint</p></td><td class="confluenceTd"><p>/api/v1/new</p></td></tr><tr><td class="confluenceTd"><p>Request</p></td><td class="confluenceTd"><p>POST</p></td></tr><tr><td class="confluenceTd"><p>Request Body</p></td><td class="confluenceTd"><p>None</p></td></tr><tr><td class="confluenceTd"><p>Response</p></td><td class="confluenceTd"><p>200 OK</p></td></tr><tr><td class="confluenceTd"><p>Response Body</p></td><td class="confluenceTd"><p>{&quot;auth_token&quot; : }</p></td></tr><tr><td class="confluenceTd"><p>Error</p></td><td class="confluenceTd"><p>401 Unauthorized 403 Forbidden 422 Unprocessable Entity</p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.1.2.DeleteUser">5.1.2. Delete User</h3><div class="table-wrap"><table class="confluenceTable"><tbody><tr><td class="confluenceTd"><p>Endpoint</p></td><td class="confluenceTd"><p>/api/v1/</p></td></tr><tr><td class="confluenceTd"><p>Request</p></td><td class="confluenceTd"><p>DELETE</p></td></tr><tr><td class="confluenceTd"><p>Request Body</p></td><td class="confluenceTd"><p>None</p></td></tr><tr><td class="confluenceTd"><p>Response</p></td><td class="confluenceTd"><p>204 No Content</p></td></tr><tr><td class="confluenceTd"><p>Response Body</p></td><td class="confluenceTd"><p>None</p></td></tr><tr><td class="confluenceTd"><p>Error</p></td><td class="confluenceTd"><p>401 Unauthorized 500 Internal Server Error</p></td></tr></tbody></table></div><h2 id="NanoleafLightPanelsOpenAPIDocumentation-5.2.GetAllPanelInfo">5.2. Get All Panel Info</h2><div class="table-wrap"><table class="confluenceTable"><tbody><tr><td class="confluenceTd"><p>Endpoint</p></td><td class="confluenceTd"><p>/api/v1//</p></td></tr><tr><td class="confluenceTd"><p>Request</p></td><td class="confluenceTd"><p>GET</p></td></tr><tr><td class="confluenceTd"><p>Request Body</p></td><td class="confluenceTd"><p>None</p></td></tr><tr><td class="confluenceTd"><p>Response</p></td><td class="confluenceTd"><p>200 OK</p></td></tr><tr><td class="confluenceTd"><p>Response Body</p></td><td class="confluenceTd"><p>See section 4. API JSON Structure</p></td></tr><tr><td class="confluenceTd"><p>Error</p></td><td class="confluenceTd"><p>401 Unauthorized 422 Unprocessable Entity</p></td></tr></tbody></table></div><h2 id="NanoleafLightPanelsOpenAPIDocumentation-5.3.State">5.3. State</h2><p>When writing state information, you set the value of a state or operate using increment where applicable. Increment can be positive or negative and will only go to the min or max value.</p><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.3.1.On/Off">5.3.1. On/Off</h3><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/state/on</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>GET</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>{value : true}</em> <em>OR</em> <em>{value : false}</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/state</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>PUT</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>{on : {value:true}}</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>204 No Content</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>401-Unauthorized</em> <em>400 Bad Request</em> <em>404 Resource Not Found</em></p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.3.2.Brightness">5.3.2. Brightness</h3><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/state/brightness</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>GET</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>none</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>{value : 100, max : 100, min : 0}</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/state</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>PUT</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>{brightness : {value:100, duration:30}}</em> <em>OR</em> <em>{brightness : {increment:-10}}</em> <em>Duration field is optional, and specified in seconds</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>204 No Content</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>none</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>401-Unauthorized</em> <em>400-Bad request</em> <em>404-Resource Not Found</em> <em>422-Unprocessible Entity</em></p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.3.3.Hue">5.3.3. Hue</h3><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/state/hue</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>GET</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>{value : 100, max : 360, min : 0}</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/state</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>PUT</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>{hue : {value:120}}</em> <em>OR</em> <em>{hue : {increment:20}}</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>204 No Content</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>401-Unauthorized</em> <em>400-Bad request</em> <em>404-Resource Not Found</em> <em>422-Unprocessible Entity</em></p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.3.4.Saturation">5.3.4. Saturation</h3><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/state/sat</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>GET</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>{value : 100, max : 100, min : 0}</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/state</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>PUT</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>{sat : {value: 20}}</em> <em>OR</em> <em>{sat : {increment: 10}}</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>204 No Content</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>401-Unauthorized</em> <em>400-Bad request</em> <em>404-Resource Not Found</em> <em>422-Unprocessible Entity</em></p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.3.5.ColorTemperature">5.3.5. Color Temperature</h3><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/state/ct</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>GET</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>{value : 4000, max : 6500, min : 1200}</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/state</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>PUT</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>{ct : {value: 3000}}</em> <em>OR</em> <em>{ct : {increment: -100}}</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>204 No Content</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>401-Unauthorized</em> <em>400-Bad request</em> <em>404-Resource Not Found</em> <em>422-Unprocessible Entity</em></p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.3.6.ColorMode">5.3.6. Color Mode</h3><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/state/colorMode</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>GET</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>ct</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><h2 id="NanoleafLightPanelsOpenAPIDocumentation-5.4.Effects">5.4. Effects</h2><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.4.1.Select">5.4.1. Select</h3><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/effects/select</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>GET</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>*Solid*</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/effects</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>PUT</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>{select : Snowfall}</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>204 No Content</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>401-Unauthorized</em> <em>400-Bad request</em> <em>404-Resource Not Found</em></p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.4.2.List">5.4.2. List</h3><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/effects/effectsList</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>GET</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>[Color Burst,Flames,Forest,Inner Peace,Nemo,Northern Lights,Romantic,Snowfall]</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.4.3.Write">5.4.3. Write</h3><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/effects</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>PUT</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>{write : {command : request, animName : Northern Lights}}</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK, 204 No Content</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>{animName:Northern Lights,loop:true,palette:[{hue:227,saturation:100,brightness:99},{hue:182,saturation:100,brightness:100},{hue:125,saturation:100,brightness:93},{hue:62,saturation:100,brightness:100},{hue:31,saturation:100,brightness:100},{hue:2,saturation:100,brightness:100},{hue:307,saturation:100,brightness:100}],transTime:{maxValue:20,minValue:20},windowSize:2,flowFactor:0,delayTime:{maxValue:20,minValue:5},colorType:HSB,animType:wheel,explodeFactor:0,brightnessRange:{maxValue:0,minValue:0},direction:left}</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>401-Unauthorized</em> <em>400-Bad request</em> <em>404-Resource Not Found</em></p></td></tr></tbody></table></div><h2 id="NanoleafLightPanelsOpenAPIDocumentation-5.5.PanelLayout">5.5. Panel Layout</h2><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.5.1.GlobalOrientation">5.5.1. Global Orientation</h3><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/panelLayout/globalOrientation</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>GET</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>{value : 0, max : 360, min : 0}</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/panelLayout</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>PUT</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>{globalOrientation : {value: 120}}</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>204 No Content</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>401-Unauthorized</em> <em>400-Bad request</em> <em>404-Resource Not Found</em> <em>422-Unprocessible Entity</em></p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.5.2.Layout">5.5.2. Layout</h3><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/panelLayout/layout</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>GET</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>{numPanels:2,sideLength:150,positionData:[{panelId:107,x:-74,y:43,o:180},{panelId:114,x:-149,y:0,o:360}]}</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><h2 id="NanoleafLightPanelsOpenAPIDocumentation-5.6.Identify">5.6. Identify</h2><p>Causes the panels to flash in unison. This is typically used to help users differentiate between multiple panels.</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/identify</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>PUT</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>204 No Content</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>401-Unauthorized</em> <em>404-Resource Not Found</em></p></td></tr></tbody></table></div><h2 id="NanoleafLightPanelsOpenAPIDocumentation-5.7.ExternalControl(Streaming)">5.7. External Control ( Streaming )</h2><p>Allows control over a UDP socket connection to stream control data to stream control data to the Panels. A request can be made as shown in the table below activate stream control to the Panels. Please note the Light panels support streaming control version v1 and v2. Canvas supports stream control version v2 and requires specifying the version in the request. If the extControlVersion key is omitted, v1 is assumed, which would return an error for Canvas.</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/effects</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>PUT</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>{</em> <em>command: display,</em> <em>animType: extControl,</em> <em>extControlVersion: v2</em> <em>}</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>204 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>Shapes, Lines, Elements, Blocks, Skylight, 4D:</em> <em>No response body.</em> <em>address: same as the IP address of the controller</em> <em>port: 60222</em> <em>protocol: udp</em> <br/><br/><em>Light Panels:</em> <em>{</em> <em>streamControlIpAddr: 192.168.2.231,</em> <em>streamControlPort: port: 60221,</em> <em>streamControlProtocol: udp</em> <em>}</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><h2 id="NanoleafLightPanelsOpenAPIDocumentation-5.8.Rhythm(LightPanelsOnly)">5.8. Rhythm ( Light Panels Only )</h2><p>The /rhythm Endpoint allows you to get information about the Rhythm and switch the Rhythm mode from microphone to aux input.</p><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.8.1.RhythmConnected">5.8.1. Rhythm Connected</h3><p style="margin-left: 30.0px;">Indicates if the Rhythm is connected to the Light Panels or not. Note in the case of Canvas, the rhythm is built into the control square</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/rhythm/rhythmConnected</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>GET</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>true</em> <em>OR</em> <em>false</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.8.2.RhythmActive">5.8.2. Rhythm Active</h3><p style="margin-left: 30.0px;">Indicates if the Rhythm's microphone is currently active or not.</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/rhythm/rhythmActive</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>GET</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>true</em> <em>OR</em> <em>false</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.8.3.RhythmId">5.8.3. Rhythm Id</h3><p style="margin-left: 30.0px;">Indicates the Rhythm's Id in the Panels system</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/rhythm/rhythmId</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>GET</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>415</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.8.4.RhythmHardwareVersion">5.8.4. Rhythm Hardware Version</h3><p style="margin-left: 30.0px;">Indicates the Rhythm's hardware version</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/rhythm/hardwareVersion</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>GET</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>&quot;1.4&quot;</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.8.5.RhythmFirmwareVersion">5.8.5. Rhythm Firmware Version</h3><p style="margin-left: 30.0px;">Indicates the Rhythm's firmware version</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/rhythm/firmwareVersion</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>GET</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>&quot;1.8&quot;</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.8.6.RhythmAuxAvailable">5.8.6. Rhythm Aux Available</h3><p style="margin-left: 30.0px;">Indicates if an aux cable (3.5mm) is currently connected to the Rhythm</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/rhythm/auxAvailable</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>GET</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>true</em> <em>OR</em> <em>false</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.8.7.RhythmMode">5.8.7. Rhythm Mode</h3><p style="margin-left: 30.0px;">Allows the user to control the sound source for the Rhythm. Writing a 0 to this field sets the Rhythm's sound source to the microphone, and writing a 1 to the field sets the sound source to the aux cable</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/rhythm/rhythmMode</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>GET</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>0 (Microphone)</em> <em>OR</em> <em>1 (Aux Cable)</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/rhythm/rhythmMode</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>PUT</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>{rhythmMode: 1}</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>204 No Content</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.8.8.RhythmPosition">5.8.8. Rhythm Position</h3><p style="margin-left: 30.0px;">Indicates the position and orientation of the Rhythm in Panels' layout</p><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p><em>/api/v1/auth_token/rhythm/rhythmPos</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p><em>GET</em></p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p><em>None</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p><em>{ x: -149, y: -86, o: 300 }</em></p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><h2 id="NanoleafLightPanelsOpenAPIDocumentation-5.9ScreenMirror">5.9 Screen Mirror</h2><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.9.1ActivateScreenMirror">5.9.1 Activate Screen Mirror</h3><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p>/api/v1/auth_token/effects</p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p>PUT</p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p /><p>{&quot;command&quot;: &quot;activateScreenMirror&quot;, &quot;screenMirrorMode&quot;: }</p><ul><li><p>1D - int 6</p></li><li><p>2D - int 2</p></li><li><p>3D - int 3</p></li><li><p>4D - int 5</p></li></ul></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p> </p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.9.2ActivateMusicSync">5.9.2 Activate Music Sync</h3><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p>/api/v1/auth_token/effects</p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p>PUT</p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p>{ &quot;command&quot;:&quot;setScreenMirrorRhythmMode&quot; &quot;screenMirrorRhythmMode&quot;: }</p><p>{ &quot;command&quot;:&quot;setScreenMirrorRhythmModeType&quot; &quot;screenMirrorRhythmModeType&quot;: }</p><ul><li><p>Pulse - int 0</p></li><li><p>Fireworks - int 1</p></li></ul></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p><em>200 OK</em></p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p> </p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.9.3GetScreenMirror">5.9.3 Get Screen Mirror</h3><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p>/api/v1/auth_token/effects</p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p>PUT</p></td></tr><tr><th class="confluenceTh"><p><em>Request Body</em></p></th><td class="confluenceTd"><p>{ &quot;command&quot;:&quot;getScreenMirrorMode&quot; }</p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p>200 OK</p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p>{ &quot;screenMirrorMode&quot;: }</p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><h3 style="margin-left: 30.0px;" id="NanoleafLightPanelsOpenAPIDocumentation-5.9.4GetMusicSync">5.9.4 Get Music Sync</h3><div class="table-wrap"><table class="confluenceTable"><tbody><tr><th class="confluenceTh"><p><em>Endpoint</em></p></th><td class="confluenceTd"><p>/api/v1/auth_token/effects</p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p>PUT</p></td></tr><tr><th class="confluenceTh"><p><em>Request</em></p></th><td class="confluenceTd"><p>{ &quot;command&quot;:&quot;getScreenMirrorRhythmMode&quot; }</p></td></tr><tr><th class="confluenceTh"><p><em>Response</em></p></th><td class="confluenceTd"><p>200 OK</p></td></tr><tr><th class="confluenceTh"><p><em>Response Body</em></p></th><td class="confluenceTd"><p>{ &quot;screenMirrorRhythmMode&quot;: }</p></td></tr><tr><th class="confluenceTh"><p><em>Error</em></p></th><td class="confluenceTd"><p><em>400-Bad Request</em> <em>401-Unauthorized</em> <em>404- Resource Not Found</em></p></td></tr></tbody></table></div><hr/><h1 id="NanoleafLightPanelsOpenAPIDocumentation-6.KnownIssues">6. Known Issues</h1><p>1.5.0: - Min and max values returned for ct are wrong. They should be 1200-6500, but are returned 0-100.</p><hr/>
+</body>
+</html>

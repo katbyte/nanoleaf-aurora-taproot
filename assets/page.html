@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🌱 taproot</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🌱%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/page.css">
+<!-- loaded here, not deferred: its first line sets the theme before anything is painted -->
+<script src="/page.js"></script>
+</head>
+<body>
+<header>
+  <h1>🌱 taproot <span id="count"></span></h1>
+  <span class="sub">Nanoleaf Light Panels, straight over your own network</span>
+  <div class="right">
+    <button class="plain" id="add" type="button">+ connect a controller</button>
+    <button class="plain" id="backup-all" type="button" title="save every scene of every controller to a dated folder">back up all</button>
+    <button class="theme" id="theme" type="button" aria-label="toggle dark mode" title="toggle dark mode">
+      <span class="sun">☀️</span><span class="moon">🌙</span><span class="leaf">🌱</span>
+    </button>
+  </div>
+</header>
+
+<div id="dryrun" class="strip warn" hidden>dry run: nothing you do here reaches a controller. Each change is printed where taproot is running.</div>
+<div id="pairing"></div>
+<div id="problem" class="strip bad" hidden></div>
+
+<main id="controllers"></main>
+
+<div id="empty" hidden>
+  <h2>no controllers yet</h2>
+  <p>taproot needs a token from each controller, and a controller only hands one out to somebody who can reach its power button.</p>
+  <p><button class="plain big" id="add-first" type="button">+ connect a controller</button></p>
+</div>
+
+<footer>
+  taproot {{version}} ·
+  the panels are drawn where the controller says they sit; it does not say what colour each one is right now, so the motion is worked out from the scene.
+</footer>
+
+<dialog id="connectbox">
+  <button class="x" type="button" data-close aria-label="close">✕</button>
+  <h2>connect a controller <span class="desc">search for it, or type its address</span></h2>
+  <div class="row">
+    <button class="plain" id="find" type="button">search the network</button>
+    <input id="scan" type="text" placeholder="or knock on a subnet, e.g. 10.0.5.0/24" autocomplete="off" spellcheck="false">
+  </div>
+  <div id="found" class="found"></div>
+  <form id="connectform" class="row">
+    <input id="address" type="text" placeholder="address, e.g. 10.0.5.183" autocomplete="off" spellcheck="false" required>
+    <input id="newname" type="text" placeholder="name (optional)" autocomplete="off" spellcheck="false">
+    <button class="plain on" type="submit">connect</button>
+  </form>
+  <p class="note">Then hold the controller's power button for 5 to 7 seconds, until its light flashes. taproot keeps asking for five minutes.</p>
+</dialog>
+
+<dialog id="copybox">
+  <button class="x" type="button" data-close aria-label="close">✕</button>
+  <h2>copy a scene <span class="desc" id="copy-what"></span></h2>
+  <div id="copy-targets" class="targets"></div>
+  <label class="tick"><input type="checkbox" id="copy-select"> start it there once it is copied</label>
+  <label class="tick"><input type="checkbox" id="copy-force"> replace a different scene of the same name</label>
+  <div id="copy-result" class="result"></div>
+  <div class="row">
+    <span class="note">each controller is backed up before anything is written to it</span>
+    <button class="plain" type="button" data-close>close</button>
+    <button class="plain on" id="copy-go" type="button">copy</button>
+  </div>
+</dialog>
+
+<dialog id="confirmbox">
+  <h2 id="confirm-title"></h2>
+  <p id="confirm-text" class="note"></p>
+  <div class="row">
+    <span class="note"></span>
+    <button class="plain" type="button" data-close>cancel</button>
+    <button class="plain on danger" id="confirm-go" type="button"></button>
+  </div>
+</dialog>
+
+<div id="toasts" aria-live="polite"></div>
+</body>
+</html>

@@ -1,0 +1,167 @@
+{
+  "fetched": "2026-10-06",
+  "sources": [
+    {
+      "title": "List of Services used by Nanoleaf devices",
+      "under": "Nanoleaf API Documentation",
+      "url": "https://nanoleaf.atlassian.net/wiki/spaces/nlapid/pages/3410591752",
+      "version": 3,
+      "edited": "2026-08-28",
+      "files": [
+        {
+          "file": "wiki/list-of-services-used-by-nanoleaf-devices.html",
+          "bytes": 4629,
+          "sha256": "d1cdfb5b7b44d43de8924d071097900e24bd8f2415f50efba4599e6c872a858e"
+        },
+        {
+          "file": "wiki/list-of-services-used-by-nanoleaf-devices.md",
+          "bytes": 1584,
+          "sha256": "7f71bd181b0d76647fac8fbc69457ac27cc2f89329f0ae06d204d1b730da5114"
+        }
+      ]
+    },
+    {
+      "title": "Motion Appendix",
+      "under": "Nanoleaf API Documentation / Nanoleaf Matter WiFi Essentials Open API Documentation",
+      "url": "https://nanoleaf.atlassian.net/wiki/spaces/nlapid/pages/2298052616",
+      "version": 27,
+      "edited": "2025-04-15",
+      "files": [
+        {
+          "file": "wiki/motion-appendix.html",
+          "bytes": 24475,
+          "sha256": "21179386d558cd61dc5a280ec5e94f3db92da8f6320491e4976068e540215798"
+        },
+        {
+          "file": "wiki/motion-appendix.md",
+          "bytes": 10654,
+          "sha256": "e052c55ff52262bbca312f697ac3eb7043a755ee4192c9eaee28083cb1077e43"
+        }
+      ]
+    },
+    {
+      "title": "Nanoleaf API Documentation",
+      "under": "",
+      "url": "https://nanoleaf.atlassian.net/wiki/spaces/nlapid/pages/2304901414",
+      "version": 13,
+      "edited": "2026-06-18",
+      "files": [
+        {
+          "file": "wiki/nanoleaf-api-documentation.html",
+          "bytes": 4132,
+          "sha256": "0b4fd3a3f81f390b464b0c9bca8520b551a977f9f8d810bb727191d1abb5d6ad"
+        },
+        {
+          "file": "wiki/nanoleaf-api-documentation.md",
+          "bytes": 2605,
+          "sha256": "52b93e544da93b256b27aabe079a1c1f1617adca4fc682aac9aa97e3b714b5db"
+        }
+      ]
+    },
+    {
+      "title": "Nanoleaf Light Panels Open API Documentation",
+      "under": "Nanoleaf API Documentation",
+      "url": "https://nanoleaf.atlassian.net/wiki/spaces/nlapid/pages/2789310530",
+      "version": 8,
+      "edited": "2026-07-08",
+      "files": [
+        {
+          "file": "wiki/attachments/2789310530-image-20260203-171929.png",
+          "bytes": 179300,
+          "sha256": "becc543ffff1e746ab7852594c957202074c1bc715b29fe9471f2acbc271e96f"
+        },
+        {
+          "file": "wiki/attachments/2789310530-image-20260203-171907.png",
+          "bytes": 135214,
+          "sha256": "5cb341d08bde688a8ae281224081aa79f87d4d55e6bb40528007617a54e7b4fa"
+        },
+        {
+          "file": "wiki/attachments/2789310530-image-20260203-171846.png",
+          "bytes": 43840,
+          "sha256": "44f5f9ff4cca53d4bc846c6b1ba425ab7ec69aba4acbe9c6ff74ff7171a65c45"
+        },
+        {
+          "file": "wiki/attachments/2789310530-image-20260203-171540.png",
+          "bytes": 90501,
+          "sha256": "131e38caa251f63238307aa091265ffe6c866bc3ca2dec9c27bb8d90c8843793"
+        },
+        {
+          "file": "wiki/attachments/2789310530-image-20260203-171442.png",
+          "bytes": 136631,
+          "sha256": "d4b35eb9e62244a17bb79af5ba31a2352bcea479d915a3f7cd081cc4926182e6"
+        },
+        {
+          "file": "wiki/nanoleaf-light-panels-open-api-documentation.html",
+          "bytes": 136099,
+          "sha256": "966a9f0a829b4399d950778084d550e88d72fe1c8c33a2cfce532a9ae083c975"
+        },
+        {
+          "file": "wiki/nanoleaf-light-panels-open-api-documentation.md",
+          "bytes": 64118,
+          "sha256": "679ce578f6c692595c770de1d616e06f35d3e1e39b3853ca6e4b34418c353f59"
+        }
+      ]
+    },
+    {
+      "title": "Nanoleaf Matter WiFi Essentials Open API Documentation",
+      "under": "Nanoleaf API Documentation",
+      "url": "https://nanoleaf.atlassian.net/wiki/spaces/nlapid/pages/2296381472",
+      "version": 37,
+      "edited": "2026-04-01",
+      "files": [
+        {
+          "file": "wiki/attachments/2296381472-image-20241219-024825.png",
+          "bytes": 31048,
+          "sha256": "0ff937d18a7db5c9a9e78164d819a984534b1172a5cfda639bece7fb2b7cb74b"
+        },
+        {
+          "file": "wiki/nanoleaf-matter-wifi-essentials-open-api-documentation.html",
+          "bytes": 55027,
+          "sha256": "c99d899c65dca6788350eddcd81084b935516eb5b811d6a7dea460ae109724c2"
+        },
+        {
+          "file": "wiki/nanoleaf-matter-wifi-essentials-open-api-documentation.md",
+          "bytes": 24633,
+          "sha256": "fac496480093f51544e39dc744b8a760e1dbe93372e7aed449c7c90e93cc8373"
+        }
+      ]
+    },
+    {
+      "title": "Nanoleaf USB Lightstrip Communication Protocol",
+      "under": "Nanoleaf API Documentation",
+      "url": "https://nanoleaf.atlassian.net/wiki/spaces/nlapid/pages/2615574530",
+      "version": 10,
+      "edited": "2026-02-12",
+      "files": [
+        {
+          "file": "wiki/nanoleaf-usb-lightstrip-communication-protocol.html",
+          "bytes": 20130,
+          "sha256": "905172038bf5fa10bdb7138472aa7a2cbad4cfaa69c23fb6011aa43a3967a8b9"
+        },
+        {
+          "file": "wiki/nanoleaf-usb-lightstrip-communication-protocol.md",
+          "bytes": 7079,
+          "sha256": "bffa12b6daa372ac641be0640acd3d53c54880650ef403d729bc78d5b1c07e43"
+        }
+      ]
+    },
+    {
+      "title": "Nanoleaf Docs (a copy of the forum documentation, kept as a gist by dennishn)",
+      "url": "https://gist.github.com/dennishn/ae06bf574748727bcce5127394a8ba43",
+      "version": "e428dda10989",
+      "edited": "2024-12-23",
+      "files": [
+        {
+          "file": "mirror/gist-docs.md",
+          "bytes": 63061,
+          "sha256": "98f6c246fd3891e5aa3f9977db84aff2a9cd1a59c99c351fbd1bcf845ee36862"
+        }
+      ]
+    },
+    {
+      "title": "The forum documentation, as the Internet Archive last saw it",
+      "url": "https://forum.nanoleaf.me/docs/openapi",
+      "not_saved": "the archive holds no copy"
+    }
+  ]
+}

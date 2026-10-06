@@ -1,0 +1,9 @@
+/taproot
+/data/
+.taproot
+.coverage/
+.DS_Store
+.idea/
+dist/
+.tools/bin/
+.tools/venv/
