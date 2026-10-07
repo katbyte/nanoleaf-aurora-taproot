@@ -136,6 +136,50 @@ upgrade does to the built-in scenes, it is not nothing, and the backup taken fir
 Those are the only paths the app uses under the token: `/effects`, `/events`, `/firmwareUpgrade`, `GET /` for
 everything, and `DELETE` of the token. It reads `cloudHash` from `GET /` to tie the controller to an account.
 
+**Why the app is flaky with these controllers**, from the same reading of Nanoleaf Desktop 3.0.1:
+
+- *It decides a controller is reachable by pinging it.* Each controller the network announces is pinged (ICMP),
+  and the app wants **five replies**, with no timeout, before it counts the controller as there; it pings every
+  controller again every 30 seconds, and one that fails is dropped to "stale" and treated as unreachable. A Light
+  Panels controller on Wi-Fi drops the odd ping as a matter of course (one here lost every ping for half a minute
+  under a port scan), and a network that rate-limits or blocks ICMP never passes at all. taproot asks the API
+  itself and believes the answer.
+- *It only learns of a firmware update at a few moments.* The app reads `GET /firmwareUpgrade` only in its full
+  "get state" of a controller, which runs when a controller is added, after a calibration, after a scene is
+  downloaded or a plugin checked, and every ten seconds while an upgrade it started is running. Nothing reads it
+  on a timer otherwise, so a controller that has learned of an update since the app last did one of those things
+  is shown as up to date until it next does. On top of that the controller itself only knows of an update once it
+  has heard from Nanoleaf's cloud, which the three here had not for most of a day. taproot asks every time.
+- *Pairing is gated by what the announcement says.* A Light Panels controller is only offered for pairing from
+  its `_nanoleafapi._tcp` announcement, and only when the announcement's `md` is a model the app lists and its
+  `srcvers` is what the app expects; one whose announcement the machine did not hear (a firewall dropping mDNS
+  answers, as on a Mac, or another subnet) is not offered at all. taproot also asks macOS's own discovery service,
+  knocks on a subnet with `--scan`, and takes an address typed in.
+
+**And the phone app**, from the Android app 11.10.1 (`z-nanoleaf-apps/`, decompiled with jadx; the iOS app is the
+same product and the same design, but its binary cannot be read):
+
+- *It does not use this API at all for Light Panels.* The phone app drives them over **HomeKit** (HAP, TCP 6517),
+  through its own HomeKit client, with Nanoleaf's custom characteristics for what HomeKit lacks: whether a firmware
+  update is waiting (`A18E1904-…`), its version (`A18E1905-…`), and the command to install it (`A18E1902-…`); and
+  through the cloud (MQTT) when it is not on the same network. A HomeKit session is a paired, encrypted, stateful
+  connection that has to be re-established with a key exchange after any drop, which is the "connecting…" the app
+  shows; this API is a plain request with a token, and nothing to re-establish.
+- *Reachable means a ping answered.* Before connecting, the app pings the controller (`InetAddress.isReachable`,
+  which is ICMP where the system allows it) and treats no answer within the timeout as unreachable; a controller is
+  only marked reachable again when a HomeKit session succeeds.
+- *Four retries, then it gives up.* A dropped session is retried with a growing wait (1 s, 2 s, 3 s, 4 s); on the
+  fifth failure the connection is declared lost and the controller is shown unreachable until something starts it
+  again. A Light Panels controller that drops off Wi-Fi for ten seconds is past that.
+- *Any Wi-Fi change marks every controller unreachable* at once, and they come back one by one only as each HomeKit
+  session is rebuilt.
+- *The update prompt comes from a HomeKit characteristic*, read over that session, so it is only ever as current as
+  the last successful session, and the controller only sets it once it has heard from Nanoleaf's cloud.
+
+So on a phone the chain is: the controller must answer a ping, then a HomeKit key exchange must complete, then the
+session must stay up, and only then is a scene sent or an update offered; each link fails quietly. taproot has one
+link: the controller answers the API, or it does not, and either way it says so.
+
 **The MAC address.** Nothing the controller serves says it in full. The name it gives itself carries the last three
 octets (`Light Panels 53:A6:3C`), and the first three are Nanoleaf's: IEEE's registry gives `00:55:DA:5x:xx:xx` to
 Nanoleaf, and every controller here is named `5x:..`. So `taproot list` shows `00:55:DA:` and the name's three. The

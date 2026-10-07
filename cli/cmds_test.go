@@ -235,6 +235,26 @@ func asks(ctl *auroratest.Controller) int {
 	return n
 }
 
+// settled waits until no controller is being asked any more: the askers of a
+// run that has just stopped may still have a request in the air, and the
+// token the next run is waiting for must not go to one of those.
+func settled(t *testing.T, ctls ...*auroratest.Controller) {
+	t.Helper()
+	count := func() int {
+		n := 0
+		for _, c := range ctls {
+			n += asks(c)
+		}
+		return n
+	}
+	for last := count(); ; last = count() {
+		time.Sleep(40 * time.Millisecond)
+		if count() == last {
+			return
+		}
+	}
+}
+
 func (h *home) named(name string) bool {
 	return slices.ContainsFunc(h.saved(), func(c store.Controller) bool { return c.Name == name })
 }
@@ -367,6 +387,7 @@ func TestConnectAllStops(t *testing.T) { //nolint:paralleltest // the commands s
 	}
 	defer func() { _ = nobody.Close() }()
 	h.stdin = nobody
+	settled(t, a, b) // a request from the run just stopped must not be the one that takes the token
 	a.Pair()
 	out := h.ok("connect", "all", "--wait", "400ms")
 	want(t, out, "stops after 400ms", "connected Light Panels AA", "connected 1: light-panels-aa", "still not connected: Light Panels BB")
@@ -381,6 +402,7 @@ func TestConnectAllStops(t *testing.T) { //nolint:paralleltest // the commands s
 	want(t, h.fails("connect", "all", "--wait", "100ms"), "no controller handed out a token in 100ms")
 
 	// for a script: what connected, as a list, with no questions
+	settled(t, a, b)
 	b.Pair()
 	var connected []cli.Connected
 	// the wait is only how long it would go on asking: it connects the moment BB answers, which under a loaded
