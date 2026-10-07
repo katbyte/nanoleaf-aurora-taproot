@@ -72,6 +72,7 @@ part of those that only one controller has: `office`, `53a63c` and `183` can all
 | `scene push <controller> <file>` | adds the scene, or scenes, in a file a dump wrote |
 | `scene copy <scene> --from A --to B` | copies a scene between controllers; `--to-all` for every other one |
 | `scene select <controller> <scene>` | starts a scene |
+| `scene rename <controller> <scene> <name>` | gives a scene another name, where it is |
 | `scene delete <controller> <scene...>` | takes scenes off a controller; `--except <scene>` deletes every one but those; needs `--force` |
 | `backup [controller] [dir]` | every scene to a folder, one file each, with checksums |
 | `restore <controller> <dir>` | adds a backup's scenes to a controller, any controller |
@@ -114,7 +115,9 @@ Before the first write of a run the whole controller is backed up, to a dated fo
 difference is reported. A backup is never written over, and its files are read-only.
 
 Deleting is as careful. `scene delete` deletes nothing without `--force`, never deletes the scene that is running,
-and backs the controller up first, so `taproot restore` can put back whatever went.
+and backs the controller up first, so `taproot restore` can put back whatever went. `scene rename` loses nothing, so
+it needs no `--force`, but it backs up first all the same, refuses a name another scene already has, and leaves the
+scene that is running alone.
 
 Controllers on different firmware hold the same scene slightly differently: firmware 5.3.2 adds a field of its own
 (`rhythmFeatureSource`) to every scene it stores. taproot knows that field is the controller's and not the scene's,

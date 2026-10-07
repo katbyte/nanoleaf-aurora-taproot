@@ -420,8 +420,8 @@ func (f *Flags) put(ctx context.Context, ctl store.Controller, c *aurora.Client,
 			if err := c.SelectEffect(ctx, first.Scene); err != nil {
 				return report, fmt.Errorf("the scene is on %s but would not start: %w", ctl.Name, err)
 			}
-		case push.Refused, push.Failed, push.Deleted:
-			// it is not there to start
+		case push.Refused, push.Failed, push.Deleted, push.Renamed:
+			// it is not there to start; a push never deletes or renames
 		}
 	}
 
@@ -494,6 +494,28 @@ func (f *Flags) Delete(ctx context.Context, ref string, names []string) error {
 
 	report, err := push.Delete(ctx, c, names, push.Options{
 		Controller: ctl.Name, BackupRoot: f.BackupRoot(), Force: f.Cmd.Force, DryRun: f.DryRun,
+	})
+	if err != nil {
+		return err
+	}
+
+	return f.finish([]push.Report{report})
+}
+
+// Rename gives a scene on a controller another name. The old name is matched
+// as the controller spells it; the new one is taken as typed.
+func (f *Flags) Rename(ctx context.Context, ref, name, newName string) error {
+	ctl, c, err := f.Controller(ref)
+	if err != nil {
+		return err
+	}
+	name, err = cli.ResolveScene(ctx, c, name)
+	if err != nil {
+		return err
+	}
+
+	report, err := push.Rename(ctx, c, name, newName, push.Options{
+		Controller: ctl.Name, BackupRoot: f.BackupRoot(), DryRun: f.DryRun,
 	})
 	if err != nil {
 		return err

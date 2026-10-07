@@ -29,6 +29,7 @@ const (
 	Added     Outcome = "added"     // it was not there, and now is
 	Replaced  Outcome = "replaced"  // a different scene of that name was there, and Force replaced it
 	Deleted   Outcome = "deleted"   // it was there, and Force took it off
+	Renamed   Outcome = "renamed"   // it was there, and is now under the name in To
 	Unchanged Outcome = "unchanged" // the same scene was already there
 	Refused   Outcome = "refused"   // nothing was sent: Reason says why
 	Failed    Outcome = "failed"    // the controller did not take it: Reason says why
@@ -38,6 +39,8 @@ const (
 type Result struct {
 	Scene   string  `json:"scene"`
 	Outcome Outcome `json:"outcome"`
+	// To is the name a scene was renamed to, for a rename only.
+	To string `json:"to,omitempty"`
 	// Reason says why a scene was refused or failed, in words for a person.
 	Reason string `json:"reason,omitempty"`
 	// Differs names the fields in which the scene on the controller differed
@@ -61,11 +64,11 @@ type Report struct {
 	DryRun bool   `json:"dryRun,omitempty"`
 }
 
-// Wrote is how many scenes were added, replaced or deleted.
+// Wrote is how many scenes were added, replaced, deleted or renamed.
 func (r Report) Wrote() int {
 	n := 0
 	for _, res := range r.Results {
-		if res.Outcome == Added || res.Outcome == Replaced || res.Outcome == Deleted {
+		if res.Outcome == Added || res.Outcome == Replaced || res.Outcome == Deleted || res.Outcome == Renamed {
 			n++
 		}
 	}

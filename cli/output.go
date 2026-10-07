@@ -184,12 +184,15 @@ func PrintReport(r push.Report) {
 			colour = "darkGray"
 		case push.Refused, push.Failed:
 			colour = "red"
-		case push.Added, push.Replaced, push.Deleted:
+		case push.Added, push.Replaced, push.Deleted, push.Renamed:
 			if r.DryRun {
 				word = "would be " + word
 			}
 		}
 		line := fmt.Sprintf("  <%s>%-10s</> %s", colour, word, Scene(res.Scene))
+		if res.To != "" {
+			line += " → " + Scene(res.To)
+		}
 		if res.Reason != "" {
 			line += " — " + Escape(res.Reason)
 		}

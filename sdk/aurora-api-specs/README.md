@@ -90,6 +90,6 @@ The canned controller the tests use (`sdk/aurora/auroratest`) does what the docu
 is marked to be checked the first time a write is recorded:
 
 - what `add`, `delete` and `rename` answer when they work (`204` is assumed, as documented; `add` is known to work)
-- what a controller does when the scene that is running is deleted; taproot refuses to try
+- what a controller does when the scene that is running is deleted, or renamed; taproot refuses to try either
 - whether firmware 5.2.1 keeps or drops `rhythmFeatureSource` when it is given a scene that has it
 - what a controller says to a scene naming a plugin it does not have; taproot refuses to send one

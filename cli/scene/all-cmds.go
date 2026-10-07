@@ -1,6 +1,6 @@
 // Package scene holds the scene commands: list what the controllers hold,
 // dump a scene to a file, push one from a file, copy one between
-// controllers, start one, and delete them.
+// controllers, start one, rename one, and delete them.
 package scene
 
 import (
@@ -19,7 +19,7 @@ func flags() *Flags { return &Flags{cli.GetFlags()} }
 func Command() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "scene",
-		Short: "the scenes: list, dump, push, copy, select and delete them",
+		Short: "the scenes: list, dump, push, copy, select, rename and delete them",
 		Long: `A scene is what a controller calls an effect: a palette of colours and the plugin that moves them. taproot never builds one.
 It reads a scene from a controller exactly as the controller holds it, and gives it to another exactly as it was read, which is
 what makes a copy work whatever the firmware.
@@ -124,6 +124,21 @@ taproot scene delete office --except "Northern Lights" --force`,
 	deleteCmd.Flags().Bool("force", false, "delete: without this, nothing is deleted")
 	deleteCmd.Flags().StringArray("except", nil, "delete every scene but this one (repeat for more)")
 	c.AddCommand(deleteCmd)
+
+	c.AddCommand(&cobra.Command{
+		Use:   "rename controller scene name",
+		Short: "gives a scene on a controller another name",
+		Long: `Renames a scene where it is. Nothing is lost by a rename, so it needs no --force, but the controller is backed up first
+all the same, and afterwards the scene is read back under its new name and compared with what it was. A name another
+scene already has is refused, and so is the scene that is running: start another first.`,
+		Aliases:       []string{"mv"},
+		Args:          cobra.ExactArgs(3),
+		SilenceErrors: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
+			return flags().Rename(cmd.Context(), args[0], args[1], args[2])
+		},
+	})
 
 	c.AddCommand(&cobra.Command{
 		Use:           "select controller scene",

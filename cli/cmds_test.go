@@ -1143,6 +1143,33 @@ func TestSceneDelete(t *testing.T) { //nolint:paralleltest // the commands share
 	}
 }
 
+func TestSceneRename(t *testing.T) { //nolint:paralleltest // the commands share viper
+	h := newHome(t)
+	office := h.controller("office") // running kt Northern Lights, holding 17
+
+	// the old name is matched as the controller spells it; a name it has not got stops here
+	want(t, h.fails("scene", "rename", "office", "Flamez", "Fire"), `no scene called "Flamez"`)
+	// a name another scene has, and the running scene, are refused
+	want(t, h.fails("scene", "rename", "office", "Flames", "Forest"), "refused", `already holds a scene called "Forest"`)
+	want(t, h.fails("scene", "rename", "office", northern, "Fire"), "refused", "it is the scene that is running")
+	if len(office.Writes()) != 0 {
+		t.Fatal("a scene was renamed that should not have been")
+	}
+
+	// a dry run says what it would send
+	out := h.ok("scene", "rename", "office", "flames", "Fire", "--dry-run")
+	want(t, out, "would first back it up", "would be renamed Flames → Fire", `{"write":{"command":"rename","animName":"Flames","newName":"Fire"}}`)
+	if held := office.EffectNames(); !slices.Contains(held, "Flames") || len(office.Writes()) != 0 {
+		t.Fatal("a dry run renamed a scene")
+	}
+
+	out = h.ok("scene", "mv", "office", "flames", "Fire")
+	want(t, out, "backed up to "+filepath.Join(h.dir, "backups", "office"), "renamed    Flames → Fire")
+	if held := office.EffectNames(); len(held) != 17 || slices.Contains(held, "Flames") || !slices.Contains(held, "Fire") {
+		t.Fatalf("held: %v", held)
+	}
+}
+
 // A controller goes by a scene's exact name, capitals and all. A person
 // pointing at a scene that is there should not have to.
 func TestSceneNamesWhateverTheCapitals(t *testing.T) { //nolint:paralleltest // the commands share viper

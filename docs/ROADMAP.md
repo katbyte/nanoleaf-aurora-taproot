@@ -18,8 +18,8 @@ save it. This is the part of the app taproot does not replace yet. What is there
 **Painting panels.** A static scene with a colour chosen for each panel (the API's `static` effects and their
 `animData`), by clicking panels on the page.
 
-**Renaming scenes, and deleting them from the page.** `taproot scene delete` deletes from the command line, with a
-backup first. Renaming has no command yet, and the page has no button for either.
+**Renaming and deleting scenes from the page.** `taproot scene rename` and `scene delete` do both from the command
+line, with a backup first. The page has no button for either.
 
 **Restoring from the page.** The page takes backups and lists none. Restoring is `taproot restore`.
 
