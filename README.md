@@ -21,6 +21,29 @@ cloud, paints each panel a colour, and sets the button lock, the fade between sc
 Nothing on a controller is replaced unless you say so, a controller is backed up before anything is written to it,
 and `--dry-run` prints exactly what would be sent without sending it.
 
+## In action
+
+Finding the controllers on the network, and what each is doing:
+
+![taproot find](docs/screenshots/find.svg)
+![taproot list](docs/screenshots/list.svg)
+
+Every scene on every controller side by side, and copying the one that only one controller still has (`--dry-run`
+shows exactly what would be sent, and sends nothing):
+
+![taproot scene list](docs/screenshots/scene-list.svg)
+![taproot scene copy](docs/screenshots/copy.svg)
+
+Settings, backups, painting panels, and firmware:
+
+![taproot get all](docs/screenshots/get.svg)
+![taproot backup](docs/screenshots/backup.svg)
+![taproot scene paint](docs/screenshots/paint.svg)
+![taproot firmware](docs/screenshots/firmware.svg)
+![taproot firmware trigger](docs/screenshots/trigger.svg)
+
+The addresses in these are made up; everything else is as it was printed.
+
 ## Installation
 
 Download a binary for your platform from the [latest release](https://github.com/katbyte/nanoleaf-aurora-taproot/releases/latest)
