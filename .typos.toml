@@ -22,6 +22,8 @@ extend-exclude = [
   # what real controllers sent, kept byte for byte
   "sdk/aurora/auroratest/fixtures/",
   "acceptance/testdata/",
+  # screenshots of what taproot printed, rendered as it was; a long line wrapped mid-word reads as a typo
+  "docs/screenshots/",
 ]
 
 [default]
