@@ -23,6 +23,11 @@ and `--dry-run` prints exactly what would be sent without sending it.
 
 ## In action
 
+The page (`taproot serve`): every controller's panels drawn where they sit, moving as their scene does, with the
+everyday controls, each scene's menu, and the scene editor behind the picker at the top left:
+
+![the taproot page: three controllers' panels, lit as their scenes move](docs/screenshots/page.jpg)
+
 Finding the controllers on the network, and what each is doing:
 
 ![taproot find](docs/screenshots/find.svg)
