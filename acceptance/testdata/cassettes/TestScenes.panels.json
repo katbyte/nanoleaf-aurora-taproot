@@ -3574,6 +3574,30 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/effects/effectsList",
+      "status": 200,
+      "response": [
+        "Color Burst",
+        "Fireworks",
+        "Flames",
+        "Forest",
+        "Inner Peace",
+        "Meteor Shower",
+        "Nemo",
+        "Northern Lights",
+        "Paint Splatter",
+        "Pulse Pop Beats",
+        "Rhythmic Northern Lights",
+        "Ripple",
+        "Romantic",
+        "Snowfall",
+        "Sound Bar",
+        "Streaking Notes",
+        "kt Northern Lights"
+      ]
+    },
+    {
       "method": "PUT",
       "path": "/effects",
       "request": {
@@ -3652,6 +3676,30 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/effects/effectsList",
+      "status": 200,
+      "response": [
+        "Color Burst",
+        "Fireworks",
+        "Flames",
+        "Forest",
+        "Inner Peace",
+        "Meteor Shower",
+        "Nemo",
+        "Northern Lights",
+        "Paint Splatter",
+        "Pulse Pop Beats",
+        "Rhythmic Northern Lights",
+        "Ripple",
+        "Romantic",
+        "Snowfall",
+        "Sound Bar",
+        "Streaking Notes",
+        "kt Northern Lights"
+      ]
+    },
+    {
       "method": "PUT",
       "path": "/effects",
       "request": {
@@ -3702,6 +3750,30 @@
         "pluginUuid": "5cec763a-6f32-45cf-a691-b81e176b6b4a",
         "hasOverlay": false
       }
+    },
+    {
+      "method": "GET",
+      "path": "/effects/effectsList",
+      "status": 200,
+      "response": [
+        "Color Burst",
+        "Fireworks",
+        "Flames",
+        "Forest",
+        "Inner Peace",
+        "Meteor Shower",
+        "Nemo",
+        "Northern Lights",
+        "Paint Splatter",
+        "Pulse Pop Beats",
+        "Rhythmic Northern Lights",
+        "Ripple",
+        "Romantic",
+        "Snowfall",
+        "Sound Bar",
+        "Streaking Notes",
+        "kt Northern Lights"
+      ]
     },
     {
       "method": "PUT",
@@ -3762,6 +3834,30 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/effects/effectsList",
+      "status": 200,
+      "response": [
+        "Color Burst",
+        "Fireworks",
+        "Flames",
+        "Forest",
+        "Inner Peace",
+        "Meteor Shower",
+        "Nemo",
+        "Northern Lights",
+        "Paint Splatter",
+        "Pulse Pop Beats",
+        "Rhythmic Northern Lights",
+        "Ripple",
+        "Romantic",
+        "Snowfall",
+        "Sound Bar",
+        "Streaking Notes",
+        "kt Northern Lights"
+      ]
+    },
+    {
       "method": "PUT",
       "path": "/effects",
       "request": {
@@ -3820,6 +3916,30 @@
         ],
         "hasOverlay": false
       }
+    },
+    {
+      "method": "GET",
+      "path": "/effects/effectsList",
+      "status": 200,
+      "response": [
+        "Color Burst",
+        "Fireworks",
+        "Flames",
+        "Forest",
+        "Inner Peace",
+        "Meteor Shower",
+        "Nemo",
+        "Northern Lights",
+        "Paint Splatter",
+        "Pulse Pop Beats",
+        "Rhythmic Northern Lights",
+        "Ripple",
+        "Romantic",
+        "Snowfall",
+        "Sound Bar",
+        "Streaking Notes",
+        "kt Northern Lights"
+      ]
     },
     {
       "method": "PUT",
@@ -3912,6 +4032,30 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/effects/effectsList",
+      "status": 200,
+      "response": [
+        "Color Burst",
+        "Fireworks",
+        "Flames",
+        "Forest",
+        "Inner Peace",
+        "Meteor Shower",
+        "Nemo",
+        "Northern Lights",
+        "Paint Splatter",
+        "Pulse Pop Beats",
+        "Rhythmic Northern Lights",
+        "Ripple",
+        "Romantic",
+        "Snowfall",
+        "Sound Bar",
+        "Streaking Notes",
+        "kt Northern Lights"
+      ]
+    },
+    {
       "method": "PUT",
       "path": "/effects",
       "request": {
@@ -3976,6 +4120,30 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/effects/effectsList",
+      "status": 200,
+      "response": [
+        "Color Burst",
+        "Fireworks",
+        "Flames",
+        "Forest",
+        "Inner Peace",
+        "Meteor Shower",
+        "Nemo",
+        "Northern Lights",
+        "Paint Splatter",
+        "Pulse Pop Beats",
+        "Rhythmic Northern Lights",
+        "Ripple",
+        "Romantic",
+        "Snowfall",
+        "Sound Bar",
+        "Streaking Notes",
+        "kt Northern Lights"
+      ]
+    },
+    {
       "method": "PUT",
       "path": "/effects",
       "request": {
@@ -4026,6 +4194,30 @@
         ],
         "hasOverlay": false
       }
+    },
+    {
+      "method": "GET",
+      "path": "/effects/effectsList",
+      "status": 200,
+      "response": [
+        "Color Burst",
+        "Fireworks",
+        "Flames",
+        "Forest",
+        "Inner Peace",
+        "Meteor Shower",
+        "Nemo",
+        "Northern Lights",
+        "Paint Splatter",
+        "Pulse Pop Beats",
+        "Rhythmic Northern Lights",
+        "Ripple",
+        "Romantic",
+        "Snowfall",
+        "Sound Bar",
+        "Streaking Notes",
+        "kt Northern Lights"
+      ]
     },
     {
       "method": "PUT",
@@ -4108,6 +4300,30 @@
         ],
         "hasOverlay": false
       }
+    },
+    {
+      "method": "GET",
+      "path": "/effects/effectsList",
+      "status": 200,
+      "response": [
+        "Color Burst",
+        "Fireworks",
+        "Flames",
+        "Forest",
+        "Inner Peace",
+        "Meteor Shower",
+        "Nemo",
+        "Northern Lights",
+        "Paint Splatter",
+        "Pulse Pop Beats",
+        "Rhythmic Northern Lights",
+        "Ripple",
+        "Romantic",
+        "Snowfall",
+        "Sound Bar",
+        "Streaking Notes",
+        "kt Northern Lights"
+      ]
     },
     {
       "method": "PUT",
@@ -4204,6 +4420,30 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/effects/effectsList",
+      "status": 200,
+      "response": [
+        "Color Burst",
+        "Fireworks",
+        "Flames",
+        "Forest",
+        "Inner Peace",
+        "Meteor Shower",
+        "Nemo",
+        "Northern Lights",
+        "Paint Splatter",
+        "Pulse Pop Beats",
+        "Rhythmic Northern Lights",
+        "Ripple",
+        "Romantic",
+        "Snowfall",
+        "Sound Bar",
+        "Streaking Notes",
+        "kt Northern Lights"
+      ]
+    },
+    {
       "method": "PUT",
       "path": "/effects",
       "request": {
@@ -4268,6 +4508,30 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/effects/effectsList",
+      "status": 200,
+      "response": [
+        "Color Burst",
+        "Fireworks",
+        "Flames",
+        "Forest",
+        "Inner Peace",
+        "Meteor Shower",
+        "Nemo",
+        "Northern Lights",
+        "Paint Splatter",
+        "Pulse Pop Beats",
+        "Rhythmic Northern Lights",
+        "Ripple",
+        "Romantic",
+        "Snowfall",
+        "Sound Bar",
+        "Streaking Notes",
+        "kt Northern Lights"
+      ]
+    },
+    {
       "method": "PUT",
       "path": "/effects",
       "request": {
@@ -4326,6 +4590,30 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/effects/effectsList",
+      "status": 200,
+      "response": [
+        "Color Burst",
+        "Fireworks",
+        "Flames",
+        "Forest",
+        "Inner Peace",
+        "Meteor Shower",
+        "Nemo",
+        "Northern Lights",
+        "Paint Splatter",
+        "Pulse Pop Beats",
+        "Rhythmic Northern Lights",
+        "Ripple",
+        "Romantic",
+        "Snowfall",
+        "Sound Bar",
+        "Streaking Notes",
+        "kt Northern Lights"
+      ]
+    },
+    {
       "method": "PUT",
       "path": "/effects",
       "request": {
@@ -4370,6 +4658,30 @@
         "pluginUuid": "bc6fe7e0-36d4-4f95-aa21-52a386daa9dc",
         "hasOverlay": false
       }
+    },
+    {
+      "method": "GET",
+      "path": "/effects/effectsList",
+      "status": 200,
+      "response": [
+        "Color Burst",
+        "Fireworks",
+        "Flames",
+        "Forest",
+        "Inner Peace",
+        "Meteor Shower",
+        "Nemo",
+        "Northern Lights",
+        "Paint Splatter",
+        "Pulse Pop Beats",
+        "Rhythmic Northern Lights",
+        "Ripple",
+        "Romantic",
+        "Snowfall",
+        "Sound Bar",
+        "Streaking Notes",
+        "kt Northern Lights"
+      ]
     },
     {
       "method": "PUT",
@@ -4442,6 +4754,30 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/effects/effectsList",
+      "status": 200,
+      "response": [
+        "Color Burst",
+        "Fireworks",
+        "Flames",
+        "Forest",
+        "Inner Peace",
+        "Meteor Shower",
+        "Nemo",
+        "Northern Lights",
+        "Paint Splatter",
+        "Pulse Pop Beats",
+        "Rhythmic Northern Lights",
+        "Ripple",
+        "Romantic",
+        "Snowfall",
+        "Sound Bar",
+        "Streaking Notes",
+        "kt Northern Lights"
+      ]
+    },
+    {
       "method": "PUT",
       "path": "/effects",
       "request": {
@@ -4494,6 +4830,30 @@
         ],
         "hasOverlay": false
       }
+    },
+    {
+      "method": "GET",
+      "path": "/effects/effectsList",
+      "status": 200,
+      "response": [
+        "Color Burst",
+        "Fireworks",
+        "Flames",
+        "Forest",
+        "Inner Peace",
+        "Meteor Shower",
+        "Nemo",
+        "Northern Lights",
+        "Paint Splatter",
+        "Pulse Pop Beats",
+        "Rhythmic Northern Lights",
+        "Ripple",
+        "Romantic",
+        "Snowfall",
+        "Sound Bar",
+        "Streaking Notes",
+        "kt Northern Lights"
+      ]
     },
     {
       "method": "PUT",
@@ -4552,6 +4912,30 @@
         "pluginUuid": "fe0d0ba8-741f-4210-940c-454eceed010f",
         "hasOverlay": false
       }
+    },
+    {
+      "method": "GET",
+      "path": "/effects/effectsList",
+      "status": 200,
+      "response": [
+        "Color Burst",
+        "Fireworks",
+        "Flames",
+        "Forest",
+        "Inner Peace",
+        "Meteor Shower",
+        "Nemo",
+        "Northern Lights",
+        "Paint Splatter",
+        "Pulse Pop Beats",
+        "Rhythmic Northern Lights",
+        "Ripple",
+        "Romantic",
+        "Snowfall",
+        "Sound Bar",
+        "Streaking Notes",
+        "kt Northern Lights"
+      ]
     },
     {
       "method": "PUT",
@@ -4616,6 +5000,30 @@
         "pluginUuid": "337784c0-6c98-447a-8a9f-fc6ac44a8024",
         "hasOverlay": false
       }
+    },
+    {
+      "method": "GET",
+      "path": "/effects/effectsList",
+      "status": 200,
+      "response": [
+        "Color Burst",
+        "Fireworks",
+        "Flames",
+        "Forest",
+        "Inner Peace",
+        "Meteor Shower",
+        "Nemo",
+        "Northern Lights",
+        "Paint Splatter",
+        "Pulse Pop Beats",
+        "Rhythmic Northern Lights",
+        "Ripple",
+        "Romantic",
+        "Snowfall",
+        "Sound Bar",
+        "Streaking Notes",
+        "kt Northern Lights"
+      ]
     },
     {
       "method": "PUT",
@@ -4698,17 +5106,6 @@
         ],
         "hasOverlay": false
       }
-    },
-    {
-      "method": "PUT",
-      "path": "/effects",
-      "request": {
-        "write": {
-          "command": "request",
-          "animName": "taproot test: no such scene"
-        }
-      },
-      "status": 404
     },
     {
       "method": "GET",

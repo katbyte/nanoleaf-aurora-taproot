@@ -1,5 +1,5 @@
 // The taproot root command and the root-level commands: find, connect, list,
-// info, rename, forget, backup and restore. The command groups (scene, serve) are
+// info, rename, get, set, forget, backup and restore. The command groups (scene, serve) are
 // added by cmd/taproot; the flag-free shared helpers live in cli/
 
 package cli
@@ -142,6 +142,55 @@ the name the controller gives itself stays as it is. Backups already taken stay 
 			return GetFlags().Rename(args[0], args[1])
 		},
 	})
+
+	root.AddCommand(&cobra.Command{
+		Use:   "get controller|all [setting]",
+		Short: "shows what a controller is set to: every setting, or the one named",
+		Long: `Reads a controller's settings: every one with what it can be set to, or just the one named, printed alone for a script
+to read. With all in place of a controller it reads every controller, one to a line.
+
+The settings:
+
+` + SettingsHelp(),
+		Args:          cobra.RangeArgs(1, 2),
+		SilenceErrors: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
+			name := ""
+			if len(args) == 2 {
+				name = args[1]
+			}
+			return GetFlags().Get(cmd.Context(), args[0], name)
+		},
+	})
+
+	setCmd := &cobra.Command{
+		Use:   "set controller|all setting [value]",
+		Short: "changes one setting of a controller: power, brightness, scene, colour, and the rest",
+		Long: `Sets one setting of a controller and says what the controller reports it as afterwards. With all in place of a
+controller it sets every controller. --by moves a number by an amount in place of setting it: --by -10 dims by ten.
+
+  taproot set office brightness 40
+  taproot set office brightness --by -10
+  taproot set all power off
+
+The settings:
+
+` + SettingsHelp(),
+		Args:          cobra.RangeArgs(2, 3),
+		SilenceErrors: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
+			value := ""
+			if len(args) == 3 {
+				value = args[2]
+			}
+			return GetFlags().Set(cmd.Context(), args[0], args[1], value, cmd.Flags().Changed("by"))
+		},
+	}
+	setCmd.Flags().Int("by", 0, "move a number by this much, up or down, in place of setting it: --by -10")
+	setCmd.Flags().Duration("fade", 0, "for brightness: take this long to get there, e.g. 3s")
+	root.AddCommand(setCmd)
 
 	forgetCmd := &cobra.Command{
 		Use:   "forget controller",

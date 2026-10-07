@@ -290,6 +290,48 @@ func TestAControllerThatRefusesTheScene(t *testing.T) {
 	}
 }
 
+// newer is what firmware 5.3.2 does to every scene it stores: it adds a field
+// of its own.
+func newer(e aurora.Effect) aurora.Effect {
+	e, _ = e.With("rhythmFeatureSource", 1)
+	return e
+}
+
+// A scene from older firmware, copied to a controller on newer firmware that
+// adds a field of its own, has arrived as it was sent, and is there already
+// when it is copied again.
+func TestAFieldTheControllerAddsIsNotADifference(t *testing.T) {
+	t.Parallel()
+
+	r := newRig(t)
+	r.ctl.StoreAs(newer)
+
+	report := r.push(t, r.scene)
+	if res := report.Results[0]; res.Outcome != push.Added || len(res.ReadsBack) != 0 {
+		t.Fatalf("the first copy: %+v", res)
+	}
+	if on, _ := r.ctl.Effect(scene); on.Equal(r.scene) || !on.SameScene(r.scene) {
+		t.Fatal("the controller should hold the scene with its own field added")
+	}
+
+	// again: it is there, so nothing is written and nothing backed up
+	writes := len(r.ctl.Writes())
+	report = r.push(t, r.scene)
+	if res := report.Results[0]; res.Outcome != push.Unchanged || report.Backup != "" || len(r.ctl.Writes()) != writes {
+		t.Errorf("the second copy: %+v, backup %q", res, report.Backup)
+	}
+
+	// a real change is still a change, and the field of the controller's own is not blamed for it
+	altered, err := r.scene.With("palette", []aurora.Color{{Hue: 10}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	report = r.push(t, altered)
+	if res := report.Results[0]; res.Outcome != push.Refused || len(res.Differs) != 1 || res.Differs[0] != "palette" {
+		t.Errorf("a changed scene: %+v", res)
+	}
+}
+
 // A controller may store a scene its own way. That is not a failure, and it
 // is said.
 func TestSaysWhenASceneReadsBackDifferently(t *testing.T) {

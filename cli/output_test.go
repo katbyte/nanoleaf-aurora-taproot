@@ -137,3 +137,31 @@ func TestSwatch(t *testing.T) {
 		t.Errorf("on this terminal: %q", got)
 	}
 }
+
+func TestMatchScene(t *testing.T) {
+	t.Parallel()
+
+	held := []string{"Flames", "Northern Lights", "kt Northern Lights", "nemo", "Nemo"}
+	for typed, want := range map[string]string{
+		"Flames":             "Flames",
+		"flames":             "Flames",
+		"  FLAMES ":          "Flames",
+		"KT NORTHERN LIGHTS": "kt Northern Lights",
+		"northern lights":    "Northern Lights", // the whole name, not part of a longer one
+		"nemo":               "nemo",            // exactly one of two that differ in their capitals
+		"Nemo":               "Nemo",
+	} {
+		if got, err := MatchScene(held, typed); err != nil || got != want {
+			t.Errorf("MatchScene(%q) = %q, %v; want %q", typed, got, err, want)
+		}
+	}
+	for typed, msg := range map[string]string{
+		"NEMO":           `"NEMO" could be nemo or Nemo: type the one you mean exactly`,
+		"Northern Light": `no scene called "Northern Light": it has Flames, Northern Lights`,
+		"":               `no scene called ""`,
+	} {
+		if got, err := MatchScene(held, typed); err == nil || !strings.Contains(err.Error(), msg) {
+			t.Errorf("MatchScene(%q) = %q, %v; want an error saying %q", typed, got, err, msg)
+		}
+	}
+}

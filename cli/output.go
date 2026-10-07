@@ -184,7 +184,7 @@ func PrintReport(r push.Report) {
 			colour = "darkGray"
 		case push.Refused, push.Failed:
 			colour = "red"
-		case push.Added, push.Replaced:
+		case push.Added, push.Replaced, push.Deleted:
 			if r.DryRun {
 				word = "would be " + word
 			}
@@ -194,7 +194,7 @@ func PrintReport(r push.Report) {
 			line += " — " + Escape(res.Reason)
 		}
 		if len(res.ReadsBack) > 0 {
-			line += " — " + Note("the controller stored it its own way:") + " reads back differently in " + strings.Join(res.ReadsBack, ", ")
+			line += " — " + Note("the controller changed it as it stored it:") + " it reads back with a different " + strings.Join(res.ReadsBack, ", ")
 		}
 		cout.Printf("%s\n", line)
 	}

@@ -4,10 +4,8 @@
 [![Go Version](https://img.shields.io/github/go-mod/go-version/katbyte/nanoleaf-aurora-taproot?label=go&color=00ADD8)](https://github.com/katbyte/nanoleaf-aurora-taproot/blob/main/go.mod)
 [![License](https://img.shields.io/github/license/katbyte/nanoleaf-aurora-taproot?color=blue)](https://github.com/katbyte/nanoleaf-aurora-taproot/blob/main/LICENSE)
 ![build](https://github.com/katbyte/nanoleaf-aurora-taproot/actions/workflows/build.yaml/badge.svg)
-![tests](https://github.com/katbyte/nanoleaf-aurora-taproot/actions/workflows/pr-tests.yaml/badge.svg)
 ![lint](https://github.com/katbyte/nanoleaf-aurora-taproot/actions/workflows/pr-golangci-lint.yaml/badge.svg)
 ![CodeQL](https://github.com/katbyte/nanoleaf-aurora-taproot/actions/workflows/codeql-analysis.yml/badge.svg)
-[![coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/katbyte/nanoleaf-aurora-taproot/badges/coverage.json)](https://github.com/katbyte/nanoleaf-aurora-taproot/actions/workflows/coverage.yaml)
 
 A command-line utility, Go SDK, and a web page, for the original Nanoleaf Aurora Light Panels (model NL22). It
 talks straight to the controllers on your own network: no app, no account, no cloud.
@@ -52,6 +50,9 @@ themselves (mDNS, the service `_nanoleafapi._tcp`). On a Mac it also asks macOS'
 the firewall there often drops the answers to the first. And with `--scan` it knocks on port 16021 at every
 address of a subnet, for networks that announcements do not cross.
 
+A scene that a controller already holds can be named in any capitals: `"kt northern lights"` finds
+`kt Northern Lights`. Should a controller hold two that differ only in their capitals, type the one you mean exactly.
+
 A controller is named on the command line by the name you gave it, the name it gives itself, its address, or any
 part of those that only one controller has: `office`, `53a63c` and `183` can all be the same one.
 
@@ -63,12 +64,15 @@ part of those that only one controller has: `office`, `53a63c` and `183` can all
 | `list` | the controllers taproot holds a token for: its name for each and the name the controller gives itself, model, firmware, power, what is running |
 | `info <controller>` | one controller in full |
 | `rename <controller> <name>` | changes what taproot calls a controller: `taproot rename 183 office` |
+| `get <controller\|all> [setting]` | what a controller is set to: every setting, or the one named, printed alone for a script |
+| `set <controller\|all> <setting> <value>` | changes a setting: `power`, `brightness`, `scene`, `hue`, `saturation`, `temperature`, `orientation`, `rhythm`; `--by -10` moves a number |
 | `forget <controller>` | has the controller delete the token, and removes it; `--local` leaves the controller alone |
 | `scene list [controller]` | a controller's scenes, or with none named, which controller holds which |
 | `scene dump <controller> [scene]` | a scene as JSON, exactly as the controller holds it; all of them when none is named; `--out file` |
 | `scene push <controller> <file>` | adds the scene, or scenes, in a file a dump wrote |
 | `scene copy <scene> --from A --to B` | copies a scene between controllers; `--to-all` for every other one |
 | `scene select <controller> <scene>` | starts a scene |
+| `scene delete <controller> <scene...>` | takes scenes off a controller; `--except <scene>` deletes every one but those; needs `--force` |
 | `backup [controller] [dir]` | every scene to a folder, one file each, with checksums |
 | `restore <controller> <dir>` | adds a backup's scenes to a controller, any controller |
 | `serve [port]` | the web page |
@@ -108,6 +112,27 @@ looks at what the controller holds:
 Before the first write of a run the whole controller is backed up, to a dated folder under
 `~/.config/taproot/backups`. After each write the scene is read back and compared with what was sent, and any
 difference is reported. A backup is never written over, and its files are read-only.
+
+Deleting is as careful. `scene delete` deletes nothing without `--force`, never deletes the scene that is running,
+and backs the controller up first, so `taproot restore` can put back whatever went.
+
+Controllers on different firmware hold the same scene slightly differently: firmware 5.3.2 adds a field of its own
+(`rhythmFeatureSource`) to every scene it stores. taproot knows that field is the controller's and not the scene's,
+so a scene copied from older firmware is still found to be there, and unchanged, the next time.
+
+### Settings
+
+```bash
+taproot get office                     # every setting, and what each can be set to
+taproot get office brightness          # 33
+taproot set office brightness 40
+taproot set office brightness --by -10 # dimmer by ten
+taproot set office brightness 0 --fade 30s
+taproot set all power off              # every controller
+```
+
+`hue`, `saturation` and `temperature` turn every panel one colour or one white in place of the scene; setting
+`scene` goes back. `set` reads the setting before and after, so what it reports is what the controller says.
 
 ## The page
 

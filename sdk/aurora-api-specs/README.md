@@ -37,7 +37,7 @@ eaten everything the forum wrote in angle brackets: the token in every path (`/a
 
 ## Where the documentation and a controller differ
 
-Checked against an NL22 on firmware 5.2.1, 6 October 2026, with reads only.
+Checked against an NL22 on firmware 5.2.1, 6 October 2026, with reads only, except where another firmware is named.
 
 **Answers the documentation does not list.** A controller answers for the whole of a section as well as for each
 value in it: `GET /state` and `GET /rhythm` work, and are in the SDK as `State` and `Rhythm`. The whole answer
@@ -65,13 +65,31 @@ effect it does not hold, are `404` with nothing in it.
 
 **Events.** The stream opens on an NL22 (`200`, `text/event-stream`) and stays open.
 
+**More sections than are documented.** On firmware 5.3.2, `GET /discovery`, `/schedules`, `/cloudHash` and
+`/firmwareUpgrade` each answer with their own section, as `/effects` and `/panelLayout` do. The values that
+identify the controller do not: `GET /name`, `/serialNo`, `/model`, `/firmwareVersion`, `/manufacturer` and
+`/hardwareVersion` are all `404`.
+
+**The name a controller gives itself cannot be set.** Nothing documented sets it, and the obvious guesses are
+refused. On an NL22 on firmware 5.3.2, 6 October 2026, each of these answered `404` with nothing in it and left
+the name as it was: `PUT /` with `{"name": "..."}` and with `{"name": {"value": "..."}}`, and `PUT /name` with
+`{"name": "..."}` and with `{"value": "..."}`. The documentation's one mention of the name changing is that it
+"could be updated by an iOS user using WAC", Apple's Wi-Fi setup for accessories. `taproot rename` therefore only
+changes taproot's own name for a controller.
+
+**Firmware 5.3.2 adds a field to every scene it stores.** A scene read from firmware 5.2.1 and added to a
+controller on 5.3.2, 6 October 2026, was accepted as it was and plays. Read back, it is the same in every field,
+with one more: `"rhythmFeatureSource": 1`. Every scene on a 5.3.2 controller has it, the built-in ones included, and
+no scene on 5.2.1 does. So it is the firmware's own bookkeeping and not part of the scene, and `sdk/aurora` compares
+scenes without it (`Effect.SameScene`): otherwise a scene copied from older firmware would look different from its
+own copy, and could never be found to be there already.
+
 ## Not yet checked on a controller
 
-Nothing has been written to a real controller yet. The canned controller the tests use (`sdk/aurora/auroratest`)
-does what the documentation says for these, and each is marked to be checked the first time a write is recorded:
+The canned controller the tests use (`sdk/aurora/auroratest`) does what the documentation says for these, and each
+is marked to be checked the first time a write is recorded:
 
-- what `add`, `delete` and `rename` answer when they work (`204` is assumed, as documented)
-- whether a controller stores a scene exactly as it was sent, or writes it its own way; taproot reads every scene
-  back after writing it and reports any field that differs
-- whether a scene read from firmware 5.2.1 is accepted as it is by firmware 5.3.2
+- what `add`, `delete` and `rename` answer when they work (`204` is assumed, as documented; `add` is known to work)
+- what a controller does when the scene that is running is deleted; taproot refuses to try
+- whether firmware 5.2.1 keeps or drops `rhythmFeatureSource` when it is given a scene that has it
 - what a controller says to a scene naming a plugin it does not have; taproot refuses to send one

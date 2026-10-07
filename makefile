@@ -181,8 +181,11 @@ spec-refresh: ## Save Nanoleaf's API documentation afresh into sdk/aurora-api-sp
 ##@ Testing
 COVERDIR?=.coverage
 
+# the acceptance tests build the taproot binary themselves as they start, where go's test cache cannot see it
+# change: they are never answered from the cache, or a change to a command would go on reading as a pass
 test: build ## Run the tests under the race detector; the acceptance tests replay their recordings, so no controller is needed
-	go test -race $$(go list ./... | grep -v vendor) -timeout ${TEST_TIMEOUT}
+	go test -race $$(go list ./... | grep -v -e vendor -e /acceptance) -timeout ${TEST_TIMEOUT}
+	go test -race -count=1 ./acceptance/... -timeout ${TEST_TIMEOUT}
 
 cover: build ## Run the tests with coverage and report the total
 	@rm -rf $(COVERDIR) && mkdir -p $(COVERDIR)

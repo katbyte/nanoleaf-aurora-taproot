@@ -61,6 +61,8 @@ type FlagsCommands struct {
 	TokenFile string        `mapstructure:"token-file"` // connect: a token already in hand
 	Local     bool          `mapstructure:"local"`      // forget: leave the controller alone
 	Force     bool          `mapstructure:"force"`      // replace what is already there
+	By        int           `mapstructure:"by"`         // set: move a number by this much
+	Fade      time.Duration `mapstructure:"fade"`       // set brightness: take this long over it
 	Scene     FlagsScene    `mapstructure:",squash"`
 	Serve     FlagsServe    `mapstructure:",squash"`
 }
@@ -73,6 +75,7 @@ type FlagsScene struct {
 	As     string   `mapstructure:"as"`     // copy, push: the name to store it under
 	Select bool     `mapstructure:"select"` // copy, push: start it once it is there
 	Out    string   `mapstructure:"out"`    // dump: the file to write
+	Except []string `mapstructure:"except"` // delete: every scene but these
 }
 
 // FlagsServe configures taproot serve.

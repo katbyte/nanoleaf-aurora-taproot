@@ -1,6 +1,6 @@
 // Package scene holds the scene commands: list what the controllers hold,
 // dump a scene to a file, push one from a file, copy one between
-// controllers, and start one.
+// controllers, start one, and delete them.
 package scene
 
 import (
@@ -19,7 +19,7 @@ func flags() *Flags { return &Flags{cli.GetFlags()} }
 func Command() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "scene",
-		Short: "the scenes: list, dump, push, copy and select them",
+		Short: "the scenes: list, dump, push, copy, select and delete them",
 		Long: `A scene is what a controller calls an effect: a palette of colours and the plugin that moves them. taproot never builds one.
 It reads a scene from a controller exactly as the controller holds it, and gives it to another exactly as it was read, which is
 what makes a copy work whatever the firmware.
@@ -103,6 +103,27 @@ controller taproot knows. A controller that already holds it unchanged is left a
 	copyCmd.Flags().Bool("to-all", false, "copy it to every other controller")
 	addWriteFlags(copyCmd)
 	c.AddCommand(copyCmd)
+
+	deleteCmd := &cobra.Command{
+		Use:   "delete controller [scene...] [--except scene]",
+		Short: "takes scenes off a controller: the ones named, or with --except every one but those",
+		Long: `Deletes scenes from a controller. A controller has no bin and no undo, so nothing is deleted without --force: without it
+this says what would go and stops. The whole controller is backed up first, and taproot restore puts back anything a backup
+holds. The scene that is running is never deleted: start another first.
+
+--except deletes every scene but the ones it names, to clear a controller down to the scenes you use:
+taproot scene delete office --except "Northern Lights" --force`,
+		Aliases:       []string{"rm", "remove"},
+		Args:          cobra.MinimumNArgs(1),
+		SilenceErrors: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
+			return flags().Delete(cmd.Context(), args[0], args[1:])
+		},
+	}
+	deleteCmd.Flags().Bool("force", false, "delete: without this, nothing is deleted")
+	deleteCmd.Flags().StringArray("except", nil, "delete every scene but this one (repeat for more)")
+	c.AddCommand(deleteCmd)
 
 	c.AddCommand(&cobra.Command{
 		Use:           "select controller scene",

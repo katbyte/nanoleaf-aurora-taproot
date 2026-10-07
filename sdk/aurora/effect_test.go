@@ -141,6 +141,42 @@ func TestEffectEqual(t *testing.T) {
 	}
 }
 
+// A scene copied to a controller on newer firmware comes back with a field
+// that firmware added. It is the same scene, and must be seen as one, or it
+// could never be found already there.
+func TestSameScene(t *testing.T) {
+	t.Parallel()
+
+	sent := mustParse(t, `{"animName":"a","palette":[{"hue":1}],"hasOverlay":false}`)
+	for doc, same := range map[string]bool{
+		`{"animName":"a","palette":[{"hue":1}],"hasOverlay":false}`:                         true,
+		`{"animName":"a","palette":[{"hue":1}],"hasOverlay":false,"rhythmFeatureSource":1}`: true,  // as firmware 5.3.2 stores it
+		`{"rhythmFeatureSource":0,"hasOverlay":false,"palette":[{"hue":1}],"animName":"a"}`: true,  // whatever value it gave it
+		`{"animName":"a","palette":[{"hue":2}],"hasOverlay":false,"rhythmFeatureSource":1}`: false, // a colour is still a colour
+		`{"animName":"a","palette":[{"hue":1}],"rhythmFeatureSource":1}`:                    false, // and a field of the scene's own still missing
+		`{"animName":"a","palette":[{"hue":1}],"hasOverlay":false,"somethingElse":1}`:       false, // only the fields known to be a controller's own
+	} {
+		stored := mustParse(t, doc)
+		// whichever way round it is asked
+		if sent.SameScene(stored) != same || stored.SameScene(sent) != same {
+			t.Errorf("SameScene(%s) = %v, want %v", doc, sent.SameScene(stored), same)
+		}
+	}
+
+	// they are still not Equal: what a controller holds is what it holds
+	stored := mustParse(t, `{"animName":"a","palette":[{"hue":1}],"hasOverlay":false,"rhythmFeatureSource":1}`)
+	if sent.Equal(stored) || len(sent.Differences(stored)) != 1 || len(sent.SceneDifferences(stored)) != 0 {
+		t.Errorf("Equal %v, Differences %v, SceneDifferences %v", sent.Equal(stored), sent.Differences(stored), sent.SceneDifferences(stored))
+	}
+
+	// a field both have, with different values, is a difference like any other
+	one := mustParse(t, `{"animName":"a","rhythmFeatureSource":1}`)
+	two := mustParse(t, `{"animName":"a","rhythmFeatureSource":2}`)
+	if one.SameScene(two) || !slices.Equal(one.SceneDifferences(two), []string{"rhythmFeatureSource"}) {
+		t.Errorf("both have it, differently: %v", one.SceneDifferences(two))
+	}
+}
+
 func TestParseEffectRefuses(t *testing.T) {
 	t.Parallel()
 

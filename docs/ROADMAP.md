@@ -18,14 +18,15 @@ save it. This is the part of the app taproot does not replace yet. What is there
 **Painting panels.** A static scene with a colour chosen for each panel (the API's `static` effects and their
 `animData`), by clicking panels on the page.
 
-**Deleting and renaming scenes.** `sdk/aurora` has both. Neither has a command or a button, because neither can be
-undone short of a restore; they want a confirmation, and a backup taken first, like every other write.
+**Renaming scenes, and deleting them from the page.** `taproot scene delete` deletes from the command line, with a
+backup first. Renaming has no command yet, and the page has no button for either.
 
 **Restoring from the page.** The page takes backups and lists none. Restoring is `taproot restore`.
 
 ## Later
 
-- colour and white modes on the page: one colour by hue and saturation, a white by temperature
+- colour and white modes on the page: one colour by hue and saturation, a white by temperature (`taproot set` has them)
+- one colour by name or hex code, `taproot set office colour ff8800`, in place of hue and saturation apart
 - schedules, which firmware 5 reports and the API does not document
 - the Rhythm module's settings: microphone or aux
 - other Nanoleaf products. Nothing blocks them where it costs nothing, since the API is shared: the page draws

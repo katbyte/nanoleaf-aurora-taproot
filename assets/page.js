@@ -691,7 +691,7 @@ async function copy() {
         const good = res.outcome === 'added' || res.outcome === 'replaced';
         const cls = good ? 'line good' : res.outcome === 'unchanged' ? 'line same' : 'line bad';
         const why = res.reason
-          || (res.readsBack && res.readsBack.length ? `the controller stored it its own way: reads back differently in ${res.readsBack.join(', ')}` : '')
+          || (res.readsBack && res.readsBack.length ? `the controller changed it as it stored it: it reads back with a different ${res.readsBack.join(', ')}` : '')
           || (res.outcome === 'unchanged' ? 'the same scene was already there' : '')
           || (r.backup ? `backed up first, to ${r.backup}` : '');
         return el('div', { class: cls }, el('span', { text: r.controller }),

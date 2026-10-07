@@ -331,6 +331,35 @@ func (e Effect) Differences(other Effect) []string {
 	return diff
 }
 
+// controllerFields are the fields a controller writes into a scene by itself
+// when it stores one, whatever it was sent. They are the bookkeeping of the
+// firmware that stored the scene and no part of the scene: the same scene
+// read from firmware that writes one and from firmware that does not differs
+// in nothing but this.
+//
+//	rhythmFeatureSource  firmware 5.3.2 adds it, as 1, to every scene it
+//	                     stores; firmware 5.2.1 has no such field
+var controllerFields = []string{"rhythmFeatureSource"}
+
+// SameScene reports whether two effects are the same scene: Equal, except
+// that a field a controller adds by itself, which only one of the two has,
+// does not make them different. It is the question to ask of a scene on one
+// controller and its copy on another, which may run other firmware.
+func (e Effect) SameScene(other Effect) bool {
+	return len(e.SceneDifferences(other)) == 0
+}
+
+// SceneDifferences names the fields in which two effects differ as scenes:
+// Differences, without any field a controller adds by itself that only one
+// of the two has. One that both have, with different values, still counts.
+func (e Effect) SceneDifferences(other Effect) []string {
+	return slices.DeleteFunc(e.Differences(other), func(key string) bool {
+		_, mine := e.Field(key)
+		_, theirs := other.Field(key)
+		return mine != theirs && slices.Contains(controllerFields, key)
+	})
+}
+
 // sameJSON compares two values by what they mean: 0 and 0.0 are the same
 // number, and an object's fields have no order.
 func sameJSON(a, b json.RawMessage) bool {

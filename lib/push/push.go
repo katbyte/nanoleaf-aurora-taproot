@@ -28,6 +28,7 @@ type Outcome string
 const (
 	Added     Outcome = "added"     // it was not there, and now is
 	Replaced  Outcome = "replaced"  // a different scene of that name was there, and Force replaced it
+	Deleted   Outcome = "deleted"   // it was there, and Force took it off
 	Unchanged Outcome = "unchanged" // the same scene was already there
 	Refused   Outcome = "refused"   // nothing was sent: Reason says why
 	Failed    Outcome = "failed"    // the controller did not take it: Reason says why
@@ -43,8 +44,9 @@ type Result struct {
 	// from the one pushed, for a scene that was refused or replaced.
 	Differs []string `json:"differs,omitempty"`
 	// ReadsBack names the fields in which the scene read back after the
-	// write differs from what was sent. A controller may write a scene its
-	// own way; this says where, so it can be judged.
+	// write differs from what was sent, beyond the ones a controller is known
+	// to add by itself. It is empty when the scene arrived as it was sent; a
+	// field named here is something the controller changed, to be looked at.
 	ReadsBack []string `json:"readsBack,omitempty"`
 }
 
@@ -59,11 +61,11 @@ type Report struct {
 	DryRun bool   `json:"dryRun,omitempty"`
 }
 
-// Wrote is how many scenes were added or replaced.
+// Wrote is how many scenes were added, replaced or deleted.
 func (r Report) Wrote() int {
 	n := 0
 	for _, res := range r.Results {
-		if res.Outcome == Added || res.Outcome == Replaced {
+		if res.Outcome == Added || res.Outcome == Replaced || res.Outcome == Deleted {
 			n++
 		}
 	}
@@ -134,13 +136,14 @@ func Scenes(ctx context.Context, c *aurora.Client, scenes []aurora.Effect, opt O
 		case e.PluginUUID() != "" && !slices.ContainsFunc(plugins, func(p aurora.Plugin) bool { return p.UUID == e.PluginUUID() }):
 			res.Outcome = Refused
 			res.Reason = fmt.Sprintf("the controller does not have the plugin the scene runs (%s), so it could not play it", e.PluginUUID())
-		case i >= 0 && held[i].Equal(e):
+		// the same scene, whatever the firmware holding it has added of its own
+		case i >= 0 && held[i].SameScene(e):
 			res.Outcome = Unchanged
 		case i >= 0 && !opt.Force:
-			res.Outcome, res.Differs = Refused, held[i].Differences(e)
+			res.Outcome, res.Differs = Refused, held[i].SceneDifferences(e)
 			res.Reason = "a different scene of that name is already there (differs in " + strings.Join(res.Differs, ", ") + "): --force replaces it"
 		case i >= 0:
-			res.Outcome, res.Differs = Replaced, held[i].Differences(e)
+			res.Outcome, res.Differs = Replaced, held[i].SceneDifferences(e)
 			write = append(write, len(report.Results))
 		default:
 			res.Outcome = Added
@@ -179,7 +182,7 @@ func Scenes(ctx context.Context, c *aurora.Client, scenes []aurora.Effect, opt O
 			res.Outcome, res.Reason = Failed, "the controller took it but does not give it back: "+err.Error()
 			continue
 		}
-		res.ReadsBack = back.Differences(e)
+		res.ReadsBack = back.SceneDifferences(e)
 	}
 
 	return report, nil

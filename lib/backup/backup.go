@@ -7,6 +7,7 @@
 package backup
 
 import (
+	"cmp"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -335,7 +336,10 @@ func List(root string) ([]Entry, error) {
 		}
 		out = append(out, Entry{Controller: filepath.Base(filepath.Dir(dir)), Dir: dir, Taken: taken, Scenes: len(m.Scenes)})
 	}
-	slices.SortFunc(out, func(a, b Entry) int { return b.Taken.Compare(a.Taken) })
+	// two taken within a second of each other are told apart by their directories, the later of which has the higher number
+	slices.SortFunc(out, func(a, b Entry) int {
+		return cmp.Or(b.Taken.Compare(a.Taken), strings.Compare(b.Dir, a.Dir))
+	})
 
 	return out, nil
 }

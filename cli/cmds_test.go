@@ -577,6 +577,153 @@ func TestRename(t *testing.T) { //nolint:paralleltest // the commands share vipe
 	want(t, h.fails("rename", "kitchen", "pantry"), `no controller matches "kitchen"`)
 }
 
+func TestGet(t *testing.T) { //nolint:paralleltest // the commands share viper
+	h := newHome(t)
+	want(t, h.fails("get", "all"), "no controllers yet")
+
+	office := h.controller("office")
+	out := h.ok("get", "office")
+	want(t, out, "office", "power        on", "brightness   33", "scene        kt Northern Lights", "hue          0", "saturation   0",
+		"temperature  3000", "orientation  88", "rhythm       microphone", "mode         effect", "0 to 100", "read only")
+
+	// one setting is its value and nothing else, for a script, whatever the output is turned down to
+	if got := h.ok("get", "office", "brightness"); got != "33\n" {
+		t.Errorf("get brightness printed %q", got)
+	}
+	if got := h.ok("get", "office", "ct", "--quiet"); got != "3000\n" {
+		t.Errorf("get ct --quiet printed %q", got)
+	}
+	if got := h.ok("get", "office", "SCENE"); got != northern+"\n" {
+		t.Errorf("get scene printed %q", got)
+	}
+
+	var all []cli.Settings
+	if err := json.Unmarshal([]byte(h.ok("get", "office", "--json")), &all); err != nil || len(all) != 1 || len(all[0].Settings) != 9 {
+		t.Fatalf("get --json: %+v, %v", all, err)
+	}
+	if s := all[0].Settings; s["power"] != "on" || s["brightness"] != float64(33) || s["scene"] != northern || s["rhythm"] != "microphone" {
+		t.Errorf("settings: %+v", s)
+	}
+	var one []cli.Settings
+	if err := json.Unmarshal([]byte(h.ok("get", "office", "power", "--json")), &one); err != nil || len(one[0].Settings) != 1 || one[0].Settings["power"] != "on" {
+		t.Errorf("get power --json: %+v, %v", one, err)
+	}
+
+	// every controller, one to a line; one that is gone says so and the rest are still read
+	gone := h.controller("bedroom")
+	gone.Unplug()
+	out, err := h.run("get", "all", "--timeout", "2s")
+	if err == nil {
+		t.Error("a controller that could not be read should be an error")
+	}
+	want(t, out, "NAME", "BRIGHTNESS", "SCENE", "office", "33", northern, "bedroom", "?")
+
+	want(t, h.fails("get", "office", "volume"), `no setting called "volume"`, "power, brightness, scene")
+	want(t, h.fails("get", "kitchen"), `no controller matches "kitchen"`)
+	if len(office.Writes()) != 0 {
+		t.Error("get wrote to the controller")
+	}
+}
+
+func TestSet(t *testing.T) { //nolint:paralleltest // the commands share viper
+	h := newHome(t)
+	office := h.controller("office")
+	state := office.State
+
+	// to a value, and what is reported is what the controller says afterwards
+	want(t, h.ok("set", "office", "brightness", "50"), "office: brightness 33 → 50")
+	if state().Brightness.Value != 50 {
+		t.Fatalf("brightness is %d", state().Brightness.Value)
+	}
+	want(t, h.ok("set", "office", "brightness", "50"), "office: brightness is 50")
+
+	// by an amount, down as well as up, stopping at the limit
+	want(t, h.ok("set", "office", "brightness", "--by", "-10"), "50 → 40")
+	want(t, h.ok("set", "office", "brightness", "--by=500"), "40 → 100")
+	// over a time
+	h.ok("set", "office", "brightness", "20", "--fade", "3s")
+	if w := office.Writes(); w[len(w)-1].Body != `{"brightness":{"duration":3,"value":20}}` {
+		t.Errorf("a fade sent %s", w[len(w)-1].Body)
+	}
+
+	// a value the controller would refuse is not sent, and the limits are said
+	before := len(office.Writes())
+	want(t, h.fails("set", "office", "brightness", "101"), "brightness is 0 to 100 on this controller, not 101")
+	want(t, h.fails("set", "office", "brightness", "bright"), `brightness is a whole number from 0 to 100, not "bright"`)
+	want(t, h.fails("set", "office", "temperature", "100"), "temperature is 1200 to 6500")
+	if len(office.Writes()) != before {
+		t.Error("a value out of range was sent")
+	}
+
+	want(t, h.ok("set", "office", "power", "off"), "office: power on → off")
+	want(t, h.ok("set", "office", "power", "toggle"), "power off → on")
+	want(t, h.ok("set", "office", "power", "toggle"), "power on → off")
+	want(t, h.fails("set", "office", "power", "maybe"), `power is on, off or toggle, not "maybe"`)
+
+	want(t, h.ok("set", "office", "scene", "Flames"), "office: scene kt Northern Lights → Flames")
+	if office.Selected() != "Flames" {
+		t.Errorf("running %q", office.Selected())
+	}
+	want(t, h.fails("set", "office", "scene", "Nope"), `no scene called "Nope"`, "it has Color Burst")
+
+	// one colour, in place of the scene, and the mode follows
+	want(t, h.ok("set", "office", "hue", "120"), "hue 0 → 120")
+	want(t, h.ok("set", "office", "sat", "80"), "saturation 0 → 80")
+	if got := h.ok("get", "office", "mode"); got != "hs\n" {
+		t.Errorf("after a colour the mode is %q", got)
+	}
+	want(t, h.ok("set", "office", "hue", "--by", "30"), "120 → 150")
+	want(t, h.ok("set", "office", "kelvin", "4000"), "temperature 3000 → 4000")
+	if got := h.ok("get", "office", "mode"); got != "ct\n" {
+		t.Errorf("after a white the mode is %q", got)
+	}
+	want(t, h.ok("set", "office", "orientation", "90"), "orientation 88 → 90")
+	want(t, h.ok("set", "office", "rhythm", "aux"), "rhythm microphone → aux")
+	want(t, h.ok("set", "office", "source", "mic"), "rhythm aux → microphone")
+	want(t, h.fails("set", "office", "rhythm", "radio"), "rhythm is microphone or aux")
+
+	for _, bad := range []struct {
+		args []string
+		msg  string
+	}{
+		{[]string{"set", "office", "mode", "hs"}, "mode is not set itself"},
+		{[]string{"set", "office", "volume", "11"}, `no setting called "volume"`},
+		{[]string{"set", "office", "brightness"}, "set brightness to what? it is 0 to 100"},
+		{[]string{"set", "office", "brightness", "10", "--by", "5"}, "not both"},
+		{[]string{"set", "office", "power", "--by", "1"}, "power is not a number to move with --by"},
+		{[]string{"set", "office", "hue", "10", "--fade", "2s"}, "--fade is for brightness"},
+		{[]string{"set", "kitchen", "power", "on"}, `no controller matches "kitchen"`},
+	} {
+		want(t, h.fails(bad.args...), bad.msg)
+	}
+
+	// a dry run says what it would send and sends none of it
+	before = len(office.Writes())
+	want(t, h.ok("set", "office", "brightness", "5", "--dry-run"), "dry run:", "PUT /api/v1/<token>/state", `{"brightness":{"value":5}}`)
+	if len(office.Writes()) != before || state().Brightness.Value != 20 {
+		t.Error("a dry run changed the controller")
+	}
+
+	// every controller at once; one that is gone is said, and the rest are still set
+	bedroom := h.controller("bedroom")
+	gone := h.controller("hall")
+	gone.Unplug()
+	out, err := h.run("set", "all", "brightness", "15", "--timeout", "2s")
+	if err == nil {
+		t.Error("a controller that could not be set should be an error")
+	}
+	want(t, out, "office: brightness 20 → 15", "bedroom: brightness 33 → 15", "hall:")
+	if state().Brightness.Value != 15 || bedroom.State().Brightness.Value != 15 {
+		t.Error("set all did not reach every controller")
+	}
+
+	var changed []cli.Changed
+	if err := json.Unmarshal([]byte(h.ok("set", "bedroom", "power", "off", "--json")), &changed); err != nil || len(changed) != 1 ||
+		changed[0].Controller != "bedroom" || changed[0].Setting != "power" || changed[0].From != "on" || changed[0].To != "off" {
+		t.Errorf("set --json: %+v, %v", changed, err)
+	}
+}
+
 func TestForget(t *testing.T) { //nolint:paralleltest // the commands share viper
 	h := newHome(t)
 	office := h.controller("office")
@@ -713,6 +860,11 @@ func TestSceneListAndCompare(t *testing.T) { //nolint:paralleltest // the comman
 	if last := listed[16]; last.Name != northern || !last.Running || last.Plugin != "Wheel" || last.Kind != "color" || last.Colours != 7 {
 		t.Errorf("the running scene: %+v", last)
 	}
+
+	// the bedroom is on newer firmware, which adds a field of its own to every scene: Forest is still the same scene
+	forest, _ := bedroom.Effect("Forest")
+	forest, _ = forest.With("rhythmFeatureSource", 1)
+	bedroom.PutEffect(forest)
 
 	// side by side: the one the bedroom lost, and the one it holds differently
 	out = h.ok("scene", "list")
@@ -935,6 +1087,117 @@ func TestSceneCopy(t *testing.T) { //nolint:paralleltest // the commands share v
 	want(t, msg, "hall:")
 	if _, ok := bedroom.Effect(northern); !ok {
 		t.Error("the bedroom did not get its copy because the hall was off")
+	}
+}
+
+func TestSceneDelete(t *testing.T) { //nolint:paralleltest // the commands share viper
+	h := newHome(t)
+	office := h.controller("office") // running kt Northern Lights, holding 17
+
+	want(t, h.fails("scene", "delete", "office"), "say which scenes to delete")
+	want(t, h.fails("scene", "delete", "office", "Flames", "--except", "Forest"), "not both")
+
+	// without being told to, nothing goes
+	want(t, h.fails("scene", "delete", "office", "Flames"), "Flames", "not deleted without --force")
+	if len(office.EffectNames()) != 17 || len(office.Writes()) != 0 {
+		t.Fatal("a scene was deleted without --force")
+	}
+
+	// a dry run says what it would send
+	out := h.ok("scene", "delete", "office", "Flames", "--force", "--dry-run")
+	want(t, out, "would first back it up", "would be deleted", `{"write":{"command":"delete","animName":"Flames"}}`)
+	if len(office.EffectNames()) != 17 {
+		t.Fatal("a dry run deleted a scene")
+	}
+
+	out = h.ok("scene", "rm", "office", "Flames", "Forest", "--force")
+	want(t, out, "backed up to "+filepath.Join(h.dir, "backups", "office"), "deleted    Flames", "deleted    Forest")
+	if names := office.EffectNames(); len(names) != 15 || slices.Contains(names, "Flames") {
+		t.Fatalf("left: %v", names)
+	}
+
+	// down to the one that is wanted: everything but it, and it is the one running, so it stays
+	want(t, h.fails("scene", "delete", "office", "--except", "Northern Light", "--force"), `--except: office: the controller has no scene called "Northern Light"`, "nothing was deleted", "it has Color Burst")
+	want(t, h.fails("scene", "delete", "office", "Nemo", "Nemoo", "--force"), `no scene called "Nemoo"`, "nothing was deleted")
+	if len(office.EffectNames()) != 15 {
+		t.Fatal("a slip in the name to keep deleted scenes")
+	}
+	out = h.ok("scene", "delete", "office", "--except", northern, "--force")
+	want(t, out, "deleted    Color Burst", "deleted    Streaking Notes")
+	if names := office.EffectNames(); len(names) != 1 || names[0] != northern {
+		t.Fatalf("left: %v", names)
+	}
+	want(t, h.ok("scene", "delete", "office", "--except", northern, "--force"), "holds nothing but the scenes to keep")
+
+	// the one that is running is never deleted from under the controller
+	want(t, h.fails("scene", "delete", "office", northern, "--force"), "it is the scene that is running")
+
+	// and what went can be put back from the backup taken before it did
+	list, err := backup.List(filepath.Join(h.dir, "backups"))
+	if err != nil || len(list) != 2 || list[0].Scenes != 15 || list[1].Scenes != 17 {
+		t.Fatalf("backups, newest first: %+v, %v", list, err)
+	}
+	want(t, h.ok("restore", "office", list[1].Dir), "added      Flames", "added      Forest")
+	if len(office.EffectNames()) != 17 {
+		t.Errorf("after restoring: %v", office.EffectNames())
+	}
+}
+
+// A controller goes by a scene's exact name, capitals and all. A person
+// pointing at a scene that is there should not have to.
+func TestSceneNamesWhateverTheCapitals(t *testing.T) { //nolint:paralleltest // the commands share viper
+	h := newHome(t)
+	office := h.controller("office")
+	bedroom := h.controller("bedroom")
+	bedroom.RemoveEffect(northern)
+
+	// read
+	e, err := aurora.ParseEffect([]byte(h.ok("scene", "dump", "office", "KT NORTHERN LIGHTS")))
+	if err != nil || e.Name() != northern {
+		t.Errorf("dump: %q, %v", e.Name(), err)
+	}
+	// started, by a command and by a setting
+	want(t, h.ok("scene", "select", "office", "flames"), "is now running Flames")
+	want(t, h.ok("set", "office", "scene", " kt northern lights "), "scene Flames → kt Northern Lights")
+	if office.Selected() != northern {
+		t.Errorf("running %q", office.Selected())
+	}
+	// copied: it arrives under the name the controller it came from spells it
+	want(t, h.ok("scene", "copy", "kt northern lights", "--from", "office", "--to", "bedroom"), "copying kt Northern Lights", "added      kt Northern Lights")
+	if _, ok := bedroom.Effect(northern); !ok || len(bedroom.EffectNames()) != 17 {
+		t.Errorf("the bedroom holds %v", bedroom.EffectNames())
+	}
+	// deleted, by name and by what to keep
+	want(t, h.ok("scene", "delete", "office", "FOREST", "--force"), "deleted    Forest")
+	want(t, h.ok("scene", "delete", "office", "--except", "kt northern lights", "--except", "NEMO", "--force"), "deleted    Flames")
+	if names := office.EffectNames(); len(names) != 2 || names[0] != "Nemo" || names[1] != northern {
+		t.Fatalf("left: %v", names)
+	}
+
+	// a controller holding two scenes that differ only in their capitals: typed exactly, each is itself
+	nemo, _ := office.Effect("Nemo")
+	office.PutEffect(nemo.WithName("nemo"))
+	want(t, h.ok("scene", "select", "office", "nemo"), "is now running nemo")
+	want(t, h.ok("scene", "select", "office", "Nemo"), "is now running Nemo")
+	// typed as neither, it is not guessed at
+	for _, args := range [][]string{
+		{"scene", "select", "office", "NEMO"},
+		{"scene", "dump", "office", "NEMO"},
+		{"set", "office", "scene", "NEMO"},
+		{"scene", "delete", "office", "NEMO", "--force"},
+		{"scene", "delete", "office", "--except", "NEMO", "--force"},
+		{"scene", "copy", "NEMO", "--from", "office", "--to", "bedroom"},
+	} {
+		want(t, h.fails(args...), `"NEMO" could be Nemo or nemo: type the one you mean exactly`)
+	}
+	if office.Selected() != "Nemo" || len(office.EffectNames()) != 3 {
+		t.Errorf("a name that could be two scenes changed something: running %q, holding %v", office.Selected(), office.EffectNames())
+	}
+
+	// a name to store a scene under is taken as it is typed
+	want(t, h.ok("scene", "copy", "nemo", "--from", "office", "--to", "bedroom", "--as", "Little Fish"), "added      Little Fish")
+	if _, ok := bedroom.Effect("Little Fish"); !ok {
+		t.Error("--as did not keep its capitals")
 	}
 }
 

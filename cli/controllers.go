@@ -902,7 +902,7 @@ func (f *FlagData) Info(ctx context.Context, ref string) error {
 		{Dim("running"), Scene(info.Effects.Select) + " " + Dim("("+info.State.ColorMode+" mode)")},
 	}
 	if r := info.Rhythm; r != nil && r.Connected {
-		source := "microphone"
+		source := wordMicrophone
 		if r.Mode == aurora.RhythmModeAux {
 			source = "aux cable"
 		}

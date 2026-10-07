@@ -9,7 +9,6 @@ import (
 	"io"
 	"os"
 	"slices"
-	"strings"
 	"sync"
 
 	"github.com/katbyte/go-kt/cout"
@@ -131,7 +130,8 @@ func (f *Flags) Compare(ctx context.Context) error {
 				names = append(names, e.Name())
 			}
 			c.On[ctl.Name] = true
-			c.Differs = c.Differs || !first[e.Name()].Equal(e)
+			// the same scene on firmware that adds a field of its own is still the same scene
+			c.Differs = c.Differs || !first[e.Name()].SameScene(e)
 		}
 	}
 	slices.Sort(names)
@@ -226,9 +226,14 @@ func (f *Flags) Dump(ctx context.Context, ref, name string) error {
 // of them in the controller's own shape for the lot.
 func document(ctx context.Context, c *aurora.Client, name string) ([]byte, error) {
 	if name != "" {
-		e, err := c.Effect(ctx, name)
+		// by the name as the controller spells it, whatever capitals were typed
+		spelt, err := cli.ResolveScene(ctx, c, name)
 		if err != nil {
-			return nil, noScene(ctx, c, name, err)
+			return nil, err
+		}
+		e, err := c.Effect(ctx, spelt)
+		if err != nil {
+			return nil, noScene(ctx, c, spelt, err)
 		}
 		return json.Marshal(e)
 	}
@@ -244,15 +249,7 @@ func document(ctx context.Context, c *aurora.Client, name string) ([]byte, error
 // noScene turns a controller's bare "not found" into the name that was asked
 // for and the names it could have been.
 func noScene(ctx context.Context, c *aurora.Client, name string, err error) error {
-	if !aurora.IsNotFound(err) {
-		return err
-	}
-	names, lerr := c.EffectNames(ctx)
-	if lerr != nil {
-		return fmt.Errorf("the controller has no scene called %q", name)
-	}
-
-	return fmt.Errorf("the controller has no scene called %q: it has %s", name, strings.Join(names, ", "))
+	return cli.NoScene(ctx, c, name, err)
 }
 
 // read reads the scenes of a file taproot scene dump wrote: one scene, the
@@ -370,6 +367,11 @@ func (f *Flags) Copy(ctx context.Context, name string) error {
 	if err != nil {
 		return err
 	}
+	// the scene on the controller it comes from, by the name as that controller spells it
+	name, err = cli.ResolveScene(ctx, source, name)
+	if err != nil {
+		return fmt.Errorf("%s: %w", from.Name, err)
+	}
 	e, err := source.Effect(ctx, name)
 	if err != nil {
 		return fmt.Errorf("%s: %w", from.Name, noScene(ctx, source, name, err))
@@ -418,7 +420,7 @@ func (f *Flags) put(ctx context.Context, ctl store.Controller, c *aurora.Client,
 			if err := c.SelectEffect(ctx, first.Scene); err != nil {
 				return report, fmt.Errorf("the scene is on %s but would not start: %w", ctl.Name, err)
 			}
-		case push.Refused, push.Failed:
+		case push.Refused, push.Failed, push.Deleted:
 			// it is not there to start
 		}
 	}
@@ -447,8 +449,65 @@ func (f *Flags) finish(reports []push.Report) error {
 	return errors.Join(failed...)
 }
 
+func (f *Flags) Delete(ctx context.Context, ref string, names []string) error {
+	ctl, c, err := f.Controller(ref)
+	if err != nil {
+		return err
+	}
+
+	keep := f.Cmd.Scene.Except
+	switch {
+	case len(names) > 0 && len(keep) > 0:
+		return errors.New("name the scenes to delete, or with --except the ones to keep: not both")
+	case len(names) == 0 && len(keep) == 0:
+		return errors.New("say which scenes to delete, or with --except which to keep")
+	}
+	held, err := c.EffectNames(ctx)
+	if err != nil {
+		return err
+	}
+
+	// each name as the controller spells it. One that cannot be matched stops everything: a slip of the
+	// hand in the name of a scene to keep would otherwise delete it with the rest
+	for i, typed := range names {
+		if names[i], err = cli.MatchScene(held, typed); err != nil {
+			return fmt.Errorf("%s: %w (nothing was deleted)", ctl.Name, err)
+		}
+	}
+	for i, typed := range keep {
+		if keep[i], err = cli.MatchScene(held, typed); err != nil {
+			return fmt.Errorf("--except: %s: %w (nothing was deleted)", ctl.Name, err)
+		}
+	}
+	if len(keep) > 0 {
+		for _, name := range held {
+			if !slices.Contains(keep, name) {
+				names = append(names, name)
+			}
+		}
+		if len(names) == 0 {
+			cout.Printf("%s holds nothing but the scenes to keep\n", cli.Name(ctl.Name))
+			_, err = f.Emit([]push.Report{})
+			return err
+		}
+	}
+
+	report, err := push.Delete(ctx, c, names, push.Options{
+		Controller: ctl.Name, BackupRoot: f.BackupRoot(), Force: f.Cmd.Force, DryRun: f.DryRun,
+	})
+	if err != nil {
+		return err
+	}
+
+	return f.finish([]push.Report{report})
+}
+
 func (f *Flags) Select(ctx context.Context, ref, name string) error {
 	ctl, c, err := f.Controller(ref)
+	if err != nil {
+		return err
+	}
+	name, err = cli.ResolveScene(ctx, c, name)
 	if err != nil {
 		return err
 	}
