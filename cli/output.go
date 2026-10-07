@@ -3,6 +3,7 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -111,6 +112,56 @@ func Swatch(palette []aurora.Color) string {
 	default:
 		return blocks(palette, colours256)
 	}
+}
+
+// RGBSwatch is one colour as its hex digits with a block in that colour
+// beside them where the terminal can show it: "ff8800 █".
+func RGBSwatch(r, g, b uint8) string {
+	hex := fmt.Sprintf("%02x%02x%02x", r, g, b)
+	switch {
+	case !c.Enable || !c.Support256Color():
+		return hex
+	case c.SupportTrueColor():
+		return fmt.Sprintf("%s <fg=%d,%d,%d>█</>", hex, r, g, b)
+	default:
+		return fmt.Sprintf("%s <fg=%d>█</>", hex, c.RgbTo256(r, g, b))
+	}
+}
+
+// colourNames are the colours that can be given by name.
+var colourNames = map[string][3]uint8{
+	"red": {255, 0, 0}, "orange": {255, 128, 0}, "yellow": {255, 255, 0}, "green": {0, 255, 0},
+	"cyan": {0, 255, 255}, "blue": {0, 0, 255}, "purple": {128, 0, 255}, "magenta": {255, 0, 255},
+	"pink": {255, 105, 180}, "white": {255, 255, 255}, "off": {0, 0, 0}, "black": {0, 0, 0},
+}
+
+// ParseColor reads a colour as six hex digits, with or without a #, or by
+// one of the names in colourNames.
+func ParseColor(s string) (r, g, b uint8, err error) {
+	s = strings.ToLower(strings.TrimSpace(s))
+	if rgb, ok := colourNames[s]; ok {
+		return rgb[0], rgb[1], rgb[2], nil
+	}
+	hex := strings.TrimPrefix(s, "#")
+	if len(hex) == 6 {
+		var rgb [3]uint8
+		ok := true
+		for i := range rgb {
+			n, perr := strconv.ParseUint(hex[2*i:2*i+2], 16, 8)
+			ok = ok && perr == nil
+			rgb[i] = uint8(n)
+		}
+		if ok {
+			return rgb[0], rgb[1], rgb[2], nil
+		}
+	}
+	names := make([]string, 0, len(colourNames))
+	for n := range colourNames {
+		names = append(names, n)
+	}
+	slices.Sort(names)
+
+	return 0, 0, 0, fmt.Errorf("%q is not a colour: six hex digits like ff8800, or %s", s, strings.Join(names, ", "))
 }
 
 // How many colours a terminal can show.

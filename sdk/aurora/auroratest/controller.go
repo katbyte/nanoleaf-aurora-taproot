@@ -57,6 +57,13 @@ type Controller struct {
 	selected string
 	plugins  json.RawMessage
 
+	// what the app's undocumented commands set; what a real controller does with each is not yet known
+	firmware  map[string]any // the firmwareUpgrade answer; empty as a controller that has not heard from the cloud
+	triggered int            // firmware upgrades asked for
+	buttons   bool           // the controller's buttons work
+	fade      bool           // scenes fade into each other
+	plr       bool           // the panels come back on after a power cut
+
 	tokens   map[string]bool
 	issued   int
 	pairing  bool
@@ -71,7 +78,10 @@ type Controller struct {
 func New(tb testing.TB) *Controller {
 	tb.Helper()
 
-	c := &Controller{tokens: map[string]bool{}, pairWait: -1, failures: map[string]int{}, watchers: map[chan string]bool{}}
+	c := &Controller{
+		tokens: map[string]bool{}, pairWait: -1, failures: map[string]int{}, watchers: map[chan string]bool{},
+		firmware: map[string]any{}, buttons: true, fade: true, plr: true,
+	}
 	if err := c.load(DefaultFixture); err != nil {
 		tb.Fatalf("auroratest: %v", err)
 	}
@@ -212,13 +222,24 @@ func (c *Controller) Writes() []Request {
 		if r.Method == http.MethodGet {
 			continue
 		}
-		if cmd := commandOf(r.Body); cmd == "request" || cmd == "requestAll" || cmd == "requestPlugins" {
+		if asksOnly(commandOf(r.Body)) {
 			continue
 		}
 		out = append(out, r)
 	}
 
 	return out
+}
+
+// asksOnly says whether an effect command changes nothing, documented or
+// one of the app's.
+func asksOnly(command string) bool {
+	switch command {
+	case "request", "requestAll", "requestPlugins",
+		"getShortIdMap", "getAdjacencyData", "requestTouchConfig", "getTouchKillSwitch", "requestBrightnessSensorConfig":
+		return true
+	}
+	return false
 }
 
 func commandOf(body string) string {
@@ -413,6 +434,19 @@ func (c *Controller) handle(method, path, token string, body []byte) (code int, 
 	case path == "/" && get:
 		return http.StatusOK, c.whole(), nil
 	case path == "/identify" && put:
+		return http.StatusNoContent, nil, nil
+
+	// as the app sends them; what a real controller answers is not yet known, so these are the obvious
+	case path == "/firmwareUpgrade" && get:
+		return http.StatusOK, c.firmware, nil
+	case path == "/firmwareUpgrade" && put:
+		var in struct {
+			Command string `json:"command"`
+		}
+		if json.Unmarshal(body, &in) != nil || in.Command != "triggerFirmwareUpgrade" {
+			return http.StatusBadRequest, nil, nil
+		}
+		c.triggered++
 		return http.StatusNoContent, nil, nil
 
 	case path == "/state" && get:
@@ -623,12 +657,101 @@ func (c *Controller) putEffects(body []byte) (code int, answer any, notes []stri
 		c.store(renamed)
 		return http.StatusNoContent, nil, nil
 	case "display":
+		if cmd.Type() == "static" {
+			if _, ok := cmd.Field("animData"); !ok {
+				return http.StatusBadRequest, nil, nil
+			}
+			return http.StatusNoContent, nil, c.run(aurora.EffectStatic)
+		}
 		return http.StatusNoContent, nil, c.run(aurora.EffectDynamic)
 	case "displayTemp":
 		return http.StatusNoContent, nil, nil
+
+	// the app's undocumented commands (sdk/aurora/app.go)
+	case "enableAllControllerButtons", "disableAllControllerButtons":
+		c.buttons = command == "enableAllControllerButtons"
+		return http.StatusNoContent, nil, nil
+	case "enableSceneChangeAnimation", "disableSceneChangeAnimation":
+		c.fade = command == "enableSceneChangeAnimation"
+		return http.StatusNoContent, nil, nil
+	case "setPLRConfig":
+		var on bool
+		if raw, ok := cmd.Field("PLRConfig"); !ok || json.Unmarshal(raw, &on) != nil {
+			return http.StatusBadRequest, nil, nil
+		}
+		c.plr = on
+		return http.StatusNoContent, nil, nil
+	case "getShortIdMap":
+		return http.StatusOK, map[string]any{"shortIdMap": c.shortIDs()}, nil
+	case "getAdjacencyData":
+		return http.StatusOK, map[string]any{"adjacencyData": []any{}}, nil
+	case "requestTouchConfig", "getTouchKillSwitch", "requestBrightnessSensorConfig",
+		"configureTouch", "setTouchKillSwitch", "setBrightnessSensorConfig":
+		return http.StatusNotFound, nil, nil // Light Panels have no touch and no light sensor
 	}
 
 	return http.StatusBadRequest, nil, nil
+}
+
+// shortIDs numbers the panels in layout order, as the app's map seems to.
+func (c *Controller) shortIDs() map[string]int {
+	var layout struct {
+		Panels []struct {
+			ID int `json:"panelId"`
+		} `json:"positionData"`
+	}
+	_ = json.Unmarshal(c.layout, &layout) // the fixture's layout is well formed
+	out := map[string]int{}
+	for i, p := range layout.Panels {
+		out[strconv.Itoa(p.ID)] = i
+	}
+
+	return out
+}
+
+// SetFirmwareUpgrade has the controller say an update is waiting, as one
+// that has heard from the cloud would; with available false and no
+// version it says one is not.
+func (c *Controller) SetFirmwareUpgrade(available bool, version string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.firmware = map[string]any{"firmwareAvailability": available, "newFirmwareVersion": nil}
+	if version != "" {
+		c.firmware["newFirmwareVersion"] = version
+	}
+}
+
+// FirmwareTriggers is how many times an upgrade has been asked for.
+func (c *Controller) FirmwareTriggers() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	return c.triggered
+}
+
+// ButtonsEnabled is what the app's undocumented command last set the
+// buttons to; SceneTransition and PowerLossRecovery likewise.
+func (c *Controller) ButtonsEnabled() bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	return c.buttons
+}
+
+// SceneTransition is described with ButtonsEnabled.
+func (c *Controller) SceneTransition() bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	return c.fade
+}
+
+// PowerLossRecovery is described with ButtonsEnabled.
+func (c *Controller) PowerLossRecovery() bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	return c.plr
 }
 
 // run makes an effect the one that is running.

@@ -69,13 +69,15 @@ type FlagsCommands struct {
 
 // FlagsScene configures the taproot scene commands.
 type FlagsScene struct {
-	From   string   `mapstructure:"from"`   // copy: the controller to read the scene from
-	To     []string `mapstructure:"to"`     // copy: the controllers to put it on
-	ToAll  bool     `mapstructure:"to-all"` // copy: every other controller
-	As     string   `mapstructure:"as"`     // copy, push: the name to store it under
-	Select bool     `mapstructure:"select"` // copy, push: start it once it is there
-	Out    string   `mapstructure:"out"`    // dump: the file to write
-	Except []string `mapstructure:"except"` // delete: every scene but these
+	From   string        `mapstructure:"from"`   // copy: the controller to read the scene from
+	To     []string      `mapstructure:"to"`     // copy: the controllers to put it on
+	ToAll  bool          `mapstructure:"to-all"` // copy: every other controller
+	As     string        `mapstructure:"as"`     // copy, push: the name to store it under
+	Select bool          `mapstructure:"select"` // copy, push: start it once it is there
+	Out    string        `mapstructure:"out"`    // dump: the file to write
+	Except []string      `mapstructure:"except"` // delete: every scene but these
+	Save   string        `mapstructure:"save"`   // paint: keep it as a scene of this name
+	Over   time.Duration `mapstructure:"over"`   // paint: how long the panels take to reach the colours
 }
 
 // FlagsServe configures taproot serve.

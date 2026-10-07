@@ -207,6 +207,34 @@ left alone and only the file changes, for one that is gone or unreachable: its t
 	forgetCmd.Flags().Bool("local", false, "only remove it from the controllers file; do not ask the controller to delete the token")
 	root.AddCommand(forgetCmd)
 
+	firmwareCmd := &cobra.Command{
+		Use:   "firmware controller|all",
+		Short: "what a controller says about a firmware update, and (trigger) has it install one",
+		Long: `Asks a controller what it knows of a firmware update. Nanoleaf does not document this: it is what the app does. A
+controller that has not heard from Nanoleaf's cloud answers with nothing, which is shown as it came.
+
+taproot firmware trigger tells the controller to fetch and install the update itself, from Nanoleaf's cloud, as the
+app's update button does. Nothing passes through taproot. It is sent whether or not the controller says an update is
+waiting: what a controller does with it then is not yet known, and taproot firmware afterwards says what it reports.`,
+		Args:          cobra.ExactArgs(1),
+		SilenceErrors: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
+			return GetFlags().Firmware(cmd.Context(), args[0])
+		},
+	}
+	firmwareCmd.AddCommand(&cobra.Command{
+		Use:           "trigger controller|all",
+		Short:         "has the controller fetch and install its firmware from Nanoleaf's cloud",
+		Args:          cobra.ExactArgs(1),
+		SilenceErrors: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
+			return GetFlags().TriggerFirmware(cmd.Context(), args[0])
+		},
+	})
+	root.AddCommand(firmwareCmd)
+
 	root.AddCommand(&cobra.Command{
 		Use:   "backup [controller] [dir]",
 		Short: "saves every scene a controller holds to a directory; with no controller, backs up all of them",

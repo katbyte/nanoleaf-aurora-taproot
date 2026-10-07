@@ -15,8 +15,8 @@ save it. This is the part of the app taproot does not replace yet. What is there
 - a scene would still be sent as a controller's own document: start from one the controller holds and change
   fields, rather than building one from nothing, so whatever else the firmware wants stays in it
 
-**Painting panels.** A static scene with a colour chosen for each panel (the API's `static` effects and their
-`animData`), by clicking panels on the page.
+**Painting panels on the page.** `taproot scene paint` does it from the command line (the API's `static` effects and
+their `animData`); the page has no way to click a panel and pick a colour yet.
 
 **Renaming and deleting scenes from the page.** `taproot scene rename` and `scene delete` do both from the command
 line, with a backup first. The page has no button for either.

@@ -241,8 +241,8 @@ func (c *Client) put(ctx context.Context, path string, body any) error {
 
 // query is a PUT that only reads. The effect commands travel as writes
 // whatever they do, and asking for an effect changes nothing.
-func (c *Client) query(ctx context.Context, path string, body, out any) error {
-	return c.call(ctx, http.MethodPut, path, body, out, false)
+func (c *Client) query(ctx context.Context, body, out any) error {
+	return c.call(ctx, http.MethodPut, "/effects", body, out, false)
 }
 
 // del removes something.

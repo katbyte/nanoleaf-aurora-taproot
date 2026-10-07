@@ -358,8 +358,15 @@ func TestConnectAllStops(t *testing.T) { //nolint:paralleltest // the commands s
 		t.Fatal("q did not stop connect all")
 	}
 
-	// with nobody at a terminal, and a time to stop at: the one that is ready connects under its own name
-	h.stdin = strings.NewReader("")
+	// with nobody at a terminal, and a time to stop at: the one that is ready connects under its own name.
+	// Nobody is a file, as a script's input is: a reader that is not a file counts as a person, and its
+	// end would race the first token for whether a name gets asked for
+	nobody, err := os.CreateTemp(t.TempDir(), "stdin")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = nobody.Close() }()
+	h.stdin = nobody
 	a.Pair()
 	out := h.ok("connect", "all", "--wait", "400ms")
 	want(t, out, "stops after 400ms", "connected Light Panels AA", "connected 1: light-panels-aa", "still not connected: Light Panels BB")
@@ -1167,6 +1174,109 @@ func TestSceneRename(t *testing.T) { //nolint:paralleltest // the commands share
 	want(t, out, "backed up to "+filepath.Join(h.dir, "backups", "office"), "renamed    Flames → Fire")
 	if held := office.EffectNames(); len(held) != 17 || slices.Contains(held, "Flames") || !slices.Contains(held, "Fire") {
 		t.Fatalf("held: %v", held)
+	}
+}
+
+// What the app does that the documentation does not list: firmware, the
+// settings a controller does not say back, and painting panels.
+
+func TestFirmware(t *testing.T) { //nolint:paralleltest // the commands share viper
+	h := newHome(t)
+	office := h.controller("office")
+
+	// a controller that has not heard from the cloud
+	want(t, h.ok("firmware", "office"), "office", "5.2.1", "has not heard of an update", "{}")
+	office.SetFirmwareUpgrade(false, "")
+	want(t, h.ok("firmware", "office"), "no update waiting")
+	office.SetFirmwareUpgrade(true, "5.3.3")
+	want(t, h.ok("firmware", "office"), "update to 5.3.3 available, not installed", "taproot firmware trigger office")
+	if office.FirmwareTriggers() != 0 || len(office.Writes()) != 0 {
+		t.Fatal("asking about firmware sent something")
+	}
+
+	var status []cli.FirmwareStatus
+	if err := json.Unmarshal([]byte(h.ok("firmware", "office", "--json")), &status); err != nil || len(status) != 1 || !status[0].Available || status[0].NewVersion != "5.3.3" {
+		t.Fatalf("--json: %+v, %v", status, err)
+	}
+
+	// the trigger: a dry run shows exactly what would go, bare as the app sends it
+	want(t, h.ok("firmware", "trigger", "office", "--dry-run"), "dry run", "PUT /api/v1/<token>/firmwareUpgrade", `{"command":"triggerFirmwareUpgrade"}`)
+	if office.FirmwareTriggers() != 0 {
+		t.Fatal("a dry run triggered an upgrade")
+	}
+	want(t, h.ok("firmware", "trigger", "office"), "told it to fetch and install", "taproot firmware office")
+	if office.FirmwareTriggers() != 1 {
+		t.Fatalf("triggers: %d", office.FirmwareTriggers())
+	}
+
+	// a controller that will not
+	office.Fail("PUT", "/firmwareUpgrade", http.StatusNotFound)
+	want(t, h.fails("firmware", "trigger", "office"), "office", "404")
+}
+
+func TestSetWhatTheControllerDoesNotSayBack(t *testing.T) { //nolint:paralleltest // the commands share viper
+	h := newHome(t)
+	office := h.controller("office")
+
+	want(t, h.ok("set", "office", "buttons", "off"), "office: buttons set to off", "does not say")
+	if office.ButtonsEnabled() {
+		t.Error("the buttons were not disabled")
+	}
+	want(t, h.ok("set", "office", "fade", "off"), "fade set to off")
+	if office.SceneTransition() {
+		t.Error("the fade was not turned off")
+	}
+	want(t, h.ok("set", "office", "plr", "on"), "recovery set to on")
+	want(t, h.ok("set", "office", "recovery", "off"), "recovery set to off")
+	if office.PowerLossRecovery() {
+		t.Error("recovery was not turned off")
+	}
+	want(t, h.fails("set", "office", "buttons", "maybe"), `buttons is on or off, not "maybe"`)
+
+	// they cannot be read, and get says so rather than guessing
+	want(t, h.fails("get", "office", "buttons"), "buttons is set, not got")
+	if out := h.ok("get", "office"); strings.Contains(out, "buttons") || strings.Contains(out, "recovery") {
+		t.Errorf("get lists what it cannot read:\n%s", out)
+	}
+}
+
+func TestScenePaint(t *testing.T) { //nolint:paralleltest // the commands share viper
+	h := newHome(t)
+	office := h.controller("office") // panels 10, 136, 147, 234
+
+	want(t, h.fails("scene", "paint", "office"), "panel=colour")
+	want(t, h.fails("scene", "paint", "office", "10"), `"10" is not panel=colour`)
+	want(t, h.fails("scene", "paint", "office", "10=mauve"), `"mauve" is not a colour`, "ff8800", "red")
+	want(t, h.fails("scene", "paint", "office", "99=red"), `no panel "99"`, "[10 136 147 234]")
+	if len(office.Writes()) != 0 {
+		t.Fatal("a bad request was sent")
+	}
+
+	// shown, not saved: later pairs win
+	out := h.ok("scene", "paint", "office", "all=off", "147=ff0000", "--over", "1.5s")
+	want(t, out, "office: painted", "10 000000", "147 ff0000", "234 000000")
+	w := office.Writes()
+	if last := w[len(w)-1].Body; !strings.Contains(last, `"animType":"static"`) || !strings.Contains(last, `"animData":"4 10 1 0 0 0 0 15 136 1 0 0 0 0 15 147 1 255 0 0 0 15 234 1 0 0 0 0 15"`) {
+		t.Errorf("sent %s", last)
+	}
+	if office.Selected() != "*Static*" {
+		t.Errorf("running %q", office.Selected())
+	}
+	if len(office.EffectNames()) != 17 {
+		t.Error("painting saved a scene")
+	}
+
+	// saved as well, as carefully as a push
+	out = h.ok("scene", "paint", "office", "all=blue", "--save", "Blue")
+	want(t, out, "painted", "backed up to", "added      Blue")
+	if !slices.Contains(office.EffectNames(), "Blue") {
+		t.Error("--save did not save")
+	}
+	// a dry run sends nothing
+	before := len(office.Writes())
+	want(t, h.ok("scene", "paint", "office", "all=red", "--dry-run"), "dry run", `"animType":"static"`)
+	if len(office.Writes()) != before {
+		t.Error("a dry run painted")
 	}
 }
 

@@ -125,6 +125,29 @@ taproot scene delete office --except "Northern Lights" --force`,
 	deleteCmd.Flags().StringArray("except", nil, "delete every scene but this one (repeat for more)")
 	c.AddCommand(deleteCmd)
 
+	paintCmd := &cobra.Command{
+		Use:   "paint controller panel=colour...",
+		Short: "holds each panel at a colour, shown but not saved; --save keeps it as a scene",
+		Long: `Paints panels: a panel is its id as taproot info shows it, or all, and a colour is six hex digits (ff8800) or a name
+(red, orange, yellow, green, cyan, blue, purple, magenta, pink, white, off). Later pairs win, so "all=off 7=red" is one
+red panel and the rest dark. The panels show it without it being saved, as the app does; --over takes time over the
+change. --save keeps it on the controller as a static scene, as carefully as a push: backed up first, and read back.
+
+taproot scene paint office all=ff8800
+taproot scene paint office all=off 7=red 12=blue --over 2s --save "Two Dots"`,
+		Args:          cobra.MinimumNArgs(1),
+		SilenceErrors: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
+			return flags().Paint(cmd.Context(), args[0], args[1:])
+		},
+	}
+	paintCmd.Flags().String("save", "", "keep it on the controller as a static scene of this name")
+	paintCmd.Flags().Duration("over", 0, "how long the panels take to reach the colours")
+	paintCmd.Flags().Bool("force", false, "with --save, replace a scene of the same name that is already there and different")
+	paintCmd.Flags().Bool("select", false, "with --save, start the scene once it is there")
+	c.AddCommand(paintCmd)
+
 	c.AddCommand(&cobra.Command{
 		Use:   "rename controller scene name",
 		Short: "gives a scene on a controller another name",

@@ -14,7 +14,9 @@ It exists because the official app stopped applying scenes to these controllers 
 help after over a year of back and forth. The company seems to have abandoned them.
 
 With taproot you can back up every scene a controller holds, copy a scene from the controller that still has it to
-the ones that lost it, and start it.
+the ones that lost it, and start it. It also does what the app did and the documentation never said: it asks a
+controller whether a **firmware update** is waiting and has the controller fetch and install it from Nanoleaf's
+cloud, paints each panel a colour, and sets the button lock, the fade between scenes and power-loss recovery.
 
 Nothing on a controller is replaced unless you say so, a controller is backed up before anything is written to it,
 and `--dry-run` prints exactly what would be sent without sending it.
@@ -43,6 +45,10 @@ taproot scene select bedroom "Northern Lights"
 
 taproot backup                        # every controller, each to a dated folder
 taproot restore bedroom ~/.config/taproot/backups/office/20261006-123629
+
+taproot firmware all                  # which controllers have a firmware update waiting; asks, changes nothing
+taproot firmware trigger bedroom      # has that controller fetch and install it from Nanoleaf's cloud
+taproot scene paint office all=off 7=red
 ```
 
 `find` looks in up to three ways and says which found each controller. It listens for controllers announcing
@@ -65,14 +71,17 @@ part of those that only one controller has: `office`, `53a63c` and `183` can all
 | `info <controller>` | one controller in full |
 | `rename <controller> <name>` | changes what taproot calls a controller: `taproot rename 183 office` |
 | `get <controller\|all> [setting]` | what a controller is set to: every setting, or the one named, printed alone for a script |
-| `set <controller\|all> <setting> <value>` | changes a setting: `power`, `brightness`, `scene`, `hue`, `saturation`, `temperature`, `orientation`, `rhythm`; `--by -10` moves a number |
+| `set <controller\|all> <setting> <value>` | changes a setting: `power`, `brightness`, `scene`, `hue`, `saturation`, `temperature`, `orientation`, `rhythm`; `--by -10` moves a number; also `buttons`, `fade` and `recovery`, which the app sets and a controller does not say back |
 | `forget <controller>` | has the controller delete the token, and removes it; `--local` leaves the controller alone |
+| `firmware <controller\|all>` | what a controller says about a firmware update, as the app asks it |
+| `firmware trigger <controller\|all>` | has the controller fetch and install its firmware from Nanoleaf's cloud, as the app's update button does |
 | `scene list [controller]` | a controller's scenes, or with none named, which controller holds which |
 | `scene dump <controller> [scene]` | a scene as JSON, exactly as the controller holds it; all of them when none is named; `--out file` |
 | `scene push <controller> <file>` | adds the scene, or scenes, in a file a dump wrote |
 | `scene copy <scene> --from A --to B` | copies a scene between controllers; `--to-all` for every other one |
 | `scene select <controller> <scene>` | starts a scene |
 | `scene rename <controller> <scene> <name>` | gives a scene another name, where it is |
+| `scene paint <controller> <panel=colour...>` | holds each panel at a colour, shown but not saved: `all=off 7=red`; `--save <name>` keeps it as a static scene |
 | `scene delete <controller> <scene...>` | takes scenes off a controller; `--except <scene>` deletes every one but those; needs `--force` |
 | `backup [controller] [dir]` | every scene to a folder, one file each, with checksums |
 | `restore <controller> <dir>` | adds a backup's scenes to a controller, any controller |

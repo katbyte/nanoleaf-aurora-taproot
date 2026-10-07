@@ -88,7 +88,9 @@ own copy, and could never be found to be there already.
 
 Read out of Nanoleaf Desktop 3.0.1 (an Electron app; its JavaScript ships as text in `app.asar`), 6 October 2026.
 This is what the app sends, not what a controller has been seen to answer: none of it has been sent to a controller
-by taproot yet, and the app gates some of it by model, so what an NL22 does with each is still to be checked.
+by taproot yet, and the app gates some of it by model, so what an NL22 does with each is still to be checked. All of
+it is in `sdk/aurora/app.go`, and `taproot firmware`, `scene paint` and `set buttons|fade|recovery` use it; the canned
+controller the tests use answers each in the obvious way until a real one has been recorded.
 
 **Firmware.** The app never downloads a firmware file for a Light Panels controller: it asks the controller to fetch
 and install one itself, from Nanoleaf's cloud. Two undocumented endpoints under the token:
@@ -98,8 +100,10 @@ and install one itself, from Nanoleaf's cloud. Two undocumented endpoints under 
 - `PUT /firmwareUpgrade` with `{"command": "triggerFirmwareUpgrade"}` starts it. The body is not wrapped in `write`
   as effect commands are. The app then reads `GET /` every 10 seconds until `firmwareAvailability` is false again.
 
-On all three controllers here the section is `{}`, the one on 5.2.1 included, so `{}` does not mean "up to date": it
-means the controller has not heard from the cloud. Where the cloud keeps the files is not in the app; other product
+Confirmed on a real controller, 7 October 2026: the NL22 on 5.2.1 answered `GET /firmwareUpgrade` with
+`{"firmwareAvailability": true, "newFirmwareVersion": "5.3.2"}`, the shape the app reads. Earlier the same day all
+three controllers answered `{}`, the one on 5.2.1 included, so `{}` does not mean "up to date": it means the
+controller has not heard from the cloud yet. Asking is a read; nothing was triggered. Where the cloud keeps the files is not in the app; other product
 lines' files are on public S3 buckets (`canvas-firmware`, `hexagon-firmware`, `nl52-firmware`, `nl59-firmware`,
 `<version>.firmware`), and no bucket of any obvious name exists for Light Panels. The offline route from community
 notes, holding the power button until the LEDs run and then uploading a file to `http://192.168.2.1/` on the

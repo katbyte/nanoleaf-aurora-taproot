@@ -9,6 +9,8 @@ import (
 	"io"
 	"os"
 	"slices"
+	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/katbyte/go-kt/cout"
@@ -500,6 +502,104 @@ func (f *Flags) Delete(ctx context.Context, ref string, names []string) error {
 	}
 
 	return f.finish([]push.Report{report})
+}
+
+// Paint holds each named panel at a colour, shown without being saved, as
+// the app's painting does; with --save it is stored as a static scene as
+// well, through the same careful path as a push.
+func (f *Flags) Paint(ctx context.Context, ref string, specs []string) error {
+	ctl, c, err := f.Controller(ref)
+	if err != nil {
+		return err
+	}
+	info, err := c.Info(ctx)
+	if err != nil {
+		return err
+	}
+	colours, err := paintColors(info.PanelLayout.Layout.Panels, specs)
+	if err != nil {
+		return err
+	}
+
+	e, err := aurora.StaticEffect("", colours, f.Cmd.Scene.Over)
+	if err != nil {
+		return err
+	}
+	if err := c.DisplayEffect(ctx, e); err != nil {
+		return fmt.Errorf("%s would not show it: %w", ctl.Name, err)
+	}
+	painted := make([]string, 0, len(colours))
+	for _, sc := range colours {
+		painted = append(painted, fmt.Sprintf("%s %s", cli.Num(sc.PanelID), cli.RGBSwatch(sc.R, sc.G, sc.B)))
+	}
+	if done, err := f.Emit(map[string]any{"controller": ctl.Name, "painted": colours, "saved": f.Cmd.Scene.Save}); done {
+		return err
+	}
+	if !f.DryRun {
+		cout.Printf("%s: painted %s\n", cli.Name(ctl.Name), strings.Join(painted, ", "))
+	}
+	if f.Cmd.Scene.Save == "" {
+		return nil
+	}
+
+	saved, err := aurora.StaticEffect(f.Cmd.Scene.Save, colours, f.Cmd.Scene.Over)
+	if err != nil {
+		return err
+	}
+	report, err := f.put(ctx, ctl, c, []aurora.Effect{saved})
+	if err != nil {
+		return err
+	}
+
+	return f.finish([]push.Report{report})
+}
+
+// paintColors reads panel=colour pairs against the panels a controller has.
+// A panel is its id as taproot info shows it, or all; a colour is six hex
+// digits or a name. Later pairs win, so "all=000000 7=ff0000" is one red
+// panel and the rest off.
+func paintColors(panels []aurora.Panel, specs []string) ([]aurora.StaticColor, error) {
+	if len(specs) == 0 {
+		return nil, errors.New("say which panels to paint and what colour: panel=colour, or all=colour")
+	}
+	ids := make([]int, 0, len(panels))
+	for _, p := range panels {
+		if p.ShapeType != aurora.ShapeRhythm { // the Rhythm module has no light of its own
+			ids = append(ids, p.ID)
+		}
+	}
+	slices.Sort(ids)
+	chosen := map[int][3]uint8{}
+	for _, spec := range specs {
+		which, colour, ok := strings.Cut(spec, "=")
+		if !ok {
+			return nil, fmt.Errorf("%q is not panel=colour", spec)
+		}
+		r, g, b, err := cli.ParseColor(colour)
+		if err != nil {
+			return nil, err
+		}
+		if strings.EqualFold(which, "all") {
+			for _, id := range ids {
+				chosen[id] = [3]uint8{r, g, b}
+			}
+			continue
+		}
+		id, err := strconv.Atoi(which)
+		if err != nil || !slices.Contains(ids, id) {
+			return nil, fmt.Errorf("no panel %q: the controller has %s", which, cli.Escape(fmt.Sprint(ids)))
+		}
+		chosen[id] = [3]uint8{r, g, b}
+	}
+
+	out := make([]aurora.StaticColor, 0, len(chosen))
+	for _, id := range ids {
+		if c, ok := chosen[id]; ok {
+			out = append(out, aurora.StaticColor{PanelID: id, R: c[0], G: c[1], B: c[2]})
+		}
+	}
+
+	return out, nil
 }
 
 // Rename gives a scene on a controller another name. The old name is matched

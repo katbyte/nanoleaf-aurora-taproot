@@ -85,7 +85,7 @@ func (c *Client) Effect(ctx context.Context, name string) (Effect, error) {
 	if err != nil {
 		return out, err
 	}
-	err = c.query(ctx, "/effects", body, &out)
+	err = c.query(ctx, body, &out)
 
 	return out, err
 }
@@ -100,7 +100,7 @@ func (c *Client) Effects(ctx context.Context) ([]Effect, error) {
 		return nil, err
 	}
 
-	err = c.query(ctx, "/effects", body, &out)
+	err = c.query(ctx, body, &out)
 
 	return out.Animations, err
 }
@@ -116,7 +116,7 @@ func (c *Client) Plugins(ctx context.Context) ([]Plugin, error) {
 		return nil, err
 	}
 
-	err = c.query(ctx, "/effects", body, &out)
+	err = c.query(ctx, body, &out)
 
 	return out.Plugins, err
 }

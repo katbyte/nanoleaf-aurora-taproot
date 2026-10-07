@@ -162,7 +162,50 @@ func settings() []setting {
 			name: "mode", takes: "read only: effect for a scene, hs for one colour, ct for one white",
 			read: func(info aurora.Info) any { return info.State.ColorMode },
 		},
+		// what the app sets that the documentation does not list (sdk/aurora/app.go). None can be read back:
+		// a controller does not say what they are, so these are set and not got
+		{
+			name: "buttons", takes: "on or off: whether the buttons on the controller do anything (set only)",
+			write: func(ctx context.Context, c *aurora.Client, _ aurora.Info, value string, _ time.Duration) error {
+				on, err := onOrOff("buttons", value)
+				if err != nil {
+					return err
+				}
+				return c.SetControllerButtons(ctx, on)
+			},
+		},
+		{
+			name: "fade", aliases: []string{"transition"}, takes: "on or off: whether one scene fades into the next (set only)",
+			write: func(ctx context.Context, c *aurora.Client, _ aurora.Info, value string, _ time.Duration) error {
+				on, err := onOrOff("fade", value)
+				if err != nil {
+					return err
+				}
+				return c.SetSceneTransition(ctx, on)
+			},
+		},
+		{
+			name: "recovery", aliases: []string{"plr", "power-recovery"}, takes: "on or off: whether the panels come back on after a power cut (set only)",
+			write: func(ctx context.Context, c *aurora.Client, _ aurora.Info, value string, _ time.Duration) error {
+				on, err := onOrOff("recovery", value)
+				if err != nil {
+					return err
+				}
+				return c.SetPowerLossRecovery(ctx, on)
+			},
+		},
 	}
+}
+
+// onOrOff reads a value that is one or the other.
+func onOrOff(name, value string) (bool, error) {
+	switch strings.ToLower(value) {
+	case wordOn, "true", "1", "yes":
+		return true, nil
+	case wordOff, "false", "0", "no":
+		return false, nil
+	}
+	return false, fmt.Errorf("%s is on or off, not %q", name, value)
 }
 
 func onOff(on bool) string {
@@ -328,8 +371,13 @@ func (f *FlagData) Get(ctx context.Context, ref, name string) error {
 		if err != nil {
 			return err
 		}
+		if one.read == nil {
+			return fmt.Errorf("%s is set, not got: a controller does not say what it is", one.name)
+		}
 		wanted = []setting{one}
 	}
+	// the ones a controller does not say are not listed as unknown; they are in taproot set's help
+	wanted = slices.DeleteFunc(wanted, func(s setting) bool { return s.read == nil })
 
 	out := make([]Settings, len(controllers))
 	var failed []error
@@ -454,7 +502,9 @@ func (f *FlagData) change(ctx context.Context, ctl store.Controller, s setting, 
 	if err != nil {
 		return err
 	}
-	out.From, out.To = s.read(before), s.read(before)
+	if s.read != nil {
+		out.From, out.To = s.read(before), s.read(before)
+	}
 
 	if adjusting {
 		err = s.adjust(ctx, c, f.Cmd.By)
@@ -463,6 +513,12 @@ func (f *FlagData) change(ctx context.Context, ctl store.Controller, s setting, 
 	}
 	if err != nil || f.DryRun {
 		return err
+	}
+	// one the controller does not say back: it took it, and that is all that can be known
+	if s.read == nil {
+		out.To = strings.ToLower(value)
+		cout.Printf("%s: %s set to %s %s\n", Name(ctl.Name), s.name, show(s.name, out.To), Dim("(the controller took it; it does not say what it is)"))
+		return nil
 	}
 
 	after, err := c.Info(ctx)
