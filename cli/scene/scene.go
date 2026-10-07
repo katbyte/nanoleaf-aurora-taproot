@@ -15,6 +15,7 @@ import (
 
 	"github.com/katbyte/go-kt/cout"
 	"github.com/katbyte/nanoleaf-aurora-taproot/cli"
+	"github.com/katbyte/nanoleaf-aurora-taproot/lib/library"
 	"github.com/katbyte/nanoleaf-aurora-taproot/lib/push"
 	"github.com/katbyte/nanoleaf-aurora-taproot/lib/store"
 	"github.com/katbyte/nanoleaf-aurora-taproot/sdk/aurora"
@@ -304,12 +305,15 @@ func named(path string, list []aurora.Effect) ([]aurora.Effect, error) {
 	return list, nil
 }
 
+// Push adds the scenes in a file to a controller; a name that is no file is
+// looked for in the scene library, the built-in scenes included, so
+// "taproot scene push office 'kt Northern Lights'" needs no file at all.
 func (f *Flags) Push(ctx context.Context, ref, path string) error {
 	ctl, c, err := f.Controller(ref)
 	if err != nil {
 		return err
 	}
-	scenes, err := read(path)
+	scenes, err := f.scenesFrom(path)
 	if err != nil {
 		return err
 	}
@@ -648,3 +652,18 @@ func (f *Flags) Select(ctx context.Context, ref, name string) error {
 
 // escape keeps a scene's name from being read as colour tags.
 func escape(s string) string { return cli.Escape(s) }
+
+// scenesFrom reads the scenes to push from a file, or from the library when
+// there is no file of that name but there is a scene.
+func (f *Flags) scenesFrom(path string) ([]aurora.Effect, error) {
+	if path != "-" {
+		if _, err := os.Stat(path); err != nil {
+			if entry, lerr := library.Read(f.ScenesRoot(), path); lerr == nil {
+				return []aurora.Effect{entry.Effect}, nil
+			}
+			return nil, fmt.Errorf("reading the scene file: no file %q, and the library has no scene of that name", path)
+		}
+	}
+
+	return read(path)
+}

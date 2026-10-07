@@ -100,7 +100,7 @@ part of those that only one controller has: `office`, `53a63c` and `183` can all
 | `firmware trigger <controller\|all>` | has the controller fetch and install its firmware from Nanoleaf's cloud, as the app's update button does |
 | `scene list [controller]` | a controller's scenes, or with none named, which controller holds which |
 | `scene dump <controller> [scene]` | a scene as JSON, exactly as the controller holds it; all of them when none is named; `--out file` |
-| `scene push <controller> <file>` | adds the scene, or scenes, in a file a dump wrote |
+| `scene push <controller> <file\|scene>` | adds the scene, or scenes, in a file a dump wrote; or a scene from the library by name, `"kt Northern Lights"` being built in |
 | `scene copy <scene> --from A --to B` | copies a scene between controllers; `--to-all` for every other one |
 | `scene select <controller> <scene>` | starts a scene |
 | `scene rename <controller> <scene> <name>` | gives a scene another name, where it is |
@@ -109,6 +109,9 @@ part of those that only one controller has: `office`, `53a63c` and `183` can all
 | `backup [controller] [dir]` | every scene to a folder, one file each, with checksums |
 | `restore <controller> <dir>` | adds a backup's scenes to a controller, any controller |
 | `serve [port]` | the web page |
+
+The scene that started all this, `kt Northern Lights`, is built into taproot: it is in every library, and
+`taproot scene push <controller> "kt Northern Lights"` puts it on any controller with no file in hand.
 
 `push`, `copy` and `restore` take `--force`, `--as <name>` to store a scene under another name, and `--select` to
 start it once it is there. Every command takes `--json` for scripts and `--dry-run`.
@@ -205,7 +208,7 @@ A container that serves the page, for a machine that is always on.
 
 ```bash
 docker compose pull    # ghcr.io/katbyte/nanoleaf-aurora-taproot, published on each release; `make docker` builds it from a checkout
-docker compose up -d   # -> http://localhost:7668/ ; the tokens and the backups live in ./data
+docker compose up -d   # -> http://localhost:7668/ ; the tokens, the backups (data/backups) and the scene library (data/scenes) live in ./data
 ```
 
 Connect controllers from the page: **connect a controller**, type an address, hold the button. To bring over

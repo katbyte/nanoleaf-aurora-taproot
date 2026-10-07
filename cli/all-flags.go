@@ -189,6 +189,12 @@ func (f *FlagData) OpenStore() (*store.Store, error) {
 	return store.Open(f.ConfigDir)
 }
 
+// ScenesRoot is where the scene library lives: scenes being made or changed
+// on the page, and copies kept of a controller's, one file each.
+func (f *FlagData) ScenesRoot() string {
+	return filepath.Join(f.ConfigDir, "scenes")
+}
+
 // BackupRoot is the directory backups are kept under.
 func (f *FlagData) BackupRoot() string {
 	if f.BackupDir != "" {

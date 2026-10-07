@@ -383,7 +383,9 @@ func TestConnectAllStops(t *testing.T) { //nolint:paralleltest // the commands s
 	// for a script: what connected, as a list, with no questions
 	b.Pair()
 	var connected []cli.Connected
-	if err := json.Unmarshal([]byte(h.ok("connect", "all", "--wait", "2s", "--json")), &connected); err != nil || len(connected) != 1 || connected[0].Name != "light-panels-bb" {
+	// the wait is only how long it would go on asking: it connects the moment BB answers, which under a loaded
+	// test run can be later than a second or two
+	if err := json.Unmarshal([]byte(h.ok("connect", "all", "--wait", "15s", "--json")), &connected); err != nil || len(connected) != 1 || connected[0].Name != "light-panels-bb" {
 		t.Errorf("connect all --json: %+v, %v", connected, err)
 	}
 }
@@ -1199,19 +1201,35 @@ func TestFirmware(t *testing.T) { //nolint:paralleltest // the commands share vi
 		t.Fatalf("--json: %+v, %v", status, err)
 	}
 
-	// the trigger: a dry run shows exactly what would go, bare as the app sends it
+	// the trigger: a dry run shows exactly what would go, bare as the app sends it, and the backup it would take first
 	want(t, h.ok("firmware", "trigger", "office", "--dry-run"), "dry run", "PUT /api/v1/<token>/firmwareUpgrade", `{"command":"triggerFirmwareUpgrade"}`)
 	if office.FirmwareTriggers() != 0 {
 		t.Fatal("a dry run triggered an upgrade")
 	}
-	want(t, h.ok("firmware", "trigger", "office"), "told it to fetch and install", "taproot firmware office")
+	// sent and not watched: backed up first
+	out := h.ok("firmware", "trigger", "office", "--wait", "0")
+	want(t, out, "backed up to "+filepath.Join(h.dir, "backups", "office"), "told to fetch and install", "not watching", "taproot firmware office")
 	if office.FirmwareTriggers() != 1 {
 		t.Fatalf("triggers: %d", office.FirmwareTriggers())
 	}
 
-	// a controller that will not
-	office.Fail("PUT", "/firmwareUpgrade", http.StatusNotFound)
-	want(t, h.fails("firmware", "trigger", "office"), "office", "404")
+	// watched through: it goes quiet, comes back on the new firmware, and a scene it had is gone
+	restore := cli.SetFirmwarePoll(20 * time.Millisecond)
+	defer restore()
+	go func() {
+		time.Sleep(60 * time.Millisecond)
+		office.Fail(http.MethodGet, "/", http.StatusServiceUnavailable)
+		time.Sleep(120 * time.Millisecond)
+		office.Set("firmwareVersion", "5.3.3")
+		office.RemoveEffect("Flames")
+		office.Fail(http.MethodGet, "/", 0)
+	}()
+	out = h.ok("firmware", "trigger", "office", "--wait", "10s")
+	want(t, out, "gone quiet", "installing", "back on 5.3.3", "holds 16 scenes", "(had 17)", "gone since the upgrade:", "Flames", "taproot restore office")
+
+	// a controller that will not take it
+	office.Fail(http.MethodPut, "/firmwareUpgrade", http.StatusNotFound)
+	want(t, h.fails("firmware", "trigger", "office", "--wait", "0"), "office", "did not take the trigger", "404")
 }
 
 func TestSetWhatTheControllerDoesNotSayBack(t *testing.T) { //nolint:paralleltest // the commands share viper
@@ -1411,5 +1429,19 @@ func TestSettingsFromTheEnvironment(t *testing.T) {
 	t.Setenv("TAPROOT_TIMEOUT", "5s")
 	if f := cli.GetFlags(); f.BackupRoot() != "/elsewhere" || f.Timeout != 5*time.Second {
 		t.Errorf("flags from the environment: %+v", f)
+	}
+}
+
+// The scene that started all this ships with taproot, and push takes it by name.
+func TestPushFromTheLibrary(t *testing.T) { //nolint:paralleltest // the commands share viper
+	h := newHome(t)
+	office := h.controller("office")
+	office.RemoveEffect(northern)
+
+	want(t, h.fails("scene", "push", "office", "No Such Thing"), `no file "No Such Thing"`, "the library has no scene of that name")
+	out := h.ok("scene", "push", "office", northern)
+	want(t, out, "added      "+northern)
+	if !slices.Contains(office.EffectNames(), northern) {
+		t.Error("the built-in scene was not pushed")
 	}
 }

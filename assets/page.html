@@ -11,11 +11,18 @@
 </head>
 <body>
 <header>
-  <h1>🌱 taproot <span id="count"></span></h1>
-  <span class="sub">Nanoleaf Light Panels, straight over your own network</span>
+  <h1><a href="https://github.com/katbyte/nanoleaf-aurora-taproot" title="taproot on GitHub" target="_blank" rel="noopener">🌱 taproot</a>
+    <select id="view" class="view-pick" aria-label="what to show" title="the controllers, or the scene library and editor">
+      <option value="controllers">controllers</option>
+      <option value="scenes">scenes</option>
+    </select>
+    <span id="count" hidden></span>
+  </h1>
+  <span class="sub">taproot {{version}} · the panels are drawn where the controller says they sit; it does not say what colour each one is right now, so the motion is worked out from the scene.</span>
   <div class="right">
     <button class="plain" id="add" type="button">+ connect a controller</button>
     <button class="plain" id="backup-all" type="button" title="save every scene of every controller to a dated folder">back up all</button>
+    <button class="plain" id="size" type="button" title="how big each card is: small, medium or large">cards: medium</button>
     <button class="theme" id="theme" type="button" aria-label="toggle dark mode" title="toggle dark mode">
       <span class="sun">☀️</span><span class="moon">🌙</span><span class="leaf">🌱</span>
     </button>
@@ -28,16 +35,91 @@
 
 <main id="controllers"></main>
 
+<section id="library" hidden>
+  <aside class="shelf">
+    <div class="shelf-head"><b>scene library</b> <span id="lib-where" class="note"></span></div>
+    <div class="row wrap">
+      <button class="plain" id="lib-new" type="button">+ new scene</button>
+      <button class="plain" id="lib-import" type="button" title="copy a scene off a controller into the library">import…</button>
+    </div>
+    <div id="lib-list" class="lib-list"></div>
+    <p class="note">one file per scene, in the controller's own format: what <code>taproot scene push</code> takes</p>
+  </aside>
+
+  <div class="editor" id="editor">
+    <div id="ed-empty" class="ed-empty">
+      <h2>pick a scene, or make one</h2>
+      <p class="note">a scene is a palette and the motion that moves it; what you see here is a likeness, and <b>show on</b> puts it on real panels without saving</p>
+    </div>
+    <div id="ed-body" class="ed-body" hidden>
+      <div class="ed-form">
+        <div class="ed-head">
+          <input id="ed-name" type="text" placeholder="scene name" autocomplete="off" spellcheck="false">
+          <span id="ed-status" class="note"></span>
+        </div>
+
+        <div class="ed-section">
+          <div class="ed-label">motion <select id="ed-plugin"></select> <span class="note">as <select id="ed-plugins-from" title="whose list of motions to choose from"></select> has them</span></div>
+          <p id="ed-plugin-desc" class="note"></p>
+        </div>
+
+        <div class="ed-section">
+          <div class="ed-label">palette <button class="plain" id="ed-add-colour" type="button">+ colour</button></div>
+          <div id="ed-palette" class="chips"></div>
+          <div id="ed-colour" class="colour-edit" hidden>
+            <label>hue <input id="ed-hue" type="range" min="0" max="359" step="1"> <output id="ed-hue-out"></output></label>
+            <label>saturation <input id="ed-sat" type="range" min="0" max="100" step="1"> <output id="ed-sat-out"></output></label>
+            <label>brightness <input id="ed-bri" type="range" min="0" max="100" step="1"> <output id="ed-bri-out"></output></label>
+            <div class="row">
+              <input id="ed-hex" type="text" maxlength="7" placeholder="#rrggbb" spellcheck="false" autocomplete="off">
+              <button class="plain" id="ed-colour-left" type="button" title="move it earlier">◀</button>
+              <button class="plain" id="ed-colour-right" type="button" title="move it later">▶</button>
+              <button class="plain" id="ed-colour-dup" type="button" title="another of this colour">duplicate</button>
+              <button class="plain" id="ed-colour-remove" type="button" title="take it out of the palette">remove</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="ed-section">
+          <div class="ed-label">options</div>
+          <div id="ed-options" class="opts"></div>
+        </div>
+
+        <div class="ed-actions">
+          <button class="plain on" id="ed-save-lib" type="button" title="keep it in the library">save to library</button>
+          <span class="joined"><button class="plain" id="ed-show" type="button" title="put it on real panels without saving; the controller goes back to its scene when another is started">show on</button><select id="ed-target-live"></select></span>
+          <button class="plain" id="ed-save-ctl" type="button" title="add it to a controller, as carefully as a push">save to controller…</button>
+          <button class="plain" id="ed-json" type="button" title="the scene as the controller will hold it">JSON</button>
+          <button class="plain" id="ed-delete-lib" type="button" title="take it out of the library">delete</button>
+        </div>
+      </div>
+
+      <div class="ed-stage">
+        <div class="row wrap stage-bar">
+          <label>preview on <select id="ed-layout"></select></label>
+          <label class="speed">speed <input id="ed-speed" type="range" min="-2" max="3" step="0.25" value="0"> <output id="ed-speed-out">1×</output></label>
+          <button class="plain" id="ed-pause" type="button">pause</button>
+          <button class="plain" id="ed-build" type="button" title="lay triangles out as a wall you would like to try the scene on">build a wall…</button>
+        </div>
+        <div class="stage"><svg id="ed-svg" role="img" preserveAspectRatio="xMidYMid meet"></svg></div>
+        <div id="ed-builder" class="builder" hidden>
+          <div class="row wrap">
+            <span class="note">click a triangle to add it, again to take it away; this wall is remembered by your browser</span>
+            <button class="plain" id="ed-build-clear" type="button">clear</button>
+            <button class="plain" id="ed-build-done" type="button">done</button>
+          </div>
+          <svg id="ed-build-svg" role="img" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <div id="empty" hidden>
   <h2>no controllers yet</h2>
   <p>taproot needs a token from each controller, and a controller only hands one out to somebody who can reach its power button.</p>
   <p><button class="plain big" id="add-first" type="button">+ connect a controller</button></p>
 </div>
-
-<footer>
-  taproot {{version}} ·
-  the panels are drawn where the controller says they sit; it does not say what colour each one is right now, so the motion is worked out from the scene.
-</footer>
 
 <dialog id="connectbox">
   <button class="x" type="button" data-close aria-label="close">✕</button>
@@ -66,6 +148,37 @@
     <span class="note">each controller is backed up before anything is written to it</span>
     <button class="plain" type="button" data-close>close</button>
     <button class="plain on" id="copy-go" type="button">copy</button>
+  </div>
+</dialog>
+
+<dialog id="importbox">
+  <button class="x" type="button" data-close aria-label="close">✕</button>
+  <h2>import a scene <span class="desc">copied off the controller into the library, as it holds it</span></h2>
+  <div id="import-list" class="found"></div>
+</dialog>
+
+<dialog id="pushbox">
+  <button class="x" type="button" data-close aria-label="close">✕</button>
+  <h2>save to a controller <span class="desc" id="push-what"></span></h2>
+  <div id="push-targets" class="targets"></div>
+  <label class="tick"><input type="checkbox" id="push-select"> start it there once it is saved</label>
+  <label class="tick"><input type="checkbox" id="push-force"> replace a different scene of the same name</label>
+  <div id="push-result" class="result"></div>
+  <div class="row">
+    <span class="note">each controller is backed up before anything is written to it</span>
+    <button class="plain" type="button" data-close>close</button>
+    <button class="plain on" id="push-go" type="button">save</button>
+  </div>
+</dialog>
+
+<dialog id="jsonbox">
+  <button class="x" type="button" data-close aria-label="close">✕</button>
+  <h2>the scene as JSON <span class="desc">exactly what the controller is given; change it here if you know what you are doing</span></h2>
+  <textarea id="json-text" spellcheck="false" rows="18"></textarea>
+  <div class="row">
+    <span class="note" id="json-note"></span>
+    <button class="plain" type="button" data-close>close</button>
+    <button class="plain on" id="json-apply" type="button">apply</button>
   </div>
 </dialog>
 

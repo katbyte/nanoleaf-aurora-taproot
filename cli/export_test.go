@@ -28,6 +28,15 @@ func SetSearch(found ...FoundController) (restore func()) {
 	return func() { search = old }
 }
 
+// SetFirmwarePoll changes how often a controller being upgraded is asked
+// whether it is back, so a test need not wait as an upgrade takes.
+func SetFirmwarePoll(d time.Duration) (restore func()) {
+	old := firmwarePoll
+	firmwarePoll = d
+
+	return func() { firmwarePoll = old }
+}
+
 // SetAskEvery changes how often connect asks a controller for a token, so a
 // test of a button being held does not take as long as holding one, and
 // returns the way back.

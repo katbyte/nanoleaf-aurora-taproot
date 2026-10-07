@@ -11,9 +11,11 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -739,5 +741,51 @@ func waitFor(t *testing.T, what string, ok func() bool) {
 			t.Fatalf("timed out waiting for %s", what)
 		}
 		time.Sleep(10 * time.Millisecond)
+	}
+}
+
+// Deleting a scene from the page, and a firmware update: what the app did that the documentation never said.
+func TestDeleteSceneAndFirmware(t *testing.T) {
+	t.Parallel()
+	w := newSite(t)
+	office := w.controller("office")
+
+	// a delete goes through the same careful path as the command: backed up first, read back after
+	code, out := w.do(http.MethodDelete, "/api/controllers/office/scenes/Flames", "")
+	var report push.Report
+	if code != http.StatusOK || json.Unmarshal([]byte(out), &report) != nil {
+		t.Fatalf("delete: %d %s", code, out)
+	}
+	if len(report.Results) != 1 || report.Results[0].Outcome != push.Deleted || report.Backup == "" {
+		t.Errorf("report: %+v", report)
+	}
+	if slices.Contains(office.EffectNames(), "Flames") {
+		t.Error("Flames is still there")
+	}
+	// the one that is running is refused, as on the command line
+	code, out = w.do(http.MethodDelete, "/api/controllers/office/scenes/"+url.PathEscape(northern), "")
+	if code != http.StatusOK || json.Unmarshal([]byte(out), &report) != nil || report.Results[0].Outcome != push.Refused || !strings.Contains(report.Results[0].Reason, "running") {
+		t.Errorf("deleting the running scene: %d %s", code, out)
+	}
+
+	// the page says when an update is waiting, and a trigger backs the controller up first
+	if st := w.state(); st.Controllers[0].FirmwareUpdate != "" {
+		t.Errorf("an update out of nowhere: %+v", st.Controllers[0])
+	}
+	office.SetFirmwareUpgrade(true, "5.3.3")
+	if st := w.state(); st.Controllers[0].FirmwareUpdate != "5.3.3" {
+		t.Errorf("the update is not shown: %+v", st.Controllers[0])
+	}
+	code, out = w.do(http.MethodPost, "/api/controllers/office/firmware", "")
+	if code != http.StatusOK || !strings.Contains(out, `"backup":"`) {
+		t.Fatalf("trigger: %d %s", code, out)
+	}
+	if office.FirmwareTriggers() != 1 {
+		t.Errorf("triggers: %d", office.FirmwareTriggers())
+	}
+	var res struct{ Backup string }
+	_ = json.Unmarshal([]byte(out), &res)
+	if b, err := backup.Read(res.Backup); err != nil || len(b.Scenes) == 0 {
+		t.Errorf("the backup taken first: %v", err)
 	}
 }

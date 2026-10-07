@@ -21,4 +21,4 @@ services:
       # controllers.json, which holds every controller's token and must stay private, and the backups.
       # to bring controllers over from a machine where taproot is already connected, copy its
       # ~/.config/taproot/controllers.json here before the first start
-      - ./data:/config
+      - ./data:/data

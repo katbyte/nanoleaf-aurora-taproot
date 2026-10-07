@@ -1,3 +1,10 @@
+## Unreleased
+
+- A scene editor on the page: make a scene or change one, preview it on a controller's panels or on a wall of triangles you lay out, try it on the real panels without saving, and keep it in a library beside the backups
+- A firmware update, triggered from the command line or the page, is watched through: backed up first, then quiet while it installs, then what came back against what was there
+- Delete scenes, and open one in the editor, from each scene's menu on the page; drag the cards into the order you like; pick how big they are; zoom and move the picture of the panels
+- The page says which controller has an update waiting, and shows a controller's address and firmware on one line
+
 ## v0.1.0 (2026-10-06)
 
 First release. The original Nanoleaf Light Panels, without the app.

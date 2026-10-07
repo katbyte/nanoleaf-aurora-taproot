@@ -103,12 +103,22 @@ and install one itself, from Nanoleaf's cloud. Two undocumented endpoints under 
 Confirmed on a real controller, 7 October 2026: the NL22 on 5.2.1 answered `GET /firmwareUpgrade` with
 `{"firmwareAvailability": true, "newFirmwareVersion": "5.3.2"}`, the shape the app reads. Earlier the same day all
 three controllers answered `{}`, the one on 5.2.1 included, so `{}` does not mean "up to date": it means the
-controller has not heard from the cloud yet. Asking is a read; nothing was triggered. Where the cloud keeps the files is not in the app; other product
+controller has not heard from the cloud yet. Asking is a read; nothing was triggered. The `firmwareUpgrade` section
+of `GET /` stayed `{}` on the same controller at the same time: the whole answer does not carry it, and only the
+path of its own says it. Where the cloud keeps the files is not in the app; other product
 lines' files are on public S3 buckets (`canvas-firmware`, `hexagon-firmware`, `nl52-firmware`, `nl59-firmware`,
 `<version>.firmware`), and no bucket of any obvious name exists for Light Panels. The offline route from community
 notes, holding the power button until the LEDs run and then uploading a file to `http://192.168.2.1/` on the
 controller's own network, is the "Local Firmware Update, TCP 80" in Nanoleaf's services list; that port is closed in
 normal running.
+
+**What an upgrade looks like**, from the NL22 going from 5.2.1 to 5.3.2 on 6 October 2026, watched every four
+seconds: the trigger was taken at once (`204`); within seconds the controller stopped answering anything, `GET /`
+included, and stayed silent for about two and a half minutes; then it answered again on 5.3.2 with
+`firmwareUpgrade` back to `{"firmwareAvailability": false, "newFirmwareVersion": null}`, running the scene it had
+been running. Its own scene came through byte for byte, with the `rhythmFeatureSource` field 5.3.2 adds. One of
+the stock scenes (`Color Burst`) was gone afterwards, though a controller shipped on 5.3.2 has it: whatever the
+upgrade does to the built-in scenes, it is not nothing, and the backup taken first is what gets it back.
 
 **Commands to `PUT /effects`** (each as `{"write": {"command": ..., ...}}`) that the documentation does not list:
 

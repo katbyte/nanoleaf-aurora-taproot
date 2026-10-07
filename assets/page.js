@@ -39,6 +39,7 @@ function el(tag, props, ...children) {
     if (value === undefined || value === null || value === false) continue;
     if (key === 'class') node.className = value;
     else if (key === 'text') node.textContent = value;
+    else if (key === 'style') node.style.cssText = value; // the page's security policy drops a style attribute; this way is allowed
     else if (key.startsWith('on')) node.addEventListener(key.slice(2), value);
     else if (key === 'dataset') Object.assign(node.dataset, value);
     else node.setAttribute(key, value === true ? '' : value);
@@ -52,7 +53,10 @@ function el(tag, props, ...children) {
 
 function svg(tag, attrs) {
   const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
-  for (const [key, value] of Object.entries(attrs || {})) node.setAttribute(key, value);
+  for (const [key, value] of Object.entries(attrs || {})) {
+    if (key.startsWith('on') && typeof value === 'function') node.addEventListener(key.slice(2), value);
+    else node.setAttribute(key, value);
+  }
   return node;
 }
 
@@ -345,7 +349,8 @@ function place(ctl, view) {
 // ---- a controller's card ---------------------------------------------------
 
 function makeCard(name) {
-  const card = { name, view: store(`taproot-view-${name}`) || { turn: 0, flip: false }, tiles: [], signature: {}, dragging: false, sendTimer: null };
+  // how this browser last had the picture: turned, mirrored, zoomed and moved
+  const card = { name, view: Object.assign({ turn: 0, flip: false, zoom: 1, pan: { x: 0, y: 0 } }, store(`taproot-view-${name}`) || {}), tiles: [], signature: {}, dragging: false, sendTimer: null };
 
   card.title = el('h2', { text: name });
   card.meta = el('div', { class: 'meta' });
@@ -363,8 +368,11 @@ function makeCard(name) {
   card.note = el('div', { class: 'away-note' });
 
   const act = (label, title, work) => el('button', { class: 'plain', type: 'button', text: label, title, onclick: work });
-  card.root = el('section', { class: 'card' },
-    el('div', { class: 'head' },
+  card.root = el('section', { class: 'card', dataset: { name } },
+    // the head is the handle: drag a card by it to put the controllers in the order you want
+    el('div', { class: 'head', draggable: 'true', title: 'drag to reorder', // the string: draggable="" means not draggable
+      ondragstart: (e) => { dragging = card; card.root.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', name); },
+      ondragend: () => { dragging = null; card.root.classList.remove('dragging'); saveOrder(); } },
       el('div', {}, card.title, card.meta),
       el('div', { class: 'actions' },
         act('flash', 'flash the panels, to tell which controller this is', () => run(`${name} is flashing`, () => api('POST', `/api/controllers/${encodeURIComponent(name)}/identify`))),
@@ -374,7 +382,10 @@ function makeCard(name) {
       card.svg,
       el('div', { class: 'view' },
         el('button', { type: 'button', text: '↻', title: 'turn the picture, if it does not match your wall', onclick: () => turnView(card, 30) }),
-        el('button', { type: 'button', text: '⇋', title: 'mirror the picture', onclick: () => flipView(card) })),
+        el('button', { type: 'button', text: '⇋', title: 'mirror the picture', onclick: () => flipView(card) }),
+        el('button', { type: 'button', text: '+', title: 'zoom in (drag the picture to move it)', onclick: () => zoomView(card, 1.25) }),
+        el('button', { type: 'button', text: '−', title: 'zoom out', onclick: () => zoomView(card, 1 / 1.25) }),
+        el('button', { type: 'button', text: '⟲', title: 'fit the picture again', onclick: () => resetView(card) })),
       el('div', { class: 'caption' }, card.running, card.plugin)),
     el('div', { class: 'controls' },
       el('label', { class: 'switch' }, card.power, card.powerLabel),
@@ -382,6 +393,7 @@ function makeCard(name) {
     card.scenes,
     card.note);
 
+  panView(card);
   card.power.addEventListener('change', () => {
     const on = card.power.checked;
     card.ctl.on = on;
@@ -411,6 +423,58 @@ function sendBrightness(card) {
     .catch((err) => toast(err.message, true));
 }
 
+// applyView shows the part of the picture the zoom and the pan pick out of the whole of it
+function applyView(card) {
+  if (!card.base) return;
+  const [x, y, w, h] = card.base;
+  const z = card.view.zoom || 1;
+  const vw = w / z, vh = h / z;
+  card.svg.setAttribute('viewBox', `${x + (w - vw) / 2 - card.view.pan.x} ${y + (h - vh) / 2 - card.view.pan.y} ${vw} ${vh}`);
+}
+
+function zoomView(card, by) {
+  card.view.zoom = Math.min(8, Math.max(0.25, (card.view.zoom || 1) * by));
+  store(`taproot-view-${card.name}`, card.view);
+  applyView(card);
+}
+
+function resetView(card) {
+  card.view.zoom = 1;
+  card.view.pan = { x: 0, y: 0 };
+  store(`taproot-view-${card.name}`, card.view);
+  applyView(card);
+}
+
+// panView lets the picture be dragged about: a pointer's movement in pixels becomes movement in the
+// picture's own units, so it follows the pointer whatever the zoom
+function panView(card) {
+  let from = null;
+  card.svg.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    from = { x: e.clientX, y: e.clientY, pan: { ...card.view.pan } };
+    card.svg.setPointerCapture(e.pointerId);
+    card.svg.classList.add('panning');
+  });
+  card.svg.addEventListener('pointermove', (e) => {
+    if (!from || !card.base) return;
+    const box = card.svg.getBoundingClientRect();
+    const [, , w, h] = card.base;
+    const z = card.view.zoom || 1;
+    // the picture is drawn to fit: the scale is whichever axis is the tighter fit
+    const scale = Math.max(w / z / box.width, h / z / box.height);
+    card.view.pan = { x: from.pan.x + (e.clientX - from.x) * scale, y: from.pan.y + (e.clientY - from.y) * scale };
+    applyView(card);
+  });
+  const done = () => {
+    if (!from) return;
+    from = null;
+    card.svg.classList.remove('panning');
+    store(`taproot-view-${card.name}`, card.view);
+  };
+  card.svg.addEventListener('pointerup', done);
+  card.svg.addEventListener('pointercancel', done);
+}
+
 function turnView(card, by) {
   card.view.turn = (card.view.turn + by) % 360;
   store(`taproot-view-${card.name}`, card.view);
@@ -431,11 +495,24 @@ function flipView(card) {
 function update(card, ctl) {
   card.ctl = ctl;
   card.root.classList.toggle('away', !ctl.reachable);
-  card.meta.textContent = [ctl.device, ctl.host, ctl.model, ctl.firmware && `firmware ${ctl.firmware}`].filter(Boolean).join(' · ');
-  card.note.textContent = ctl.reachable ? '' : `cannot be reached: ${ctl.error || 'no answer'}`;
+  // each part on one line, whatever the width; an update the controller says is waiting is said beside the firmware
+  const parts = [ctl.device, ctl.host, ctl.model].filter(Boolean).map((text) => el('span', { class: 'part', text }));
+  if (ctl.firmware) {
+    // the firmware, and an update with its trigger, stay together on one line
+    const firmware = el('span', { class: 'part' }, `firmware ${ctl.firmware}`);
+    if (ctl.firmwareUpdate) {
+      firmware.append(' · ', el('span', { class: 'update', text: `update to ${ctl.firmwareUpdate} available` }), ' · ',
+        el('button', { class: 'plain trigger', type: 'button', text: 'trigger', title: 'have the controller fetch and install it, after a backup', onclick: () => triggerFirmware(ctl.name, ctl.firmware, ctl.firmwareUpdate) }));
+    }
+    parts.push(firmware);
+  }
+  card.meta.replaceChildren(...parts.flatMap((p, i) => (i ? [' · ', p] : [p])));
+  const upgrading = upgradeNote(card, ctl);
+  card.note.textContent = upgrading || (ctl.reachable ? '' : `cannot be reached: ${ctl.error || 'no answer'}`);
   if (!ctl.reachable) { card.light = null; return; }
 
-  const layoutSig = JSON.stringify([ctl.layout, ctl.orientation, card.view]);
+  // zoom and pan only move the window on the picture: they do not redraw it
+  const layoutSig = JSON.stringify([ctl.layout, ctl.orientation, card.view.turn, card.view.flip]);
   if (card.signature.layout !== layoutSig) {
     card.signature.layout = layoutSig;
     card.glow.replaceChildren();
@@ -443,7 +520,8 @@ function update(card, ctl) {
     card.tiles = [];
     const placed = place(ctl, card.view);
     if (placed) {
-      card.svg.setAttribute('viewBox', placed.viewBox);
+      card.base = placed.viewBox.split(' ').map(Number);
+      applyView(card);
       for (const p of placed.panels) {
         const halo = svg('polygon', { points: p.path });
         const tile = svg('polygon', { points: p.path });
@@ -484,7 +562,100 @@ function sceneRow(card, ctl, scene) {
   return el('div', { class: scene.name === ctl.running ? 'scene running' : 'scene' },
     el('button', { class: 'pick', type: 'button', title: `start ${scene.name}`, onclick: () => select(card, scene.name) },
       swatch, el('span', { class: 'name', text: scene.name }), el('span', { class: 'kind', text: kind })),
-    state.controllers.length > 1 && el('button', { class: 'plain copy', type: 'button', text: 'copy…', title: 'copy this scene to another controller', onclick: () => openCopy(ctl.name, scene.name) }));
+    sceneMenu(ctl, scene));
+}
+
+// sceneMenu is the … at the end of a scene's row: what can be done with the scene, one click away
+function sceneMenu(ctl, scene) {
+  const running = scene.name === ctl.running;
+  const item = (text, title, onclick, disabled) => el('button', { class: 'item', type: 'button', text, title, disabled: disabled || null, onclick: () => { closeMenus(); onclick(); } });
+  const menu = el('div', { class: 'menu', hidden: true },
+    item('copy…', state.controllers.length > 1 ? 'copy this scene to another controller' : 'there is no other controller to copy it to', () => openCopy(ctl.name, scene.name), state.controllers.length < 2),
+    item('delete…', running ? 'the scene that is running cannot be deleted: start another first' : 'take this scene off the controller (it is backed up first)', () => deleteScene(ctl.name, scene.name), running),
+    item('edit…', 'open a copy of this scene in the editor', () => openFromController(ctl.name, scene.name)));
+  const more = el('button', { class: 'plain more', type: 'button', text: '…', title: 'copy, delete, edit', 'aria-haspopup': 'menu',
+    onclick: (e) => { e.stopPropagation(); const open = menu.hidden; closeMenus(); menu.hidden = !open; } });
+  return el('span', { class: 'actions' }, more, menu);
+}
+
+// ---- reordering the cards ----------------------------------------------------
+
+let dragging = null; // the card being dragged, by its head
+
+// as a card is dragged over another, it moves before or after that one, by which half the pointer is in
+function dragOver(e) {
+  if (!dragging) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  const over = e.target.closest('.card');
+  if (!over || over === dragging.root) return;
+  const box = over.getBoundingClientRect();
+  const columns = getComputedStyle($('controllers')).gridTemplateColumns.split(' ').length;
+  const after = columns > 1 ? e.clientX > box.left + box.width / 2 : e.clientY > box.top + box.height / 2;
+  over.parentNode.insertBefore(dragging.root, after ? over.nextSibling : over);
+}
+
+function saveOrder() {
+  store('taproot-order', [...$('controllers').children].map((c) => c.dataset.name));
+}
+
+function closeMenus() {
+  for (const m of document.querySelectorAll('.scene .menu')) m.hidden = true;
+}
+document.addEventListener('click', closeMenus);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenus(); });
+
+function triggerFirmware(name, from, to) {
+  confirmThen(`update ${name} from ${from} to ${to}?`,
+    'The controller fetches the firmware from Nanoleaf\'s cloud and installs it itself, and is off the network while it does. Every scene is backed up first; firmware can change how scenes are stored, so keep that backup.',
+    'update it',
+    async () => {
+      const out = await run(null, () => api('POST', `/api/controllers/${encodeURIComponent(name)}/firmware`));
+      if (!out) return;
+      if (state.dryRun) { toast(`dry run: ${name} would be backed up to ${out.backup} and told to update`); return; }
+      toast(`${name}: backed up to ${out.backup}, and told to fetch and install ${to}; watching`);
+      const card = cards.get(name);
+      const ctl = card && card.ctl;
+      // the card follows it through: quiet while it installs, then what came back against what was there
+      if (card) card.updating = { since: Date.now(), from, to, quietSince: null, scenes: ctl ? ctl.scenes.map((s) => s.name) : [], running: ctl ? ctl.running : '' };
+      soon(0);
+    });
+}
+
+// upgradeNote is what a card says while its controller is being upgraded, and once when it is back
+function upgradeNote(card, ctl) {
+  const u = card.updating;
+  if (!u) return null;
+  const secs = (ms) => `${Math.round(ms / 1000)}s`;
+  if (!ctl.reachable) {
+    u.quietSince = u.quietSince || Date.now();
+    return `updating to ${u.to}: gone quiet, installing… (${secs(Date.now() - u.quietSince)})`;
+  }
+  if (!u.quietSince) {
+    if (Date.now() - u.since > 90000) { card.updating = null; toast(`${ctl.name}: still on ${ctl.firmware} after 90s: it did not start an upgrade`, true); return null; }
+    return `updating to ${u.to}: asked ${secs(Date.now() - u.since)} ago, still answering on ${ctl.firmware}`;
+  }
+  // back
+  card.updating = null;
+  const lost = u.scenes.filter((n) => !ctl.scenes.some((s) => s.name === n));
+  const took = secs(Date.now() - u.since);
+  if (ctl.firmware === u.from) toast(`${ctl.name}: back after ${took}, still on ${ctl.firmware}`, true);
+  else toast(`${ctl.name}: back on ${ctl.firmware} after ${took}; ${ctl.scenes.length} scenes (had ${u.scenes.length})${lost.length ? `; gone: ${lost.join(', ')} — in the backup taken first` : ''}`, lost.length > 0);
+  return null;
+}
+
+function deleteScene(name, scene) {
+  confirmThen(`delete ${scene} from ${name}?`,
+    'A controller has no bin and no undo. The whole controller is backed up first, and taproot restore can put the scene back from that backup.',
+    'delete',
+    async () => {
+      const report = await run(null, () => api('DELETE', `/api/controllers/${encodeURIComponent(name)}/scenes/${encodeURIComponent(scene)}`));
+      if (!report) return;
+      const res = report.results && report.results[0];
+      if (res && res.outcome === 'deleted') toast(state.dryRun ? `dry run: ${scene} would be deleted from ${name}` : `${name}: deleted ${scene}; backed up first to ${report.backup}`);
+      else if (res) toast(`${name}: ${scene} ${res.outcome}: ${res.reason || ''}`);
+      refresh();
+    });
 }
 
 function select(card, name) {
@@ -528,6 +699,7 @@ function frame(now) {
   lastFrame = now;
   const off = tileOff();
   for (const card of cards.values()) draw(card, now / 1000, off);
+  editorFrame(now);
 }
 
 // ---- the whole page --------------------------------------------------------
@@ -537,19 +709,25 @@ function render() {
   for (const [name, card] of cards) {
     if (!names.has(name)) { card.root.remove(); cards.delete(name); }
   }
-  for (const ctl of state.controllers) {
+  // in the order this browser last dragged them into; one it has not seen goes after those, by name
+  const order = store('taproot-order') || [];
+  const rank = (name) => { const i = order.indexOf(name); return i < 0 ? order.length : i; };
+  const controllers = [...state.controllers].sort((a, b) => rank(a.name) - rank(b.name) || a.name.localeCompare(b.name));
+  for (const ctl of controllers) {
     let card = cards.get(ctl.name);
     if (!card) {
       card = makeCard(ctl.name);
       cards.set(ctl.name, card);
     }
-    $('controllers').append(card.root); // in the order they came, which is by name
+    $('controllers').append(card.root);
     update(card, ctl);
   }
 
   const away = state.controllers.filter((c) => !c.reachable).length;
   $('count').textContent = state.controllers.length === 0 ? '' : `· ${state.controllers.length} controller${state.controllers.length === 1 ? '' : 's'}${away ? `, ${away} unreachable` : ''}`;
-  $('empty').hidden = state.controllers.length > 0 || state.pairing.length > 0;
+  $('empty').hidden = state.controllers.length > 0 || state.pairing.length > 0 || $('view').value !== 'controllers';
+  viewCounts();
+  if (editor.effect) { renderPluginsFrom(); renderLayoutPick(); }
   $('backup-all').hidden = state.controllers.length === 0;
   $('dryrun').hidden = !state.dryRun;
   renderPairing();
@@ -709,11 +887,23 @@ async function copy() {
 // ---- start -----------------------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
+  wireEditor();
   $('theme').addEventListener('click', () => {
     const root = document.documentElement;
     root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
     try { localStorage.setItem('taproot-theme', root.dataset.theme); } catch (e) { /* not remembered */ }
     for (const card of cards.values()) for (const t of card.tiles) t.tile.dataset.fill = ''; // repaint against the new wall
+  });
+  $('controllers').addEventListener('dragover', dragOver);
+  $('controllers').addEventListener('drop', (e) => e.preventDefault());
+  // how big each card is: three sizes, cycled by the button, remembered by this browser
+  const sizes = ['small', 'medium', 'large'];
+  const setSize = (size) => { $('controllers').dataset.size = size; $('size').textContent = `cards: ${size}`; };
+  setSize(sizes.includes(store('taproot-size')) ? store('taproot-size') : 'medium');
+  $('size').addEventListener('click', () => {
+    const next = sizes[(sizes.indexOf($('controllers').dataset.size) + 1) % sizes.length];
+    setSize(next);
+    store('taproot-size', next);
   });
   $('add').addEventListener('click', openConnect);
   $('add-first').addEventListener('click', openConnect);
@@ -731,3 +921,608 @@ document.addEventListener('DOMContentLoaded', () => {
   // the countdown on a connect in progress ticks without asking the server
   setInterval(() => { if (state.pairing.some((p) => p.state === 'waiting')) renderPairing(); }, 1000);
 });
+
+// ---- the scene library and the editor ----------------------------------------
+//
+// A scene is edited as the document the controller holds it as: only the
+// fields the form knows are touched, and whatever else the firmware put in
+// it goes back as it came. The preview is the same likeness the cards show.
+
+let library = []; // what the library holds, as the page lists it
+const plugins = new Map(); // controller name -> the motions it has
+const editor = {
+  effect: null, // the scene being edited, as its JSON object
+  from: null, // { kind: 'library' | 'controller' | 'new', name, controller }
+  dirty: false,
+  colour: 0, // which palette entry is being edited
+  stage: null, // a card-like thing the preview is drawn on
+  time: 0, // the preview's own clock, which the speed control runs
+  speed: 1,
+  paused: false,
+  layout: 'wall', // a controller's name, or 'wall' for the built one
+};
+
+const SIDE = 150; // a Light Panels triangle's side
+const BUILD = { rows: 7, cols: 14 };
+
+// the six motions every Light Panels controller has, for when no controller is there to ask
+const BUILTIN = [
+  { uuid: '6970681a-20b5-4c5e-8813-bdaebc4ee4fa', name: 'Wheel', type: 'color', description: 'the palette slides across the panels as a gradient', config: ['transTime', 'delayTime', 'linDirection', 'nColorsPerFrame', 'loop'] },
+  { uuid: '027842e4-e1d6-4a4c-a731-be74a1ebd4cf', name: 'Flow', type: 'color', description: 'each colour sweeps across, one after another', config: ['transTime', 'delayTime', 'linDirection', 'loop'] },
+  { uuid: '713518c1-d560-47db-8991-de780af71d1e', name: 'Burst', type: 'color', description: 'each colour bursts out from the middle', config: ['transTime', 'delayTime', 'loop'] },
+  { uuid: 'b3fd723a-aae8-4c99-bf2b-087159e0ef53', name: 'Fade', type: 'color', description: 'every panel fades from one colour to the next together', config: ['transTime', 'delayTime', 'loop'] },
+  { uuid: 'ba632d3e-9c2b-4413-a965-510c839b3f71', name: 'Random', type: 'color', description: 'each panel picks its own colour, in its own time', config: ['transTime', 'delayTime', 'loop'] },
+  { uuid: '70b7c636-6bf8-491f-89c1-f4103508d642', name: 'Highlight', type: 'color', description: 'mostly the first colour, with the others flashing through', config: ['transTime', 'delayTime', 'mainColorProb', 'loop'] },
+];
+const OPTION_DEFAULTS = {
+  transTime: { type: 'int', defaultValue: 20, minValue: 1, maxValue: 600, hint: 'tenths of a second a change takes' },
+  delayTime: { type: 'int', defaultValue: 10, minValue: 0, maxValue: 600, hint: 'tenths of a second a colour stays' },
+  linDirection: { type: 'string', defaultValue: 'right', strings: ['left', 'right', 'up', 'down'], hint: 'which way it moves' },
+  nColorsPerFrame: { type: 'int', defaultValue: 2, minValue: 1, maxValue: 12, hint: 'how many colours are showing at once' },
+  mainColorProb: { type: 'int', defaultValue: 80, minValue: 0, maxValue: 100, hint: 'how often the first colour shows, in percent' },
+  loop: { type: 'bool', defaultValue: true, hint: 'start again at the end' },
+};
+
+// motionName is a built-in motion's name from its id, for a scene no controller has named the motion of
+function motionName(uuid) {
+  const p = BUILTIN.find((b) => b.uuid === uuid);
+  return p ? p.name : '';
+}
+
+function pluginList(controller) {
+  const list = controller && plugins.get(controller);
+  if (list && list.length) return list.map((p) => ({ uuid: p.uuid, name: p.name, type: p.type, description: p.description, config: p.pluginConfig || [] }));
+  return BUILTIN.map((p) => ({ ...p, config: p.config.map((name) => ({ name, ...OPTION_DEFAULTS[name] })) }));
+}
+
+async function loadPlugins(controller) {
+  if (!controller || plugins.has(controller)) return;
+  try {
+    plugins.set(controller, await api('GET', `/api/controllers/${encodeURIComponent(controller)}/plugins`));
+  } catch (e) { plugins.set(controller, []); }
+}
+
+// ---- the view: controllers, or scenes
+
+function showView(which) {
+  $('view').value = which;
+  $('controllers').hidden = which !== 'controllers';
+  $('empty').hidden = which !== 'controllers' || state.controllers.length > 0;
+  $('library').hidden = which !== 'scenes';
+  store('taproot-view', which);
+  if (which === 'scenes') loadLibrary();
+}
+
+function viewCounts() {
+  const [c, s] = $('view').options;
+  c.textContent = `controllers (${state.controllers.length})`;
+  s.textContent = `scenes (${library.length})`;
+}
+
+// ---- the library
+
+async function loadLibrary() {
+  try {
+    library = await api('GET', '/api/scenes');
+  } catch (e) { toast(e.message, true); return; }
+  viewCounts();
+  $('lib-where').textContent = library.length ? `${library.length} kept` : 'nothing kept yet';
+  $('lib-list').replaceChildren(...library.map((s) => {
+    const swatch = el('span', { class: 'swatch' });
+    for (const c of (s.palette || []).slice(0, 12)) swatch.append(el('i', { style: `background:${css(hsb(c.hue, c.saturation, c.brightness))}` }));
+    const current = editor.from && editor.from.kind === 'library' && editor.from.name === s.name;
+    return el('div', { class: current ? 'scene current' : 'scene' },
+      el('button', { class: 'pick', type: 'button', title: `edit ${s.name}`, onclick: () => openFromLibrary(s.name) },
+        swatch, el('span', { class: 'name', text: s.name }), el('span', { class: 'kind', text: [s.builtIn ? 'built in' : '', s.plugin || motionName(s.pluginUuid)].filter(Boolean).join(' · ') })));
+  }));
+  if (library.length === 0) $('lib-list').append(el('p', { class: 'note', text: 'import a scene off a controller, or make a new one' }));
+}
+
+async function openFromLibrary(name) {
+  if (!(await leaveEditor())) return;
+  try {
+    const effect = await api('GET', `/api/scenes/${encodeURIComponent(name)}`);
+    const entry = library.find((l) => l.name === name);
+    loadEditor(effect, { kind: 'library', name, builtIn: Boolean(entry && entry.builtIn) });
+  } catch (e) { toast(e.message, true); }
+}
+
+async function openFromController(controller, name) {
+  if (!(await leaveEditor())) return;
+  try {
+    const effect = await api('GET', `/api/controllers/${encodeURIComponent(controller)}/scenes/${encodeURIComponent(name)}`);
+    showView('scenes');
+    await loadPlugins(controller);
+    loadEditor(effect, { kind: 'controller', name, controller });
+  } catch (e) { toast(e.message, true); }
+}
+
+function newScene() {
+  leaveEditor().then((ok) => {
+    if (!ok) return;
+    const effect = {
+      version: '2.0', animName: 'New scene', animType: 'plugin', colorType: 'HSB',
+      palette: [{ hue: 200, saturation: 100, brightness: 100 }, { hue: 280, saturation: 100, brightness: 100 }, { hue: 330, saturation: 80, brightness: 100 }],
+      pluginType: 'color', pluginUuid: BUILTIN[0].uuid,
+      pluginOptions: [{ name: 'transTime', value: 20 }, { name: 'delayTime', value: 10 }, { name: 'linDirection', value: 'right' }, { name: 'nColorsPerFrame', value: 2 }, { name: 'loop', value: true }],
+    };
+    loadEditor(effect, { kind: 'new', name: '' });
+    $('ed-name').focus();
+    $('ed-name').select();
+  });
+}
+
+// leaveEditor asks before unsaved work is thrown away
+function leaveEditor() {
+  if (!editor.effect || !editor.dirty) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    confirmThen(`leave ${editor.effect.animName || 'this scene'} unsaved?`, 'What you changed here is not in the library and not on any controller.', 'leave it',
+      () => resolve(true));
+    $('confirmbox').addEventListener('close', () => resolve(false), { once: true });
+  });
+}
+
+function openImport() {
+  const rows = [];
+  for (const c of state.controllers) {
+    if (!c.reachable) continue;
+    for (const s of c.scenes) {
+      const kept = library.some((l) => l.name === s.name);
+      rows.push(el('div', { class: 'line' },
+        el('span', { class: 'what grow', text: `${s.name}` }), el('span', { class: 'why', text: `on ${c.name}${kept ? ' · already in the library' : ''}` }),
+        el('button', { class: 'plain', type: 'button', text: kept ? 'import again' : 'import', onclick: async () => {
+          try {
+            await api('POST', '/api/scenes/import', { controller: c.name, scene: s.name });
+            toast(`${s.name} imported from ${c.name}`);
+            $('importbox').close();
+            await loadLibrary();
+            openFromLibrary(s.name);
+          } catch (e) { toast(e.message, true); }
+        } })));
+    }
+  }
+  $('import-list').replaceChildren(...(rows.length ? rows : [el('p', { class: 'note', text: 'no controller can be reached to import from' })]));
+  $('importbox').showModal();
+}
+
+// ---- the editor
+
+function option(name) {
+  const o = (editor.effect.pluginOptions || []).find((x) => x.name === name);
+  return o ? o.value : undefined;
+}
+function setOption(name, value) {
+  editor.effect.pluginOptions = editor.effect.pluginOptions || [];
+  const o = editor.effect.pluginOptions.find((x) => x.name === name);
+  if (o) o.value = value; else editor.effect.pluginOptions.push({ name, value });
+}
+
+// asSceneView is the scene as the cards see one: what sampler takes
+function asSceneView() {
+  const e = editor.effect;
+  const options = {};
+  for (const o of e.pluginOptions || []) options[o.name] = o.value;
+  return { name: e.animName, kind: e.pluginType, pluginUuid: e.pluginUuid, palette: e.palette || [], options };
+}
+
+function loadEditor(effect, from) {
+  editor.effect = effect;
+  editor.from = from;
+  editor.dirty = from.kind === 'new';
+  editor.colour = 0;
+  $('ed-empty').hidden = true;
+  $('ed-body').hidden = false;
+  $('ed-name').value = effect.animName || '';
+  renderPluginsFrom();
+  renderPlugin();
+  renderPalette();
+  renderOptions();
+  renderLayoutPick();
+  renderStatus();
+  loadLibrary();
+  previewAgain();
+}
+
+function touched() {
+  editor.dirty = true;
+  renderStatus();
+  previewAgain();
+}
+
+function renderStatus() {
+  const f = editor.from;
+  const where = f.kind === 'library' ? (f.builtIn ? 'built into taproot' : 'in the library') : f.kind === 'controller' ? `a copy of ${f.name} on ${f.controller}` : 'not saved anywhere yet';
+  $('ed-status').textContent = editor.dirty ? `${where} · changed` : where;
+  $('ed-delete-lib').disabled = f.kind !== 'library' || f.builtIn;
+  $('ed-delete-lib').title = f.builtIn ? 'it ships with taproot: saving a changed copy stands in for it, and deleting that copy brings it back' : 'take it out of the library';
+}
+
+function renderPluginsFrom() {
+  const sel = $('ed-plugins-from');
+  const current = sel.value;
+  const reachable = state.controllers.filter((c) => c.reachable);
+  sel.replaceChildren(el('option', { value: '', text: 'the built-in six' }), ...reachable.map((c) => el('option', { value: c.name, text: c.name })));
+  const want = editor.from && editor.from.controller ? editor.from.controller : current;
+  sel.value = reachable.some((c) => c.name === want) ? want : '';
+  if (sel.value) loadPlugins(sel.value).then(renderPlugin);
+}
+
+function renderPlugin() {
+  const list = pluginList($('ed-plugins-from').value);
+  const sel = $('ed-plugin');
+  const uuid = editor.effect.pluginUuid;
+  const known = list.some((p) => p.uuid === uuid);
+  sel.replaceChildren(...list.map((p) => el('option', { value: p.uuid, text: `${p.name}${p.type === 'rhythm' ? ' ♪' : ''}` })));
+  if (!known && uuid) sel.append(el('option', { value: uuid, text: `(as it is: ${uuid.slice(0, 8)}…)` }));
+  sel.value = uuid || list[0].uuid;
+  const p = list.find((x) => x.uuid === sel.value);
+  $('ed-plugin-desc').textContent = p ? (p.description || '') + (p.type === 'rhythm' ? ' · moves to sound, which the preview cannot hear' : '') : 'a motion this list does not know; its options are kept as they are';
+}
+
+function choosePlugin(uuid) {
+  const list = pluginList($('ed-plugins-from').value);
+  const p = list.find((x) => x.uuid === uuid);
+  editor.effect.pluginUuid = uuid;
+  if (p) {
+    editor.effect.pluginType = p.type || 'color';
+    // the options this motion takes, at their defaults where the scene has no value yet; the rest are dropped
+    const kept = [];
+    for (const c of p.config) {
+      const had = option(c.name);
+      kept.push({ name: c.name, value: had !== undefined ? had : c.defaultValue });
+    }
+    editor.effect.pluginOptions = kept;
+  }
+  renderPlugin();
+  renderOptions();
+  touched();
+}
+
+function renderPalette() {
+  const palette = editor.effect.palette || [];
+  $('ed-palette').replaceChildren(...palette.map((c, i) => el('button', {
+    class: i === editor.colour ? 'chip current' : 'chip', type: 'button', title: `colour ${i + 1}: hue ${Math.round(c.hue)}, ${Math.round(c.saturation)}% ${Math.round(c.brightness)}%`,
+    style: `background:${css(hsb(c.hue, c.saturation, c.brightness))}`, onclick: () => { editor.colour = i; renderPalette(); },
+  })));
+  const c = palette[editor.colour];
+  $('ed-colour').hidden = !c;
+  if (!c) return;
+  $('ed-hue').value = c.hue; $('ed-hue-out').value = `${Math.round(c.hue)}°`;
+  $('ed-sat').value = c.saturation; $('ed-sat-out').value = `${Math.round(c.saturation)}%`;
+  $('ed-bri').value = c.brightness; $('ed-bri-out').value = `${Math.round(c.brightness)}%`;
+  $('ed-hex').value = hex(hsb(c.hue, c.saturation, c.brightness));
+  $('ed-colour-left').disabled = editor.colour === 0;
+  $('ed-colour-right').disabled = editor.colour === palette.length - 1;
+  $('ed-colour-remove').disabled = palette.length <= 1;
+}
+
+const hex = ([r, g, b]) => '#' + [r, g, b].map((v) => Math.round(v).toString(16).padStart(2, '0')).join('');
+
+// toHSB is a colour's hue, saturation and brightness from red, green and blue, as the API counts them
+function toHSB(r, g, b) {
+  const max = Math.max(r, g, b) / 255, min = Math.min(r, g, b) / 255, d = max - min;
+  let h = 0;
+  if (d) {
+    if (max === r / 255) h = ((g - b) / 255 / d) % 6;
+    else if (max === g / 255) h = (b - r) / 255 / d + 2;
+    else h = (r - g) / 255 / d + 4;
+  }
+  return { hue: Math.round(((h * 60) + 360) % 360), saturation: Math.round(max ? (d / max) * 100 : 0), brightness: Math.round(max * 100) };
+}
+
+function colourChanged(part, value) {
+  const c = editor.effect.palette[editor.colour];
+  if (!c) return;
+  c[part] = Number(value);
+  renderPalette();
+  touched();
+}
+
+function renderOptions() {
+  const list = pluginList($('ed-plugins-from').value);
+  const p = list.find((x) => x.uuid === editor.effect.pluginUuid);
+  const config = p ? p.config : [];
+  const rows = [];
+  // the motion's own options first, as its list has them; then any the scene carries that the list does not mention
+  const seen = new Set();
+  for (const c of config) {
+    seen.add(c.name);
+    rows.push(optionRow(c, option(c.name)));
+  }
+  for (const o of editor.effect.pluginOptions || []) {
+    if (!seen.has(o.name)) rows.push(optionRow({ name: o.name, type: typeof o.value === 'boolean' ? 'bool' : typeof o.value === 'number' ? 'double' : 'string' }, o.value));
+  }
+  $('ed-options').replaceChildren(...(rows.length ? rows : [el('p', { class: 'note', text: 'this motion takes no options' })]));
+}
+
+function optionRow(c, value) {
+  const title = c.hint || '';
+  const name = el('span', { class: 'name', text: c.name, title });
+  const current = value !== undefined ? value : c.defaultValue;
+  if (c.type === 'bool') {
+    const box = el('input', { type: 'checkbox' });
+    box.checked = Boolean(current);
+    box.addEventListener('change', () => { setOption(c.name, box.checked); touched(); });
+    return el('label', { class: 'opt' }, name, box, el('span'));
+  }
+  if (c.type === 'string' && c.strings && c.strings.length) {
+    const sel = el('select', {}, ...c.strings.map((s) => el('option', { value: s, text: s })));
+    sel.value = current;
+    sel.addEventListener('change', () => { setOption(c.name, sel.value); touched(); });
+    return el('label', { class: 'opt' }, name, sel, el('span'));
+  }
+  if (c.type === 'int' || c.type === 'double') {
+    const min = num(c.minValue, 0), max = num(c.maxValue, 1000);
+    const step = c.type === 'int' ? 1 : (max - min) / 200;
+    const range = el('input', { type: 'range', min, max, step, value: num(current, min) });
+    const number = el('input', { type: 'number', min, max, step, value: num(current, min) });
+    const set = (v) => { const n = c.type === 'int' ? Math.round(Number(v)) : Number(v); range.value = n; number.value = n; setOption(c.name, n); touched(); };
+    range.addEventListener('input', () => set(range.value));
+    number.addEventListener('change', () => set(number.value));
+    return el('label', { class: 'opt' }, name, range, number);
+  }
+  const text = el('input', { type: 'text', value: current == null ? '' : String(current) });
+  text.addEventListener('change', () => { setOption(c.name, text.value); touched(); });
+  return el('label', { class: 'opt' }, name, text, el('span'));
+}
+
+// ---- the preview
+
+function renderLayoutPick() {
+  const sel = $('ed-layout');
+  const current = sel.value || editor.layout;
+  sel.replaceChildren(el('option', { value: 'wall', text: 'the wall you built' }),
+    ...state.controllers.filter((c) => c.reachable && c.layout).map((c) => el('option', { value: c.name, text: `${c.name}'s panels` })));
+  sel.value = [...sel.options].some((o) => o.value === current) ? current : 'wall';
+  editor.layout = sel.value;
+  const live = $('ed-target-live');
+  const was = live.value;
+  live.replaceChildren(...state.controllers.filter((c) => c.reachable).map((c) => el('option', { value: c.name, text: c.name })));
+  if ([...live.options].some((o) => o.value === was)) live.value = was;
+  $('ed-show').disabled = live.options.length === 0;
+}
+
+// stageCtl is what the preview draws on, in the shape a card's controller has
+function stageCtl() {
+  const sv = editor.effect ? asSceneView() : null;
+  let layout, orientation = 0;
+  if (editor.layout !== 'wall') {
+    const c = state.controllers.find((x) => x.name === editor.layout);
+    if (c && c.layout) { layout = c.layout; orientation = c.orientation; }
+  }
+  if (!layout) layout = wallLayout();
+  return { reachable: true, on: true, brightness: 100, colorMode: 'effect', layout, orientation, scenes: sv ? [sv] : [], running: sv ? sv.name : '' };
+}
+
+function previewAgain() {
+  if (!editor.stage) {
+    const s = { name: 'editor', view: { turn: 0, flip: false, zoom: 1, pan: { x: 0, y: 0 } }, tiles: [], signature: {} };
+    s.svg = $('ed-svg');
+    s.glow = svg('g', { class: 'glow' });
+    s.tilesGroup = svg('g', { class: 'tiles' });
+    s.svg.append(s.glow, s.tilesGroup);
+    panView(s);
+    editor.stage = s;
+  }
+  const s = editor.stage;
+  s.ctl = stageCtl();
+  const sig = JSON.stringify([s.ctl.layout, s.ctl.orientation]);
+  if (s.signature.layout !== sig) {
+    s.signature.layout = sig;
+    s.glow.replaceChildren();
+    s.tilesGroup.replaceChildren();
+    s.tiles = [];
+    const placed = place(s.ctl, s.view);
+    if (placed) {
+      s.base = placed.viewBox.split(' ').map(Number);
+      applyView(s);
+      for (const p of placed.panels) {
+        const halo = svg('polygon', { points: p.path });
+        const tile = svg('polygon', { points: p.path });
+        s.glow.append(halo);
+        s.tilesGroup.append(tile);
+        s.tiles.push({ panel: p, halo, tile });
+      }
+    }
+  }
+  s.light = lighting(s.ctl);
+  for (const t of s.tiles) t.tile.dataset.fill = '';
+  draw(s, editor.time, tileOff());
+}
+
+// the preview's clock, run by the frame loop at the chosen speed
+let editorLast = 0;
+function editorFrame(now) {
+  if (!editor.stage || $('library').hidden) { editorLast = now; return; }
+  const dt = editorLast ? (now - editorLast) / 1000 : 0;
+  editorLast = now;
+  if (!editor.paused) editor.time += dt * editor.speed;
+  draw(editor.stage, editor.time, tileOff());
+}
+
+// ---- building a wall of triangles
+
+// the wall is cells of a triangular grid, each a panel; cells that share an edge make a shape
+function wallCells() {
+  const kept = store('taproot-wall');
+  if (Array.isArray(kept) && kept.length) return kept;
+  return [[3, 5], [3, 6], [3, 7], [2, 6]]; // a small shape to start from
+}
+
+// cellCentre is where a cell's panel sits, y upwards as the layout counts, and whether it points up
+function cellCentre([r, c]) {
+  const h = (SIDE * Math.sqrt(3)) / 2;
+  const up = (r + c) % 2 === 0;
+  return { x: c * (SIDE / 2), y: r * h + (up ? h / 3 : (2 * h) / 3), up };
+}
+
+function wallLayout() {
+  const cells = wallCells();
+  return {
+    numPanels: cells.length, sideLength: SIDE,
+    positionData: cells.map((cell, i) => { const p = cellCentre(cell); return { panelId: i + 1, x: Math.round(p.x), y: Math.round(p.y), o: p.up ? 0 : 180, shapeType: 0 }; }),
+  };
+}
+
+function renderBuilder() {
+  const on = new Set(wallCells().map(([r, c]) => `${r},${c}`));
+  const h = (SIDE * Math.sqrt(3)) / 2;
+  const cells = [];
+  for (let r = 0; r < BUILD.rows; r++) {
+    for (let c = 0; c < BUILD.cols; c++) {
+      const p = cellCentre([r, c]);
+      const pts = corners(0, SIDE, p.up ? 0 : 180).map(([dx, dy]) => `${(p.x + dx * 0.96).toFixed(1)},${(BUILD.rows * h - (p.y + dy * 0.96)).toFixed(1)}`).join(' ');
+      cells.push(svg('polygon', { points: pts, class: on.has(`${r},${c}`) ? 'cell on' : 'cell', onclick: () => toggleCell(r, c) }));
+    }
+  }
+  const s = $('ed-build-svg');
+  s.setAttribute('viewBox', `${-SIDE / 2} 0 ${(BUILD.cols + 1) * (SIDE / 2)} ${BUILD.rows * h}`);
+  s.replaceChildren(...cells);
+}
+
+function toggleCell(r, c) {
+  const cells = wallCells();
+  const i = cells.findIndex(([a, b]) => a === r && b === c);
+  if (i >= 0) cells.splice(i, 1); else cells.push([r, c]);
+  store('taproot-wall', cells);
+  renderBuilder();
+  if (editor.layout === 'wall') previewAgain();
+}
+
+// ---- saving, showing, and the rest
+
+async function saveToLibrary() {
+  const name = $('ed-name').value.trim();
+  if (!name) { toast('give the scene a name first', true); $('ed-name').focus(); return; }
+  editor.effect.animName = name;
+  try {
+    await api('PUT', `/api/scenes/${encodeURIComponent(name)}`, editor.effect);
+    editor.from = { kind: 'library', name };
+    editor.dirty = false;
+    renderStatus();
+    toast(`${name} saved to the library`);
+    loadLibrary();
+  } catch (e) { toast(e.message, true); }
+}
+
+function deleteFromLibrary() {
+  const name = editor.from.name;
+  confirmThen(`delete ${name} from the library?`, 'Only the library\'s copy goes; nothing on any controller is touched.', 'delete', async () => {
+    try {
+      await api('DELETE', `/api/scenes/${encodeURIComponent(name)}`);
+      toast(`${name} deleted from the library`);
+      editor.effect = null; editor.from = null; editor.dirty = false;
+      $('ed-body').hidden = true; $('ed-empty').hidden = false;
+      loadLibrary();
+    } catch (e) { toast(e.message, true); }
+  });
+}
+
+async function showOnPanels() {
+  const target = $('ed-target-live').value;
+  if (!target) return;
+  editor.effect.animName = $('ed-name').value.trim() || editor.effect.animName;
+  const out = await run(null, () => api('POST', `/api/controllers/${encodeURIComponent(target)}/preview`, editor.effect));
+  if (out !== null) toast(state.dryRun ? `dry run: ${target} would show it` : `${target} is showing it, unsaved: start a scene there to go back`);
+}
+
+function openPush() {
+  const name = $('ed-name').value.trim();
+  if (!name) { toast('give the scene a name first', true); $('ed-name').focus(); return; }
+  editor.effect.animName = name;
+  $('push-what').textContent = name;
+  $('push-result').replaceChildren();
+  $('push-targets').replaceChildren(...state.controllers.map((c) => {
+    const has = c.scenes.some((s) => s.name === name);
+    const box = el('input', { type: 'checkbox', value: c.name, disabled: !c.reachable });
+    box.checked = c.reachable && editor.from.kind === 'controller' && editor.from.controller === c.name;
+    return el('label', { class: c.reachable ? 'target' : 'target off' }, box,
+      el('span', { class: 'grow', text: c.name }),
+      el('span', { class: 'has', text: !c.reachable ? 'cannot be reached' : has ? 'has a scene of this name' : 'does not have it' }));
+  }));
+  $('pushbox').showModal();
+}
+
+async function pushScene() {
+  const to = [...document.querySelectorAll('#push-targets input:checked')].map((i) => i.value);
+  if (to.length === 0) { toast('tick at least one controller', true); return; }
+  $('push-go').disabled = true;
+  const lines = [];
+  for (const name of to) {
+    try {
+      const report = await api('POST', `/api/controllers/${encodeURIComponent(name)}/scenes`, { scene: editor.effect, force: $('push-force').checked, select: $('push-select').checked });
+      const r = report.results[0];
+      const bad = r.outcome === 'refused' || r.outcome === 'failed';
+      lines.push(el('div', { class: bad ? 'line bad' : 'line' }, el('span', { class: 'what', text: `${name}: ${report.dryRun ? 'would be ' : ''}${r.outcome}` }), el('span', { class: 'why', text: r.reason || (report.backup ? `backed up first to ${report.backup}` : '') })));
+    } catch (e) {
+      lines.push(el('div', { class: 'line bad' }, el('span', { class: 'what', text: `${name}: failed` }), el('span', { class: 'why', text: e.message })));
+    }
+  }
+  $('push-result').replaceChildren(...lines);
+  $('push-go').disabled = false;
+  soon(100);
+}
+
+function openJSON() {
+  editor.effect.animName = $('ed-name').value.trim() || editor.effect.animName;
+  $('json-text').value = JSON.stringify(editor.effect, null, 2);
+  $('json-note').textContent = '';
+  $('jsonbox').showModal();
+}
+
+function applyJSON() {
+  try {
+    const effect = JSON.parse($('json-text').value);
+    if (!effect || typeof effect !== 'object') throw new Error('not a scene');
+    loadEditor(effect, editor.from);
+    editor.dirty = true;
+    renderStatus();
+    $('jsonbox').close();
+  } catch (e) { $('json-note').textContent = e.message; }
+}
+
+function wireEditor() {
+  $('view').addEventListener('change', () => showView($('view').value));
+  $('lib-new').addEventListener('click', newScene);
+  $('lib-import').addEventListener('click', openImport);
+  $('ed-name').addEventListener('input', () => { editor.effect.animName = $('ed-name').value; editor.dirty = true; renderStatus(); });
+  $('ed-plugin').addEventListener('change', () => choosePlugin($('ed-plugin').value));
+  $('ed-plugins-from').addEventListener('change', async () => { await loadPlugins($('ed-plugins-from').value); renderPlugin(); renderOptions(); });
+  $('ed-add-colour').addEventListener('click', () => {
+    editor.effect.palette = editor.effect.palette || [];
+    const last = editor.effect.palette[editor.effect.palette.length - 1] || { hue: 0, saturation: 100, brightness: 100 };
+    editor.effect.palette.push({ hue: (last.hue + 40) % 360, saturation: last.saturation, brightness: last.brightness });
+    editor.colour = editor.effect.palette.length - 1;
+    renderPalette(); touched();
+  });
+  $('ed-hue').addEventListener('input', () => colourChanged('hue', $('ed-hue').value));
+  $('ed-sat').addEventListener('input', () => colourChanged('saturation', $('ed-sat').value));
+  $('ed-bri').addEventListener('input', () => colourChanged('brightness', $('ed-bri').value));
+  $('ed-hex').addEventListener('change', () => {
+    const m = /^#?([0-9a-f]{6})$/i.exec($('ed-hex').value.trim());
+    if (!m) { toast('a colour is six hex digits', true); return; }
+    const n = parseInt(m[1], 16);
+    Object.assign(editor.effect.palette[editor.colour], toHSB(n >> 16, (n >> 8) & 255, n & 255));
+    renderPalette(); touched();
+  });
+  const move = (by) => { const p = editor.effect.palette; const i = editor.colour, j = i + by; if (j < 0 || j >= p.length) return; [p[i], p[j]] = [p[j], p[i]]; editor.colour = j; renderPalette(); touched(); };
+  $('ed-colour-left').addEventListener('click', () => move(-1));
+  $('ed-colour-right').addEventListener('click', () => move(1));
+  $('ed-colour-dup').addEventListener('click', () => { const p = editor.effect.palette; p.splice(editor.colour + 1, 0, { ...p[editor.colour] }); editor.colour++; renderPalette(); touched(); });
+  $('ed-colour-remove').addEventListener('click', () => { const p = editor.effect.palette; if (p.length <= 1) return; p.splice(editor.colour, 1); editor.colour = Math.min(editor.colour, p.length - 1); renderPalette(); touched(); });
+  $('ed-layout').addEventListener('change', () => { editor.layout = $('ed-layout').value; previewAgain(); });
+  $('ed-speed').addEventListener('input', () => { editor.speed = Math.pow(2, Number($('ed-speed').value)); $('ed-speed-out').value = `${editor.speed}×`; });
+  $('ed-pause').addEventListener('click', () => { editor.paused = !editor.paused; $('ed-pause').textContent = editor.paused ? 'play' : 'pause'; });
+  $('ed-build').addEventListener('click', () => { const b = $('ed-builder'); b.hidden = !b.hidden; if (!b.hidden) { renderBuilder(); $('ed-layout').value = 'wall'; editor.layout = 'wall'; previewAgain(); } });
+  $('ed-build-clear').addEventListener('click', () => { store('taproot-wall', []); renderBuilder(); previewAgain(); });
+  $('ed-build-done').addEventListener('click', () => { $('ed-builder').hidden = true; });
+  $('ed-save-lib').addEventListener('click', saveToLibrary);
+  $('ed-delete-lib').addEventListener('click', deleteFromLibrary);
+  $('ed-show').addEventListener('click', showOnPanels);
+  $('ed-save-ctl').addEventListener('click', openPush);
+  $('push-go').addEventListener('click', pushScene);
+  $('ed-json').addEventListener('click', openJSON);
+  $('json-apply').addEventListener('click', applyJSON);
+  window.addEventListener('beforeunload', (e) => { if (editor.dirty) { e.preventDefault(); e.returnValue = ''; } });
+  showView(store('taproot-view') === 'scenes' ? 'scenes' : 'controllers');
+}

@@ -223,16 +223,22 @@ waiting: what a controller does with it then is not yet known, and taproot firmw
 			return GetFlags().Firmware(cmd.Context(), args[0])
 		},
 	}
-	firmwareCmd.AddCommand(&cobra.Command{
-		Use:           "trigger controller|all",
-		Short:         "has the controller fetch and install its firmware from Nanoleaf's cloud",
+	triggerCmd := &cobra.Command{
+		Use:   "trigger controller|all",
+		Short: "has the controller fetch and install its firmware from Nanoleaf's cloud, and watches it through",
+		Long: `Backs the controller up, then tells it to fetch and install the update itself, from Nanoleaf's cloud; nothing passes
+through taproot. It is sent whether or not the controller says an update is waiting. Then the controller is watched: it
+goes quiet for a few minutes while it installs, and when it answers again what it holds is compared with what it held,
+since an upgrade has been seen to drop a scene. What went is in the backup, and taproot restore puts it back.`,
 		Args:          cobra.ExactArgs(1),
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
 			return GetFlags().TriggerFirmware(cmd.Context(), args[0])
 		},
-	})
+	}
+	triggerCmd.Flags().Duration("wait", 10*time.Minute, "how long to watch for the controller to come back; 0 sends the trigger and stops")
+	firmwareCmd.AddCommand(triggerCmd)
 	root.AddCommand(firmwareCmd)
 
 	root.AddCommand(&cobra.Command{

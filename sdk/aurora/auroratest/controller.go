@@ -499,6 +499,7 @@ func (c *Controller) whole() map[string]json.RawMessage {
 	out["effects"] = mustJSON(map[string]any{"effectsList": c.names(), "select": c.selected})
 	out["panelLayout"] = mustJSON(map[string]any{"globalOrientation": c.orient, "layout": c.layout})
 	out["rhythm"] = mustJSON(c.rhythm)
+	// as a real one: the whole answer says {} here even while GET /firmwareUpgrade says an update is waiting
 
 	return out
 }

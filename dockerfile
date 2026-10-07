@@ -28,9 +28,9 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -trimpath -mod=
 FROM alpine:3.24
 RUN apk upgrade --no-cache && apk add --no-cache tzdata
 
-# the volume: the controllers file, which holds the tokens, and the backups
-ENV TAPROOT_CONFIG_DIR=/config
-VOLUME /config
+# the volume: the controllers file, which holds the tokens, the backups (/data/backups) and the scene library (/data/scenes)
+ENV TAPROOT_CONFIG_DIR=/data
+VOLUME /data
 COPY --from=build /out/taproot /usr/bin/taproot
 
 EXPOSE 7668

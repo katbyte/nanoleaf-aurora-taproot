@@ -2,6 +2,7 @@ package serve
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 	"github.com/katbyte/go-kt/version"
 	"github.com/katbyte/nanoleaf-aurora-taproot/cli"
 	"github.com/katbyte/nanoleaf-aurora-taproot/lib/backup"
+	"github.com/katbyte/nanoleaf-aurora-taproot/lib/library"
 	"github.com/katbyte/nanoleaf-aurora-taproot/lib/push"
 	"github.com/katbyte/nanoleaf-aurora-taproot/lib/store"
 	"github.com/katbyte/nanoleaf-aurora-taproot/sdk/aurora"
@@ -42,6 +44,8 @@ type controllerView struct {
 	Host     string `json:"host"`
 	Model    string `json:"model"`
 	Firmware string `json:"firmware"`
+	// FirmwareUpdate is the version the controller says is waiting to be installed, when one is.
+	FirmwareUpdate string `json:"firmwareUpdate,omitempty"`
 
 	Reachable bool   `json:"reachable"`
 	Error     string `json:"error,omitempty"`
@@ -145,6 +149,11 @@ func (s *server) view(ctx context.Context, ctl store.Controller) controllerView 
 	plugins := s.pluginsOf(ctx, ctl.Name, c)
 
 	v.Reachable, v.Device, v.Model, v.Firmware = true, info.Name, info.Model, info.FirmwareVersion
+	// a real controller says {} for firmwareUpgrade in the whole answer even while GET /firmwareUpgrade
+	// says an update is waiting, so it has to be asked by itself; one that will not say is shown without
+	if fw, err := c.FirmwareUpgrade(ctx); err == nil && fw.Available {
+		v.FirmwareUpdate = fw.NewVersion
+	}
 	v.On, v.Brightness, v.ColorMode = info.State.On.Value, info.State.Brightness.Value, info.State.ColorMode
 	v.Hue, v.Sat, v.CT = info.State.Hue.Value, info.State.Sat.Value, info.State.CT.Value
 	v.Running, v.Orientation = info.Effects.Select, info.PanelLayout.GlobalOrientation.Value
@@ -245,6 +254,247 @@ func (s *server) putScene(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.change(w, r, func(ctx context.Context, c *aurora.Client) error { return c.SelectEffect(ctx, in.Name) })
+}
+
+// ---- the scene library and the editor ------------------------------------------------------------
+
+// libraryView is one scene in the library, as the page lists it: the summary a controller's scene gets,
+// with where and when it was kept.
+type libraryView struct {
+	sceneView
+	File     string    `json:"file"`
+	Modified time.Time `json:"modified"`
+	BuiltIn  bool      `json:"builtIn,omitempty"` // ships with taproot; a library file of the same name stands in for it
+}
+
+// summarise is a scene as the page lists it, its plugin named from whichever controller's plugins have it.
+func (s *server) summarise(e aurora.Effect) sceneView {
+	sv := sceneView{Name: e.Name(), Kind: e.PluginType(), PluginUUID: e.PluginUUID(), Palette: e.Palette(), Options: map[string]any{}}
+	if sv.Palette == nil {
+		sv.Palette = []aurora.Color{}
+	}
+	s.plugins.Range(func(_, cached any) bool {
+		plugins, ok := cached.([]aurora.Plugin)
+		if !ok {
+			return true
+		}
+		if i := slices.IndexFunc(plugins, func(p aurora.Plugin) bool { return p.UUID == sv.PluginUUID }); i >= 0 {
+			sv.Plugin = plugins[i].Name
+			return false
+		}
+		return true
+	})
+	for _, o := range e.PluginOptions() {
+		sv.Options[o.Name] = o.Value
+	}
+
+	return sv
+}
+
+func (s *server) getLibrary(w http.ResponseWriter, _ *http.Request) {
+	entries, err := library.List(s.f.ScenesRoot())
+	if err != nil {
+		fail(w, http.StatusInternalServerError, err)
+		return
+	}
+	out := make([]libraryView, 0, len(entries))
+	for _, entry := range entries {
+		out = append(out, libraryView{sceneView: s.summarise(entry.Effect), File: entry.File, Modified: entry.Modified, BuiltIn: entry.BuiltIn})
+	}
+	reply(w, http.StatusOK, out)
+}
+
+// getLibraryScene is one scene whole, as the editor takes it.
+func (s *server) getLibraryScene(w http.ResponseWriter, r *http.Request) {
+	entry, err := library.Read(s.f.ScenesRoot(), r.PathValue("scene"))
+	if err != nil {
+		failFor(w, err)
+		return
+	}
+	reply(w, http.StatusOK, entry.Effect)
+}
+
+// putLibraryScene keeps a scene under the name in the path, whatever name the document carries.
+func (s *server) putLibraryScene(w http.ResponseWriter, r *http.Request) {
+	var e aurora.Effect
+	if err := read(r, &e); err != nil {
+		failFor(w, errors.Join(errBadRequest, err))
+		return
+	}
+	e = e.WithName(r.PathValue("scene"))
+	path, err := library.Write(s.f.ScenesRoot(), e)
+	if err != nil {
+		failFor(w, err)
+		return
+	}
+	reply(w, http.StatusOK, libraryView{sceneView: s.summarise(e), File: path, Modified: time.Now().UTC()})
+}
+
+func (s *server) deleteLibraryScene(w http.ResponseWriter, r *http.Request) {
+	if err := library.Delete(s.f.ScenesRoot(), r.PathValue("scene")); err != nil {
+		failFor(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// postImport copies a scene from a controller into the library, as it is held there.
+func (s *server) postImport(w http.ResponseWriter, r *http.Request) {
+	var in struct {
+		Controller string `json:"controller"`
+		Scene      string `json:"scene"`
+		As         string `json:"as"`
+	}
+	if err := read(r, &in); err != nil || in.Controller == "" || in.Scene == "" {
+		failFor(w, errors.Join(fmt.Errorf("%w: an import needs a controller and a scene", errBadRequest), err))
+		return
+	}
+	_, c, err := s.byName(in.Controller)
+	if err != nil {
+		failFor(w, err)
+		return
+	}
+	e, err := c.Effect(r.Context(), in.Scene)
+	if err != nil {
+		failFor(w, fmt.Errorf("reading %q from %s: %w", in.Scene, in.Controller, err))
+		return
+	}
+	if in.As != "" {
+		e = e.WithName(in.As)
+	}
+	path, err := library.Write(s.f.ScenesRoot(), e)
+	if err != nil {
+		failFor(w, err)
+		return
+	}
+	reply(w, http.StatusOK, libraryView{sceneView: s.summarise(e), File: path, Modified: time.Now().UTC()})
+}
+
+// getControllerScene is one of a controller's scenes whole, to edit a copy of.
+func (s *server) getControllerScene(w http.ResponseWriter, r *http.Request) {
+	ctl, c, err := s.controller(r)
+	if err != nil {
+		failFor(w, err)
+		return
+	}
+	e, err := c.Effect(r.Context(), r.PathValue("scene"))
+	if err != nil {
+		failFor(w, fmt.Errorf("reading %q from %s: %w", r.PathValue("scene"), ctl.Name, err))
+		return
+	}
+	reply(w, http.StatusOK, e)
+}
+
+// getPlugins is the motions a controller has, with the options each takes: what the editor's form is built from.
+func (s *server) getPlugins(w http.ResponseWriter, r *http.Request) {
+	ctl, c, err := s.controller(r)
+	if err != nil {
+		failFor(w, err)
+		return
+	}
+	plugins := s.pluginsOf(r.Context(), ctl.Name, c)
+	if plugins == nil {
+		plugins = []aurora.Plugin{}
+	}
+	reply(w, http.StatusOK, plugins)
+}
+
+// postPreview shows a scene on a controller's panels without storing it, the API's display: what the
+// editor's "show on the panels" does. The controller goes back to its scene when another is started.
+func (s *server) postPreview(w http.ResponseWriter, r *http.Request) {
+	var e aurora.Effect
+	if err := read(r, &e); err != nil {
+		failFor(w, errors.Join(errBadRequest, err))
+		return
+	}
+	s.change(w, r, func(ctx context.Context, c *aurora.Client) error { return c.DisplayEffect(ctx, e) })
+}
+
+// postControllerScene adds a scene to a controller, as carefully as a push: backed up first, read back after,
+// a different scene of the same name replaced only with force.
+func (s *server) postControllerScene(w http.ResponseWriter, r *http.Request) {
+	var in struct {
+		Scene  json.RawMessage `json:"scene"`
+		Force  bool            `json:"force"`
+		Select bool            `json:"select"`
+	}
+	if err := read(r, &in); err != nil || len(in.Scene) == 0 {
+		failFor(w, errors.Join(fmt.Errorf("%w: a scene to add", errBadRequest), err))
+		return
+	}
+	var e aurora.Effect
+	if err := json.Unmarshal(in.Scene, &e); err != nil || e.Name() == "" {
+		failFor(w, errors.Join(fmt.Errorf("%w: the scene needs a name", errBadRequest), err))
+		return
+	}
+	ctl, c, err := s.controller(r)
+	if err != nil {
+		failFor(w, err)
+		return
+	}
+	report, err := push.Scenes(r.Context(), c, []aurora.Effect{e}, push.Options{
+		Controller: ctl.Name, BackupRoot: s.f.BackupRoot(), Force: in.Force, DryRun: s.f.DryRun,
+	})
+	if err != nil {
+		failFor(w, err)
+		return
+	}
+	if in.Select && len(report.Results) == 1 {
+		if o := report.Results[0].Outcome; o == push.Added || o == push.Replaced || o == push.Unchanged {
+			if err := c.SelectEffect(r.Context(), e.Name()); err != nil {
+				report.Results[0].Reason = "it is there, but would not start: " + err.Error()
+			}
+		}
+	}
+	s.stale()
+	reply(w, http.StatusOK, report)
+}
+
+// deleteScene takes one scene off a controller, as taproot scene delete does: backed up first, never the
+// scene that is running. The page's confirm stands in for --force.
+func (s *server) deleteScene(w http.ResponseWriter, r *http.Request) {
+	ctl, c, err := s.controller(r)
+	if err != nil {
+		failFor(w, err)
+		return
+	}
+	scene := r.PathValue("scene")
+	if scene == "" {
+		failFor(w, fmt.Errorf("%w: which scene?", errBadRequest))
+		return
+	}
+	report, err := push.Delete(r.Context(), c, []string{scene}, push.Options{
+		Controller: ctl.Name, BackupRoot: s.f.BackupRoot(), Force: true, DryRun: s.f.DryRun,
+	})
+	if err != nil {
+		failFor(w, err)
+		return
+	}
+	s.stale()
+	reply(w, http.StatusOK, report)
+}
+
+// postFirmware has a controller fetch and install the firmware update it says is waiting, as taproot
+// firmware trigger does. It is the biggest write there is, so the whole controller is backed up first.
+func (s *server) postFirmware(w http.ResponseWriter, r *http.Request) {
+	ctl, c, err := s.controller(r)
+	if err != nil {
+		failFor(w, err)
+		return
+	}
+	dir := backup.Dir(s.f.BackupRoot(), ctl.Name, time.Now())
+	if !s.f.DryRun {
+		if _, err := backup.Take(r.Context(), c, dir); err != nil {
+			failFor(w, fmt.Errorf("backing up %s before its firmware is replaced: %w (nothing was triggered)", ctl.Name, err))
+			return
+		}
+	}
+	if err := c.TriggerFirmwareUpgrade(r.Context()); err != nil {
+		failFor(w, fmt.Errorf("%s did not take the trigger: %w", ctl.Name, err))
+		return
+	}
+	s.stale()
+	reply(w, http.StatusOK, map[string]string{"controller": ctl.Name, "backup": dir})
 }
 
 func (s *server) postIdentify(w http.ResponseWriter, r *http.Request) {
