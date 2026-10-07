@@ -2,7 +2,7 @@
 
 Initial release.
 
-- `taproot find`, `connect`, `list`, `info`, `rename` and `forget`: find Nanoleaf Light Panels controllers on the network, get a token from each with one press of the power button, and keep the tokens in a file only you can read
+- `taproot find`, `connect`, `list`, `info`, `rename` and `forget`: find Nanoleaf Light Panels controllers on the network, get a token from each with one press of the power button, and keep the tokens in a file only you can read; `list` shows each controller's MAC address, worked out from its name
 - `taproot connect all`: asks every controller not connected yet, so the one whose button you hold is the one that connects, and names it as it does
 - `taproot scene list`, `dump`, `push`, `copy`, `select`, `rename` and `delete`: read scenes, copy one from the controller that has it to the ones that do not, start it, rename it, and clear out the ones you do not use
 - `taproot get` and `set`: power, brightness, scene, colour, white, orientation and the Rhythm module's source, for one controller or all

@@ -7,3 +7,4 @@
 dist/
 .tools/bin/
 .tools/venv/
+/z-nanoleaf-apps/

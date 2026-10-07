@@ -78,10 +78,14 @@ func (f *FlagData) Emit(v any) (bool, error) {
 // makes it safe to print before colouring it.
 
 // Name is taproot's name for a controller.
-func Name(s string) string { return "<cyan>" + Escape(s) + "</>" }
+func Name(s string) string { return "<lightCyan>" + Escape(s) + "</>" }
 
-// Device is the name a controller gives itself.
-func Device(s string) string { return "<white;op=bold>" + Escape(s) + "</>" }
+// Device is the name a controller gives itself: there for the eye to match
+// against the app or the network, not the thing to read first.
+func Device(s string) string { return "<gray>" + Escape(s) + "</>" }
+
+// Addr is a controller's address, bright: it is what gets typed.
+func Addr(s string) string { return "<white;op=bold>" + Escape(s) + "</>" }
 
 // Scene is a scene's name.
 func Scene(s string) string { return "<magenta>" + Escape(s) + "</>" }

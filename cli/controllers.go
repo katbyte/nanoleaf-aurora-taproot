@@ -777,6 +777,9 @@ type Status struct {
 	Host     string `json:"host"`
 	Model    string `json:"model,omitempty"`
 	Firmware string `json:"firmwareVersion,omitempty"`
+	// MAC is the controller's hardware address, worked out from its name:
+	// see MAC. Empty when the name does not give it.
+	MAC string `json:"mac,omitempty"`
 
 	Reachable  bool   `json:"reachable"`
 	Error      string `json:"error,omitempty"`
@@ -814,9 +817,41 @@ func (f *FlagData) Statuses(ctx context.Context, s *store.Store) []Status {
 		})
 	}
 	wg.Wait()
+	for i := range out {
+		out[i].MAC = MAC(out[i].Device)
+	}
 	slices.SortFunc(out, func(a, b Status) int { return strings.Compare(a.Name, b.Name) })
 
 	return out
+}
+
+// nanoleafMAC is the start of every address in the block IEEE registered to
+// Nanoleaf (00:55:DA:5x:xx:xx), of which a controller's name carries the rest.
+const nanoleafMAC = "00:55:DA"
+
+// MAC is a controller's hardware address, from the name it gives itself: the
+// last three octets of the address are the "53:A6:3C" in "Light Panels
+// 53:A6:3C", and the first three are Nanoleaf's. Nothing the controller
+// serves says it in full: the id in its announcement is shaped like one but
+// is not, and changes when the controller is reset. It is empty when the
+// name is not of that shape.
+func MAC(device string) string {
+	_, tail, ok := strings.Cut(strings.TrimSpace(device), " ")
+	if !ok {
+		return ""
+	}
+	tail = tail[strings.LastIndex(tail, " ")+1:]
+	parts := strings.Split(tail, ":")
+	if len(parts) != 3 {
+		return ""
+	}
+	for _, p := range parts {
+		if len(p) != 2 || strings.Trim(strings.ToUpper(p), "0123456789ABCDEF") != "" {
+			return ""
+		}
+	}
+
+	return nanoleafMAC + ":" + strings.ToUpper(tail)
 }
 
 func (f *FlagData) List(ctx context.Context) error {
@@ -835,14 +870,14 @@ func (f *FlagData) List(ctx context.Context) error {
 	}
 
 	// taproot's name for each, and beside it the name the controller gives itself, which is the one
-	// other apps and the network know it by
-	header := []string{"NAME", "CALLS ITSELF", "ADDRESS", "MODEL", "FIRMWARE", "PANELS", "SCENES", "POWER", "RUNNING"}
+	// other apps and the network know it by; the address bright, since it is what gets typed
+	header := []string{"NAME", "CALLS ITSELF", "ADDRESS", "MAC", "MODEL", "FIRMWARE", "PANELS", "SCENES", "POWER", "RUNNING"}
 	for i, h := range header {
 		header[i] = Dim(h)
 	}
 	rows := [][]string{header}
 	for _, st := range statuses {
-		row := []string{Name(st.Name), Device(orDash(st.Device)), st.Host, Dim(orDash(st.Model)), Dim(orDash(st.Firmware))}
+		row := []string{Name(st.Name), Device(orDash(st.Device)), Addr(st.Host), Dim(orDash(st.MAC)), Dim(orDash(st.Model)), Dim(orDash(st.Firmware))}
 		if !st.Reachable {
 			rows = append(rows, append(row, Dim("-"), Dim("-"), "<red>unreachable</>", Dim("-")))
 			continue

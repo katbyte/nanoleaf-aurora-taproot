@@ -84,6 +84,50 @@ no scene on 5.2.1 does. So it is the firmware's own bookkeeping and not part of 
 scenes without it (`Effect.SameScene`): otherwise a scene copied from older firmware would look different from its
 own copy, and could never be found to be there already.
 
+## What the desktop app sends that the documentation does not list
+
+Read out of Nanoleaf Desktop 3.0.1 (an Electron app; its JavaScript ships as text in `app.asar`), 6 October 2026.
+This is what the app sends, not what a controller has been seen to answer: none of it has been sent to a controller
+by taproot yet, and the app gates some of it by model, so what an NL22 does with each is still to be checked.
+
+**Firmware.** The app never downloads a firmware file for a Light Panels controller: it asks the controller to fetch
+and install one itself, from Nanoleaf's cloud. Two undocumented endpoints under the token:
+
+- `GET /firmwareUpgrade` answers `{"firmwareAvailability": bool, "newFirmwareVersion": "x.y.z" | null}`, and the same
+  section is in `GET /`. The app shows the version and an update button when `firmwareAvailability` is true.
+- `PUT /firmwareUpgrade` with `{"command": "triggerFirmwareUpgrade"}` starts it. The body is not wrapped in `write`
+  as effect commands are. The app then reads `GET /` every 10 seconds until `firmwareAvailability` is false again.
+
+On all three controllers here the section is `{}`, the one on 5.2.1 included, so `{}` does not mean "up to date": it
+means the controller has not heard from the cloud. Where the cloud keeps the files is not in the app; other product
+lines' files are on public S3 buckets (`canvas-firmware`, `hexagon-firmware`, `nl52-firmware`, `nl59-firmware`,
+`<version>.firmware`), and no bucket of any obvious name exists for Light Panels. The offline route from community
+notes, holding the power button until the LEDs run and then uploading a file to `http://192.168.2.1/` on the
+controller's own network, is the "Local Firmware Update, TCP 80" in Nanoleaf's services list; that port is closed in
+normal running.
+
+**Commands to `PUT /effects`** (each as `{"write": {"command": ..., ...}}`) that the documentation does not list:
+
+| Command | With | What the app uses it for |
+|---|---|---|
+| `enableAllControllerButtons`, `disableAllControllerButtons` | | locking the buttons on the controller |
+| `enableSceneChangeAnimation`, `disableSceneChangeAnimation` | | the fade between scenes |
+| `setPLRConfig` | `"PLRConfig": bool` | whether it comes back on after a power cut |
+| `getShortIdMap`, `getAdjacencyData` | | which panel touches which, for the layout editor |
+| `displayOverlay` | `"overlayPalette"`, `"animData"` | drawing on top of the running scene |
+| `display` | `"animType": "static"`, `"animData"`, `"palette": []` | a colour per panel, unsaved |
+| `requestBrightnessSensorConfig`, `setBrightnessSensorConfig` | `"brightnessSensorConfig"` | auto-brightness, on models with the sensor |
+| `requestTouchConfig`, `configureTouch`, `getTouchKillSwitch`, `setTouchKillSwitch` | `"touchConfig"`, `"touchKillSwitchOn"` | touch, on models that have it (not NL22) |
+
+Those are the only paths the app uses under the token: `/effects`, `/events`, `/firmwareUpgrade`, `GET /` for
+everything, and `DELETE` of the token. It reads `cloudHash` from `GET /` to tie the controller to an account.
+
+**The MAC address.** Nothing the controller serves says it in full. The name it gives itself carries the last three
+octets (`Light Panels 53:A6:3C`), and the first three are Nanoleaf's: IEEE's registry gives `00:55:DA:5x:xx:xx` to
+Nanoleaf, and every controller here is named `5x:..`. So `taproot list` shows `00:55:DA:` and the name's three. The
+`id` in a controller's mDNS announcement is shaped like a MAC address and is not one: it changes when the controller
+is reset.
+
 ## Not yet checked on a controller
 
 The canned controller the tests use (`sdk/aurora/auroratest`) does what the documentation says for these, and each
@@ -93,3 +137,5 @@ is marked to be checked the first time a write is recorded:
 - what a controller does when the scene that is running is deleted, or renamed; taproot refuses to try either
 - whether firmware 5.2.1 keeps or drops `rhythmFeatureSource` when it is given a scene that has it
 - what a controller says to a scene naming a plugin it does not have; taproot refuses to send one
+- which of the commands the desktop app sends (above) an NL22 answers, and what `firmwareUpgrade` holds while an
+  upgrade runs

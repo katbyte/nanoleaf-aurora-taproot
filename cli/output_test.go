@@ -78,15 +78,16 @@ func TestColoursByWhatAThingIs(t *testing.T) {
 	t.Parallel()
 
 	for got, want := range map[string]string{
-		Name("office"):         "<cyan>office</>",
-		Device("Light Panels"): "<white;op=bold>Light Panels</>",
+		Name("office"):         "<lightCyan>office</>",
+		Device("Light Panels"): "<gray>Light Panels</>",
+		Addr("10.0.5.183"):     "<white;op=bold>10.0.5.183</>",
 		Scene("Flames"):        "<magenta>Flames</>",
 		Num(17):                "<yellow>17</>",
 		Dim("10.0.5.183"):      "<darkGray>10.0.5.183</>",
 		Note("take note"):      "<fg=208>take note</>",
 		// whatever a controller or a person called something, it is printed as text, never read as a colour
 		Scene("<red>alert</>"): "<magenta>‹red›alert‹/›</>",
-		Name("<b>"):            "<cyan>‹b›</>",
+		Name("<b>"):            "<lightCyan>‹b›</>",
 	} {
 		if got != want {
 			t.Errorf("got %q, want %q", got, want)
@@ -135,6 +136,25 @@ func TestSwatch(t *testing.T) {
 	// whatever this terminal can do, the answer is one of the three
 	if got := Swatch(palette); got != "" && strings.Count(got, "█") != 3 {
 		t.Errorf("on this terminal: %q", got)
+	}
+}
+
+func TestMAC(t *testing.T) {
+	t.Parallel()
+
+	for device, want := range map[string]string{
+		"Light Panels 53:A6:3C":   "00:55:DA:53:A6:3C",
+		"Light Panels 52:56:c3":   "00:55:DA:52:56:C3", // as the controller spells it, in capitals
+		" Canvas 7B:1F:00 ":       "00:55:DA:7B:1F:00",
+		"Light Panels office":     "", // the test harness's name for one
+		"Light Panels 53:A6":      "",
+		"Light Panels 53:A6:3C:1": "",
+		"Light Panels 5G:A6:3C":   "",
+		"":                        "",
+	} {
+		if got := MAC(device); got != want {
+			t.Errorf("MAC(%q) = %q, want %q", device, got, want)
+		}
 	}
 }
 

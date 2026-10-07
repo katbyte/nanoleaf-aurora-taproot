@@ -61,7 +61,7 @@ part of those that only one controller has: `office`, `53a63c` and `183` can all
 | `find` | searches the network, saying how as it goes; `--scan 10.0.5.0/24` also knocks on every address of a subnet |
 | `connect [address\|name]` | gets a token and saves it; keeps asking until the button has been held (`--wait`, default 5m) |
 | `connect all` | asks every controller not connected yet, all at once: the one whose button you hold connects, and you name it there and then |
-| `list` | the controllers taproot holds a token for: its name for each and the name the controller gives itself, model, firmware, power, what is running |
+| `list` | the controllers taproot holds a token for: its name for each and the name the controller gives itself, address, MAC, model, firmware, power, what is running |
 | `info <controller>` | one controller in full |
 | `rename <controller> <name>` | changes what taproot calls a controller: `taproot rename 183 office` |
 | `get <controller\|all> [setting]` | what a controller is set to: every setting, or the one named, printed alone for a script |
